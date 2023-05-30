@@ -1,1 +1,0 @@
-Follow the tutorial on [this website](https://www.circuitstate.com/tutorials/how-to-use-vs-code-for-creating-and-uploading-arduino-sketches/)
