@@ -8,6 +8,8 @@ void setup() {
   int result = myFunction(2, 3);
 
   //add pedal position sensors
+
+  ///simple commit to setup gps sensors
 }
 
 void loop() {
