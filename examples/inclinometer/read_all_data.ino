@@ -5,7 +5,7 @@
 
 /* This driver uses the Adafruit unified sensor library (Adafruit_Sensor),
    which provides a common 'type' for sensor data and some helper functions.
-
+a
    To use this driver you will also need to download the Adafruit_Sensor
    library and include it in your libraries folder.
 
