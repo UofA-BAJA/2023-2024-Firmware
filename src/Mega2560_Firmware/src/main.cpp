@@ -1,18 +1,17 @@
 #include <Arduino.h>
 
-// put function declarations here:
-int myFunction(int, int);
-
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  // initialize serial communication at 9600 bits per second:
+  Serial.begin(9600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  // check if there's any serial available:
+  while (Serial.available() > 0) {
+    // read the incoming byte:
+    char incomingByte = Serial.read();
+    
+    // echo the byte back out the serial port:
+    Serial.write(incomingByte);
+  }
 }
