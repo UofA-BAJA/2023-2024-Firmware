@@ -2,13 +2,12 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include <rpm.h>
-#include <config.h>
+#include <datamodule.h>
 
-
+using namespace BAJA_EMBEDDED;
 
 int main() {
-  DataModule data_module;
+  DataModule data_module(DEBUG_LEVEL::COMPLETE);
 
   data_module.self_identify_type_of_data_module();
 

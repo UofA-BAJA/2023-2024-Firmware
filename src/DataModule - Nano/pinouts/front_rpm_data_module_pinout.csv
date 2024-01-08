@@ -4,5 +4,5 @@ input, data module select pin1, A1, PC1, -, data module select pin1
 input, data module select pin2, A2, PC2, -, data module select pin2
 output, hall effect ground, GND, -, -
 output, hall effect 5v, gnd, -, -
-input, rear left Hall effect out, D2, PD2, INT0, rear left rpm input
-input, rear right hall effect out, D3, PD3, INT1, rear right rpm input
+input, front left Hall effect out, D2, PD2, INT0, front left rpm input
+input, front right hall effect out, D3, PD3, INT1, front right rpm input
