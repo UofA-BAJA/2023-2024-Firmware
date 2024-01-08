@@ -5,8 +5,6 @@
 #include <rpm.h>
 #include <config.h>
 
-volatile int rpm_count = 0;
-
 int main() {
   sei(); // Enable interrupts
 
@@ -18,18 +16,12 @@ int main() {
 
   _delay_ms(1000);
   
-  while (1)
-  {
-    float rpm = calculate_rpm(rpm_count);
-
-    Serial.print(rpm);
-    _delay_ms(RPM_SENSING_DURATION_MS);
-  }
+  
   
 
   return 0;
 }
 
 ISR (INT0_vect) {
-  rpm_count++;
+  rear_left_rpm_counter++;
 }

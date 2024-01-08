@@ -1,7 +1,13 @@
 #include <avr/io.h>
 
-#include "rpm.h"
-#include "config.h"
+#include <config.h>
+
+#include <rpm.h>
+
+float rear_left_rpm;
+int rear_left_rpm_counter;
+
+bool rear_left_rpm_counting = false;
 
 void initialize_rpm_sensor() {
     DDRD &= ~(1 << DDD2); // set direction for input
@@ -12,9 +18,13 @@ void initialize_rpm_sensor() {
     EIMSK |= (1 << INT0); // enable INT0
 }
 
+void start_counting_rpms() {
+
+}
+
 float calculate_rpm(int rpm_count) {
 
-    float rpm;
+    float rpm; 
 
     rpm = (rpm_count * 60) / (RPM_SENSING_DURATION_MS / 1000.0);
 
