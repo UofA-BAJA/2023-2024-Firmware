@@ -1,0 +1,5 @@
+input/output, Source/Destination, Physical Pin, Port in Code, Special Function, Notes
+output, hall effect ground, GND, -, -
+output, hall effect 5v, gnd, -, -
+input, rear left Hall effect out, D2, PD2, INT0, rear left rpm input
+input, rear right hall effect out, D3, PD3, INT1, rear right rpm input

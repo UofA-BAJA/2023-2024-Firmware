@@ -1,21 +1,38 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 
 #include <config.h>
-
 #include <rpm.h>
 
 float rear_left_rpm;
 int rear_left_rpm_counter;
 
-bool rear_left_rpm_counting = false;
+
+
+void rpm_data_module_initialization_procedure() {
+    sei(); // Enable interrupts
+
+    initialize_rpm_sensor();
+
+}
+
+void rpm_data_module_operating_procedure() {
+
+    while (1)
+    {
+        /* code */
+    }
+    
+}
 
 void initialize_rpm_sensor() {
-    DDRD &= ~(1 << DDD2); // set direction for input
-    PORTD |= (1 << PORTD2);  // enable the pullup resistor for stable input
+
+    // setting up rear left rpm sensor
+    DDRB &= ~(1 << DDB0); // set direction for input
+    PORTB |= (1 << PORTB0);  // enable the pullup resistor for stable input
     
-    EICRA |= ((1 << ISC01) | (1 << ISC00)); // set INT0 to trigger on rising edge
-    
-    EIMSK |= (1 << INT0); // enable INT0
+    PCICR |= (1 << PCIE0); // enable pin change interrupt for PCINT7:0
+    PCMSK0 |= (1 << PCINT0); // enable pin change interrupt for PCINT0
 }
 
 void start_counting_rpms() {
@@ -29,4 +46,8 @@ float calculate_rpm(int rpm_count) {
     rpm = (rpm_count * 60) / (RPM_SENSING_DURATION_MS / 1000.0);
 
     return rpm;
+}
+
+ISR (INT0_vect) {
+  rear_left_rpm_counter++;
 }

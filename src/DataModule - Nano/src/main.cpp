@@ -5,23 +5,16 @@
 #include <rpm.h>
 #include <config.h>
 
+
+
 int main() {
-  sei(); // Enable interrupts
+  DataModule data_module;
 
-  Serial.begin(9600);
+  data_module.self_identify_type_of_data_module();
 
-  initialize_rpm_sensor();
+  data_module.data_module_initialization_procedure();
 
-  Serial.println("Initialized RPM sensor");
-
-  _delay_ms(1000);
-  
-  
-  
+  data_module.data_module_operating_procedure();  
 
   return 0;
-}
-
-ISR (INT0_vect) {
-  rear_left_rpm_counter++;
 }
