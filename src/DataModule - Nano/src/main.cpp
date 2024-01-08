@@ -1,17 +1,35 @@
 #include <Arduino.h>
-#include <rpm.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
-#include <Arduino.h>
+#include <rpm.h>
+#include <config.h>
+
+volatile int rpm_count = 0;
 
 int main() {
-  pinMode(LED_BUILTIN, OUTPUT); // Set the built-in LED pin as an output
+  sei(); // Enable interrupts
 
-  while (true) {
-    digitalWrite(LED_BUILTIN, HIGH); // Turn on the LED
-    delay(1000); // Wait for 1 second
-    digitalWrite(LED_BUILTIN, LOW); // Turn off the LED
-    delay(1000); // Wait for 1 second
+  Serial.begin(9600);
+
+  initialize_rpm_sensor();
+
+  Serial.println("Initialized RPM sensor");
+
+  _delay_ms(1000);
+  
+  while (1)
+  {
+    float rpm = calculate_rpm(rpm_count);
+
+    Serial.print(rpm);
+    _delay_ms(RPM_SENSING_DURATION_MS);
   }
+  
 
   return 0;
+}
+
+ISR (INT0_vect) {
+  rpm_count++;
 }
