@@ -12,7 +12,6 @@ void setup_debug() {
     case (DEBUG_LEVEL::NONE):
         break;
     case (DEBUG_LEVEL::COMPLETE):
-    case (DEBUG_LEVEL::GENERAL):
     case (DEBUG_LEVEL::CRITICAL):
         Serial.begin(9600);
         break;

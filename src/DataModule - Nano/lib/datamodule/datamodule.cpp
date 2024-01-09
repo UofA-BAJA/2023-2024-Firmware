@@ -29,7 +29,12 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
     if (data_module_select == 0b111) {
         return new RPM_DataModule;
     }
-    else { return nullptr; }
+    else {
+         if (debug_level <= BAJA_EMBEDDED::DEBUG_LEVEL::CRITICAL) {
+        Serial.print("No datamodule found for this pin selection");
+        }
+     
+        return nullptr; }
 
 }
 

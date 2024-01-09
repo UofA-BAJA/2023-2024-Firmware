@@ -37,6 +37,8 @@ void RPM_DataModule::data_module_operating_procedure() {
         3. store new value in data array
         4. avg data points in array
         5. report rpm
+        - print to serial
+        - write to sd card
         */
        _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
     }

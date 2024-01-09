@@ -5,7 +5,6 @@ namespace BAJA_EMBEDDED {
 
     enum class DEBUG_LEVEL {
         COMPLETE,
-        GENERAL,
         CRITICAL,
         NONE
     };

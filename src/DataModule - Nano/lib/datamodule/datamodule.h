@@ -4,6 +4,7 @@
 #include <config.h>
 
 namespace BAJA_EMBEDDED {
+    
     class DataModule {
        
     public:
