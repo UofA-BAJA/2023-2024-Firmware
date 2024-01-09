@@ -7,8 +7,8 @@
 #include "config.h"
 #include "datamodule.h"
 
-#define RPM_SENSING_DURATION_PERIOD_MS 100 //time in ms for sensor to collect
-#define RPM_NUM_OF_PERIODS_TO_AVG 10
+#define RPM_SENSING_DURATION_PERIOD_MS 20 //time in ms for sensor to collect
+#define RPM_NUM_OF_PERIODS_TO_AVG 20 //number of periods to average for rpm calculation
 
 
 int rpm_counts[RPM_NUM_OF_PERIODS_TO_AVG] = {0};
@@ -49,7 +49,6 @@ void RPM_DataModule::data_module_operating_procedure() {
         left_rpm = get_average_of_data_array(rpm_counts, RPM_NUM_OF_PERIODS_TO_AVG);
 
         #if DEBUG_LEVEL == DEV
-           
             Serial.print(">left_rpm: ");
             Serial.println(left_rpm);
         #endif
