@@ -21,9 +21,9 @@ void RPM_DataModule::data_module_initialization_procedure() {
     sei(); // Enable interrupts
     initialize_left_rpm_sensor();
 
-    if (debug_level == BAJA_EMBEDDED::DEBUG_LEVEL::COMPLETE) {
+    #if DEBUG_LEVEL == DEV
         Serial.println("initialized RPM data module");
-    }
+    #endif
     
 }
 
@@ -40,7 +40,19 @@ void RPM_DataModule::data_module_operating_procedure() {
         - print to serial
         - write to sd card
         */
-       _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
+        _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
+
+        shift_data_array_left(rpm_counts, RPM_NUM_OF_PERIODS_TO_AVG);
+        rpm_counts[RPM_NUM_OF_PERIODS_TO_AVG - 1] = left_rpm_counter;
+        left_rpm_counter = 0;
+
+        left_rpm = get_average_of_data_array(rpm_counts, RPM_NUM_OF_PERIODS_TO_AVG);
+
+        #if DEBUG_LEVEL == DEV
+           
+            Serial.print(">left_rpm: ");
+            Serial.println(left_rpm);
+        #endif
     }
     
 }
@@ -55,6 +67,19 @@ void RPM_DataModule::initialize_left_rpm_sensor() {
     EIMSK |= (1 << INT0); // enable external interrupt for INT0
 }
 
+void RPM_DataModule::shift_data_array_left(int data_array[], int array_size) {
+    for (int i = 0; i < array_size - 1; i++) {
+        data_array[i] = data_array[i + 1];
+    }
+}
+
+float RPM_DataModule::get_average_of_data_array(int data_array[], int array_size) {
+    float sum = 0.0;
+    for (int i = 0; i < array_size; i++) {
+        sum += data_array[i];
+    }
+    return sum / (float)array_size;
+}
 // float calculate_rpm(int rpm_count) {
 
 //     float rpm; 

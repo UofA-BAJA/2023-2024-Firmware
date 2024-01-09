@@ -2,21 +2,14 @@
 
 #include <Arduino.h>
 
-using namespace BAJA_EMBEDDED;
+#define NONE 0 //no serial output, note that this will siginicantly reduce the size of the binary (FLASH)
+#define DEV 1 //all serial output, for development
 
-DEBUG_LEVEL debug_level;
+#define DEBUG_LEVEL DEV
 
 void setup_debug() {
-    switch (debug_level)
-    {
-    case (DEBUG_LEVEL::NONE):
-        break;
-    case (DEBUG_LEVEL::COMPLETE):
-    case (DEBUG_LEVEL::CRITICAL):
-        Serial.begin(9600);
-        break;
-
-    default:
-        break;
-    }
+    #if DEBUG_LEVEL == DEV
+        Serial.begin(9600); // Initialize serial communication at 9600 baud rate
+        Serial.println("Debug Mode: DEV");
+    #endif
 }

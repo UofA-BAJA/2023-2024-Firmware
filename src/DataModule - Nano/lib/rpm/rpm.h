@@ -14,8 +14,13 @@ class RPM_DataModule : public BAJA_EMBEDDED::DataModule {
         static volatile int right_rpm_counter;
         static volatile int left_rpm_counter;
 
+        float left_rpm;
+
         void data_module_initialization_procedure() override;
         void data_module_operating_procedure() override;
+
+        static void shift_data_array_left(int* data_array, int array_size);
+        static float get_average_of_data_array(int* data_array, int array_size);
 
 };
 

@@ -20,21 +20,22 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
                             ((PINC & (1 << PINC1)) >> PINC1) << 1 | 
                             ((PINC & (1 << PINC0)) >> PINC0);
 
-    if (debug_level == BAJA_EMBEDDED::DEBUG_LEVEL::COMPLETE) {
+    #if DEBUG_LEVEL == DEV
         Serial.print("DataModule select pins read: ");
         Serial.println(data_module_select);
-    }
+    #endif
     
 
     if (data_module_select == 0b111) {
         return new RPM_DataModule;
     }
     else {
-         if (debug_level <= BAJA_EMBEDDED::DEBUG_LEVEL::CRITICAL) {
-        Serial.print("No datamodule found for this pin selection");
-        }
+        #if DEBUG_LEVEL == DEV
+            Serial.print("No datamodule found for this pin selection");
+        #endif
      
-        return nullptr; }
+        return nullptr; 
+        }
 
 }
 
