@@ -11,6 +11,8 @@ int main() {
 
   debug_level = DEBUG_LEVEL::COMPLETE;
 
+  setup_debug();
+
   DataModule* selected_data_module = create_data_module_type();
   
   selected_data_module->data_module_initialization_procedure();

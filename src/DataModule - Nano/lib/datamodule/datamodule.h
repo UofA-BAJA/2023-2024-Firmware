@@ -15,9 +15,10 @@ namespace BAJA_EMBEDDED {
         virtual void data_module_operating_procedure() = 0;
     };
 
-    DataModule* create_data_module_type();
 }
 
+BAJA_EMBEDDED::DataModule* create_data_module_type();
 
+void initialize_data_module_select_pins();
 
 #endif // DATAMODULE_H

@@ -14,6 +14,8 @@ namespace BAJA_EMBEDDED {
 
 extern BAJA_EMBEDDED::DEBUG_LEVEL debug_level;
 
+void setup_debug();
+
 
 #endif
 

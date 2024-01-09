@@ -1,7 +1,7 @@
 input/output, Source/Destination, Physical Pin, Port in Code, Special Function, Notes
-input, data module select pin0, A0, PC0, -, data module select pin0
-input, data module select pin1, A1, PC1, -, data module select pin1
-input, data module select pin2, A2, PC2, -, data module select pin2
+input, unconnected, A0, PC0, -, data module select pin0
+input, unconnected, A1, PC1, -, data module select pin1
+input, unconnected, A2, PC2, -, data module select pin2
 output, hall effect ground, GND, -, -
 output, hall effect 5v, gnd, -, -
 input, rear left Hall effect out, D2, PD2, INT0, rear left rpm input
