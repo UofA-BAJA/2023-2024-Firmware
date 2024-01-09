@@ -9,12 +9,10 @@ namespace BAJA_EMBEDDED {
         CRITICAL,
         NONE
     };
+
 }
 
-
-
-// RPM sensor
-extern int RPM_SENSING_DURATION_MS; // time in ms the sensor will accumalte pulses for before calculating RPM
+extern BAJA_EMBEDDED::DEBUG_LEVEL debug_level;
 
 
 #endif

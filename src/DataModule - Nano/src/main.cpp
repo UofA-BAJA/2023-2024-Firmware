@@ -2,18 +2,21 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include <datamodule.h>
+#include "datamodule.h"
+#include "config.h"
 
 using namespace BAJA_EMBEDDED;
 
 int main() {
-  DataModule data_module(DEBUG_LEVEL::COMPLETE);
 
-  data_module.self_identify_type_of_data_module();
+  debug_level = DEBUG_LEVEL::COMPLETE;
 
-  data_module.data_module_initialization_procedure();
+  DataModule* selected_data_module = create_data_module_type();
+  
+  selected_data_module->data_module_initialization_procedure();
+  
+  selected_data_module->data_module_operating_procedure();
 
-  data_module.data_module_operating_procedure();  
-
+  
   return 0;
 }

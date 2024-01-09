@@ -3,20 +3,15 @@
 #include <avr/io.h>
 #include <Arduino.h>
 
-#include <config.h>
+#include "config.h"
+
+#include "rpm.h"
 
 using namespace BAJA_EMBEDDED;
 
 DataModule::DataModule() {
-    // empty constructor
-    this->debug_level = DEBUG_LEVEL::NONE;
-}
 
-DataModule::DataModule(DEBUG_LEVEL debug) {
-
-    this->debug_level = debug;
-
-    switch (debug)
+    switch (debug_level)
     {
     case (DEBUG_LEVEL::NONE):
         break;
@@ -31,7 +26,7 @@ DataModule::DataModule(DEBUG_LEVEL debug) {
     }
 }
 
-void DataModule::self_identify_type_of_data_module() {
+DataModule* create_data_module_type() {
     //look at pinout csv files
     // Clear the bits DDC0, DDC1, and DDC2 in the Data Direction Register C (DDRC).
     // This configures the pins PC0, PC1, and PC2 as inputs.
@@ -45,20 +40,15 @@ void DataModule::self_identify_type_of_data_module() {
     //read the select pins
     int data_module_select = ((2 << PINC2) | (1 << PINC1) | PINC0);
 
-    if (this->debug_level == DEBUG_LEVEL::COMPLETE) {
+    if (debug_level == DEBUG_LEVEL::COMPLETE) {
         Serial.print("DataModule select pins read ");
         Serial.println(data_module_select);
     }
 
-    switch (data_module_select)
-    {
-    case /* constant-expression */:
-        /* code */
-        break;
-    
-    default:
-        break;
+    if (data_module_select == 0b001) {
+        return new RPM_DataModule;
     }
+    else { return new RPM_DataModule; }
 
 
 }

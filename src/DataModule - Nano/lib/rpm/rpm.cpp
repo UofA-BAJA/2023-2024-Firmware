@@ -1,42 +1,45 @@
-#include <avr/io.h>
-#include <avr/interrupt.h>
-
-#include <config.h>
 #include <rpm.h>
 
-float rear_left_rpm;
-int rear_left_rpm_counter;
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <Arduino.h>
 
+#include "config.h"
+#include "datamodule.h"
 
+#define RPM_SENSING_DURATION_MS 500
 
-void rpm_data_module_initialization_procedure() {
+volatile int RPM_DataModule::left_rpm_counter = 0; // Define and initialize the static member
+
+void RPM_DataModule::data_module_initialization_procedure() {
     sei(); // Enable interrupts
+    initialize_left_rpm_sensor();
 
-    initialize_rpm_sensor();
-
-}
-
-void rpm_data_module_operating_procedure() {
-
-    while (1)
-    {
-        /* code */
+    if (debug_level == BAJA_EMBEDDED::DEBUG_LEVEL::COMPLETE) {
+        Serial.println("initialized RPM data module");
     }
     
 }
 
-void initialize_rpm_sensor() {
+void RPM_DataModule::data_module_operating_procedure() {
 
-    // setting up rear left rpm sensor
-    DDRB &= ~(1 << DDB0); // set direction for input
-    PORTB |= (1 << PORTB0);  // enable the pullup resistor for stable input
+    while (1)
+    {
+        /*operating procedure
+        1. wait 
+        */
+    }
     
-    PCICR |= (1 << PCIE0); // enable pin change interrupt for PCINT7:0
-    PCMSK0 |= (1 << PCINT0); // enable pin change interrupt for PCINT0
 }
 
-void start_counting_rpms() {
+void RPM_DataModule::initialize_left_rpm_sensor() {
 
+    // setting up rear left rpm sensor
+    DDRD &= ~(1 << DDD2); // set direction for input
+    PORTD |= (1 << PORTD2);  // enable the pullup resistor for stable input
+    
+    EICRA |= (1 << ISC01) | (1 << ISC00); // set INT0 to trigger on rising edge
+    EIMSK |= (1 << INT0); // enable external interrupt for INT0
 }
 
 float calculate_rpm(int rpm_count) {
@@ -49,5 +52,5 @@ float calculate_rpm(int rpm_count) {
 }
 
 ISR (INT0_vect) {
-  rear_left_rpm_counter++;
+    RPM_DataModule::left_rpm_counter++;
 }
