@@ -14,7 +14,6 @@ BAJA_EMBEDDED::DataModule::DataModule() {
 
 BAJA_EMBEDDED::DataModule* create_data_module_type() {
     
-    return new Inclinometer_DataModule;
     initialize_data_module_select_pins();
 
     //read the select pins
