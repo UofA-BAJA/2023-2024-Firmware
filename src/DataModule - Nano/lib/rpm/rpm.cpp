@@ -11,7 +11,8 @@
 #define RPM_NUM_OF_PERIODS_TO_AVG 20 //number of periods to average for rpm calculation
 
 
-int rpm_counts[RPM_NUM_OF_PERIODS_TO_AVG] = {0};
+int rpm_left_counts[RPM_NUM_OF_PERIODS_TO_AVG] = {0};
+int rpm_right_counts[RPM_NUM_OF_PERIODS_TO_AVG] = {0};
 
 
 volatile int RPM_DataModule::left_rpm_counter = 0; // Define and initialize the static member
@@ -20,6 +21,7 @@ volatile int RPM_DataModule::right_rpm_counter = 0; // Define and initialize the
 void RPM_DataModule::data_module_initialization_procedure() {
     sei(); // Enable interrupts
     initialize_left_rpm_sensor();
+    initialize_right_rpm_sensor();
 
     #if DEBUG_LEVEL == DEV
         Serial.println("initialized RPM data module");
@@ -42,15 +44,23 @@ void RPM_DataModule::data_module_operating_procedure() {
         */
         _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
 
-        shift_data_array_left(rpm_counts, RPM_NUM_OF_PERIODS_TO_AVG);
-        rpm_counts[RPM_NUM_OF_PERIODS_TO_AVG - 1] = left_rpm_counter;
+        shift_data_array_left(rpm_left_counts, RPM_NUM_OF_PERIODS_TO_AVG);
+        rpm_left_counts[RPM_NUM_OF_PERIODS_TO_AVG - 1] = left_rpm_counter;
         left_rpm_counter = 0;
 
-        left_rpm = get_average_of_data_array(rpm_counts, RPM_NUM_OF_PERIODS_TO_AVG);
+        left_rpm = get_average_of_data_array(rpm_left_counts, RPM_NUM_OF_PERIODS_TO_AVG);
+
+        shift_data_array_left(rpm_right_counts, RPM_NUM_OF_PERIODS_TO_AVG);
+        rpm_right_counts[RPM_NUM_OF_PERIODS_TO_AVG - 1] = right_rpm_counter;
+        right_rpm_counter = 0;
+
+        right_rpm = get_average_of_data_array(rpm_right_counts, RPM_NUM_OF_PERIODS_TO_AVG);
 
         #if DEBUG_LEVEL == DEV
             Serial.print(">left_rpm: ");
             Serial.println(left_rpm);
+            Serial.print(">right_rpm: ");
+            Serial.println(right_rpm);
         #endif
     }
     
@@ -64,6 +74,16 @@ void RPM_DataModule::initialize_left_rpm_sensor() {
     
     EICRA |= (1 << ISC01) | (1 << ISC00); // set INT0 to trigger on rising edge
     EIMSK |= (1 << INT0); // enable external interrupt for INT0
+}
+
+void RPM_DataModule::initialize_right_rpm_sensor() {
+
+    // setting up rear right rpm sensor
+    DDRD &= ~(1 << DDD3); // set direction for input
+    PORTD |= (1 << PORTD3);  // enable the pullup resistor for stable input
+    
+    EICRA |= (1 << ISC11) | (1 << ISC10); // set INT1 to trigger on rising edge
+    EIMSK |= (1 << INT1); // enable external interrupt for INT1
 }
 
 void RPM_DataModule::shift_data_array_left(int data_array[], int array_size) {
@@ -90,4 +110,8 @@ float RPM_DataModule::get_average_of_data_array(int data_array[], int array_size
 
 ISR (INT0_vect) {
     RPM_DataModule::left_rpm_counter++;
+}
+
+ISR (INT1_vect) {
+    RPM_DataModule::right_rpm_counter++;
 }

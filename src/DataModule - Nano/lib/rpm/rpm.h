@@ -10,11 +10,13 @@ class RPM_DataModule : public BAJA_EMBEDDED::DataModule {
 
     private:
         void initialize_left_rpm_sensor();
+        void initialize_right_rpm_sensor();
     public:
         static volatile int right_rpm_counter;
         static volatile int left_rpm_counter;
 
         float left_rpm;
+        float right_rpm;
 
         void data_module_initialization_procedure() override;
         void data_module_operating_procedure() override;
