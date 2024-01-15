@@ -1,5 +1,5 @@
 // #include <Arduino.h>
-#include <inclinometer.h>
+#include <imu.h>
 #include <config.h>
 
 #include <Wire.h>
@@ -9,10 +9,11 @@
   
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
-void Inclinometer_DataModule::data_module_initialization_procedure() 
+void IMU_DataModule::data_module_initialization_procedure() 
 {
+
     #if DEBUG_LEVEL == DEV
-        Serial.println("Initialized Inclinometer data module");
+        Serial.println("Initialized IMU data module");
     #endif
 
   // Serial.println("Orientation Sensor Test"); Serial.println("");
@@ -31,10 +32,9 @@ void Inclinometer_DataModule::data_module_initialization_procedure()
   bno.setExtCrystalUse(true);
 }
 
-void Inclinometer_DataModule::data_module_operating_procedure(){
+void IMU_DataModule::data_module_operating_procedure(){
 
   while(true){
-    _delay_ms(100);
   /* Get a new sensor event */ 
   sensors_event_t event; 
   bno.getEvent(&event);
@@ -48,7 +48,7 @@ void Inclinometer_DataModule::data_module_operating_procedure(){
   Serial.print(event.orientation.z, 4);
   Serial.println("");
   
-  delay(100);
+  delay(20);
   }
 }
 

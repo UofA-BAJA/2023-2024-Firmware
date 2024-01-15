@@ -1,5 +1,5 @@
 #include <datamodule.h>
-#include <inclinometer.h>
+#include <imu.h>
 
 #include <avr/io.h>
 #include <Arduino.h>
@@ -31,8 +31,8 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
         return new RPM_DataModule;
     }
     else if(data_module_select == 0b110){
-        Serial.println("Inclinometer Detected");
-        return new Inclinometer_DataModule;
+        Serial.println("IMU Detected");
+        return new IMU_DataModule;
     }
     else {
         #if DEBUG_LEVEL == DEV
