@@ -10,6 +10,7 @@
 #define RPM_SENSING_DURATION_PERIOD_MS 20 // time in ms for sensor to collect
 #define RPM_NUM_OF_PERIODS_TO_AVG 20      // number of periods to average for rpm calculation
 #define NUM_MAGNETS 30                    // number of magnets on the wheel
+#define WHEEL_CIRCUMFERENCE 70.5          // circumference of the wheel in inches
 
 int rpm_left_counts[RPM_NUM_OF_PERIODS_TO_AVG] = {0};
 int rpm_rear_counts[RPM_NUM_OF_PERIODS_TO_AVG] = {0};
@@ -18,6 +19,8 @@ int rpm_right_counts[RPM_NUM_OF_PERIODS_TO_AVG] = {0};
 volatile int RPM_DataModule::left_rpm_counter = 0;  // Define and initialize the static member
 volatile int RPM_DataModule::right_rpm_counter = 0; // Define and initialize the static member
 volatile int RPM_DataModule::rear_rpm_counter = 0;  // Define and initialize the static member
+volatile float RPM_DataModule::speed = 0;           // volatile float RPM_DataModule::speed = 0; // Define and initialize the static member
+
 void RPM_DataModule::data_module_initialization_procedure()
 {
     sei(); // Enable interrupts
@@ -73,9 +76,13 @@ void RPM_DataModule::data_module_operating_procedure()
 
         // right_rpm = calculate_rpm(avg_right_rpm_count);
 
+        speed = calculate_speed(rear_rpm);
+
 #if DEBUG_LEVEL == DEV
         Serial.print(">rear_rpm: ");
         Serial.println(rear_rpm);
+        Serial.print(">Speed: ");
+        Serial.println(speed);
         // Serial.print(">left_rpm: ");
         // Serial.println(left_rpm);
         // Serial.print(">right_rpm: ");
@@ -134,6 +141,13 @@ float RPM_DataModule::calculate_rpm(float sensor_trigger_count)
     rpm = (rotations / ((RPM_SENSING_DURATION_PERIOD_MS) / 1000.0)) * 60;
 
     return rpm;
+}
+
+float RPM_DataModule::calculate_speed(float rpm)
+{
+    float speed;
+    speed = ((rpm * WHEEL_CIRCUMFERENCE) / 63360) * 60;
+    return speed;
 }
 
 ISR(INT0_vect)

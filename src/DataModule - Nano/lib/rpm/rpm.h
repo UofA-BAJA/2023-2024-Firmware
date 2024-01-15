@@ -25,8 +25,10 @@ public:
     float left_rpm;
     float right_rpm;
     float rear_rpm;
+    static volatile float speed;
 
     float calculate_rpm(float avg_rpm_count);
+    float calculate_speed(float rpm);
 
     void data_module_initialization_procedure() override;
     void data_module_operating_procedure() override;
