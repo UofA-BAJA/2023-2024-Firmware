@@ -1,4 +1,5 @@
 #include <datamodule.h>
+#include <inclinometer.h>
 
 #include <avr/io.h>
 #include <Arduino.h>
@@ -25,9 +26,13 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
         Serial.println(data_module_select);
     #endif
     
-
     if (data_module_select == 0b111) {
+        Serial.println("RPM Sensor Detected");
         return new RPM_DataModule;
+    }
+    else if(data_module_select == 0b110){
+        Serial.println("Inclinometer Detected");
+        return new Inclinometer_DataModule;
     }
     else {
         #if DEBUG_LEVEL == DEV

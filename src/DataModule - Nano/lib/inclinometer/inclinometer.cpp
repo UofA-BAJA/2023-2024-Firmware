@@ -1,26 +1,47 @@
+#include <Arduino.h>
+#include <inclinometer.h>
+#include <config.h>
+
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
-  
-Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
-void setup(void) 
+// #include <Adafruit_I2CDevice.h>
+  
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
+
+void Inclinometer_DataModule::data_module_initialization_procedure() 
 {
-  Serial.begin(9600);
-  Serial.println("Orientation Sensor Test"); Serial.println("");
+
+    #if DEBUG_LEVEL == DEV
+        Serial.println("Initialized Inclinometer data module");
+    #endif
+
+  // Serial.println("Orientation Sensor Test"); Serial.println("");
   
   /* Initialise the sensor */
-  if(!bno.begin())
-  {
-    /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while(1);
-  }
+
+  // bno.begin();
+
+  // if(!bno.begin())
+  // {
+  //   /* There was a problem detecting the BNO055 ... check your connections */
+  //   Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+  //   while(1);
+  // }
   
-  delay(1000);
+  // delay(1000);
     
-  bno.setExtCrystalUse(true);
+  // bno.setExtCrystalUse(true);
+}
+
+void Inclinometer_DataModule::data_module_operating_procedure(){
+
+  while(true){
+    _delay_ms(100);
+    Serial.println("test");
+  }
 }
 
 void loop(void) 
