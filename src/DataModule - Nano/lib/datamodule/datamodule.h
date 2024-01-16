@@ -2,8 +2,7 @@
 #define DATAMODULE_H
 
 #include <config.h>
-#include <SPI.h>
-#include <SD.h>
+#include <SD.h> // This include is so I can use the File type for the dataFile.
 
 namespace BAJA_EMBEDDED {
     
@@ -16,7 +15,7 @@ namespace BAJA_EMBEDDED {
 
     private:
         int chipSelect = 10; // Where the CS Pin is plugged into
-        String fileName;
+        String fileName = "data.txt";
         File dataFile;
     public:
         virtual ~DataModule() {} // Virtual destructor is important for a class with virtual functions

@@ -7,6 +7,9 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
+
+// I'm not sure why these two includes have to be here. I would think that because it inherits from
+// The datamodule, it should be fine. However, I'm not really sure.
 #include <SD.h>
 #include <SPI.h>
 
@@ -14,7 +17,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
 void IMU_DataModule::data_module_initialization_procedure() 
 {
-  pinMode(5, INPUT_PULLUP);
+    pinMode(5, INPUT_PULLUP);
 
     #if DEBUG_LEVEL == DEV
         Serial.println("Initialized IMU data module");
@@ -47,7 +50,7 @@ void IMU_DataModule::data_module_operating_procedure(){
     /* Display the floating point data */
     String dataString = "";
     dataString += millis();
-    dataString += "ms  X:";
+    dataString += "ms  Y:";
     dataString += event.orientation.y;
     // Serial.print("X: ");
     // Serial.print(event.orientation.x, 4);

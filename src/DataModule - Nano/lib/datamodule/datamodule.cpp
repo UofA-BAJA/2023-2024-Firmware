@@ -15,11 +15,13 @@ BAJA_EMBEDDED::DataModule::DataModule() {
 
 }
 
+#pragma region SD_Card_Functions
 void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileName) {
     this->chipSelect = chipSelect;
 
     if(fileName.length() > 12){
         Serial.println("Your code won't work and life is terrible and please just make the file name less than 13 characters ong");
+        while(1);
     }
     this->fileName = fileName;
 }
@@ -46,6 +48,8 @@ void BAJA_EMBEDDED::DataModule::CloseSD(){
     dataFile.close();
     Serial.print("File Closed");
 }
+#pragma endregion SD_Card_Functions
+
 
 BAJA_EMBEDDED::DataModule* create_data_module_type() {
     
