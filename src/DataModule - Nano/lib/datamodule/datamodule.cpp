@@ -1,12 +1,12 @@
 #include <datamodule.h>
 #include <imu.h>
+#include "rpm.h"
 
 #include <avr/io.h>
 #include <Arduino.h>
 
 #include "config.h"
 
-#include "rpm.h"
 
 #include <SPI.h>
 #include <SD.h>
@@ -17,8 +17,13 @@ BAJA_EMBEDDED::DataModule::DataModule() {
 
 void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileName) {
     this->chipSelect = chipSelect;
+
+    if(fileName.length() > 12){
+        Serial.println("Your code won't work and life is terrible and please just make the file name less than 13 characters ong");
+    }
     this->fileName = fileName;
 }
+
 void BAJA_EMBEDDED::DataModule::StartSDReading() {
     if(!SD.begin(chipSelect)){
         Serial.println("Card failed, or not present");
@@ -28,15 +33,18 @@ void BAJA_EMBEDDED::DataModule::StartSDReading() {
 
     dataFile = SD.open(fileName, FILE_WRITE);
 }
+
 void BAJA_EMBEDDED::DataModule::WriteToSD(String dataString){
     if (dataFile){
         dataFile.println(dataString);
     }else{
-        Serial.println("error opening datalog.txt");
+        Serial.println("error opening " + fileName);
     }
 }
+
 void BAJA_EMBEDDED::DataModule::CloseSD(){
-    
+    dataFile.close();
+    Serial.print("File Closed");
 }
 
 BAJA_EMBEDDED::DataModule* create_data_module_type() {

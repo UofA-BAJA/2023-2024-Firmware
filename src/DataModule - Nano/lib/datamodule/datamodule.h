@@ -21,7 +21,6 @@ namespace BAJA_EMBEDDED {
     public:
         virtual ~DataModule() {} // Virtual destructor is important for a class with virtual functions
         DataModule();
-        DataModule(int chipSelect, String fileName);
 
         virtual void data_module_initialization_procedure() = 0; //ive never seen this =0 syntax but thats how u do it
         

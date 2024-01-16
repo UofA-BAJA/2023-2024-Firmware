@@ -7,6 +7,11 @@
 #include "config.h"
 #include "datamodule.h"
 
+
+// ! I feel like you shouldn't need to have this dependency in every single data module...?
+#include <SD.h>
+#include <SPI.h>
+
 #define RPM_SENSING_DURATION_PERIOD_MS 20 //time in ms for sensor to collect
 #define RPM_NUM_OF_PERIODS_TO_AVG 20 //number of periods to average for rpm calculation
 

@@ -7,17 +7,21 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
-  
+#include <SD.h>
+#include <SPI.h>
+
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
 void IMU_DataModule::data_module_initialization_procedure() 
 {
+  pinMode(5, INPUT_PULLUP);
+
     #if DEBUG_LEVEL == DEV
         Serial.println("Initialized IMU data module");
     #endif
 
   // SD Reading setup
-  InitializeSDReading(10, "rotations.txt");
+  InitializeSDReading(10, "RotData.txt");
   
   /* Initialise the sensor */
   if(!bno.begin())
@@ -32,12 +36,19 @@ void IMU_DataModule::data_module_initialization_procedure()
 
 void IMU_DataModule::data_module_operating_procedure(){
   StartSDReading();
+
   while(true){
+    if(digitalRead(5) == HIGH){
+      CloseSD();
+    }
     /* Get a new sensor event */ 
     sensors_event_t event; 
     bno.getEvent(&event);
     /* Display the floating point data */
-    String dataString = millis() + "ms  X:" + (String)event.orientation.y;
+    String dataString = "";
+    dataString += millis();
+    dataString += "ms  X:";
+    dataString += event.orientation.y;
     // Serial.print("X: ");
     // Serial.print(event.orientation.x, 4);
     // Serial.print("\tY: ");
@@ -45,6 +56,7 @@ void IMU_DataModule::data_module_operating_procedure(){
     // Serial.print("\tZ: ");
     // Serial.print(event.orientation.z, 4);
     // Serial.println("");
+    WriteToSD(dataString);
     
     delay(20);
   }
