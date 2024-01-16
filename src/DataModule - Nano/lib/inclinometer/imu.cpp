@@ -9,7 +9,7 @@
 
 
 // I'm not sure why these two includes have to be here. I would think that because it inherits from
-// The datamodule, it should be fine. However, I'm not really sure.
+// The datamodule, it should be fine. However, it doesn't seem to work that way.
 #include <SD.h>
 #include <SPI.h>
 
