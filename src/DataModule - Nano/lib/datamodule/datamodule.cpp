@@ -8,8 +8,35 @@
 
 #include "rpm.h"
 
+#include <SPI.h>
+#include <SD.h>
+
 BAJA_EMBEDDED::DataModule::DataModule() {
 
+}
+
+void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileName) {
+    this->chipSelect = chipSelect;
+    this->fileName = fileName;
+}
+void BAJA_EMBEDDED::DataModule::StartSDReading() {
+    if(!SD.begin(chipSelect)){
+        Serial.println("Card failed, or not present");
+        while(1);
+    }
+    Serial.println("SD Card Initialized");
+
+    dataFile = SD.open(fileName, FILE_WRITE);
+}
+void BAJA_EMBEDDED::DataModule::WriteToSD(String dataString){
+    if (dataFile){
+        dataFile.println(dataString);
+    }else{
+        Serial.println("error opening datalog.txt");
+    }
+}
+void BAJA_EMBEDDED::DataModule::CloseSD(){
+    
 }
 
 BAJA_EMBEDDED::DataModule* create_data_module_type() {
