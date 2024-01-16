@@ -15,7 +15,6 @@ BAJA_EMBEDDED::DataModule::DataModule() {
 
 }
 
-#pragma region SD_Card_Functions
 void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileName) {
     this->chipSelect = chipSelect;
 
@@ -48,7 +47,6 @@ void BAJA_EMBEDDED::DataModule::CloseSD(){
     dataFile.close();
     Serial.print("File Closed");
 }
-#pragma endregion SD_Card_Functions
 
 
 BAJA_EMBEDDED::DataModule* create_data_module_type() {
