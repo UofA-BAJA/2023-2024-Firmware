@@ -1,15 +1,60 @@
 #include <datamodule.h>
+#include <imu.h>
+#include "rpm.h"
 
 #include <avr/io.h>
 #include <Arduino.h>
 
 #include "config.h"
 
-#include "rpm.h"
+
+#include <SPI.h>
+#include <SD.h>
 
 BAJA_EMBEDDED::DataModule::DataModule() {
 
 }
+
+/* 
+    Start of section for SD card reading
+*/
+void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileName) {
+    this->chipSelect = chipSelect;
+
+    if(fileName.length() > 12){
+        Serial.println("Your code won't work and life is terrible and please just make the file name less than 13 characters ong");
+        while(1);
+    }
+    this->fileName = fileName;
+}
+
+void BAJA_EMBEDDED::DataModule::StartSDReading() {
+    if(!SD.begin(chipSelect)){
+        Serial.println("Card failed, or not present");
+        while(1);
+    }
+    Serial.println("SD Card Initialized");
+
+    dataFile = SD.open(fileName, FILE_WRITE);
+}
+
+void BAJA_EMBEDDED::DataModule::WriteToSD(String dataString){
+    if (dataFile){
+        dataFile.println(dataString);
+    }else{
+        Serial.println("error opening " + fileName);
+    }
+}
+
+void BAJA_EMBEDDED::DataModule::CloseSD(){
+    dataFile.close();
+    Serial.print("File Closed");
+}
+
+/* 
+    End of section for SD card reading
+*/
+
 
 BAJA_EMBEDDED::DataModule* create_data_module_type() {
     
@@ -25,9 +70,13 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
         Serial.println(data_module_select);
     #endif
     
-
     if (data_module_select == 0b111) {
+        Serial.println("RPM Sensor Detected");
         return new RPM_DataModule;
+    }
+    else if(data_module_select == 0b110){
+        Serial.println("IMU Detected");
+        return new IMU_DataModule;
     }
     else {
         #if DEBUG_LEVEL == DEV
