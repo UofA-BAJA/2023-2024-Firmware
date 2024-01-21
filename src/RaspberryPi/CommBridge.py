@@ -34,15 +34,21 @@ def get_serial_devices(port_paths):
 
 def begin_logging(serial_devices):
     # send command to nano's to start logging onto their SD cards
+    for ser in serial_devices:
+        ser.write(b"Begin Logging")
     print("Begin logging")
 
 
 def end_logging(serial_devices):
     # send command to nano's to stop logging onto their SD cards
+    for ser in serial_devices:
+        ser.write(b"End Logging")
     print("End logging")
 
 def retrieve_logs(serial_devices):
     # retrieve data from nano's SD cards
+    for ser in serial_devices:
+        ser.write(b"Retrieve Logs")
     print("Retrieving logs")
 
 def receive_data(serial_devices):
