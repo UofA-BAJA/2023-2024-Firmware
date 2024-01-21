@@ -4,6 +4,10 @@
 #include <avr/interrupt.h>
 #include <Arduino.h>
 
+// ! I feel like you shouldn't need to have this dependency in every single data module...?
+#include <SD.h>
+#include <SPI.h>
+
 #include "config.h"
 #include "datamodule.h"
 
