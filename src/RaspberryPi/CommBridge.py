@@ -1,7 +1,6 @@
 import serial
 import serial.tools.list_ports
 import time
-# from xmodem import XMODEM
 # https://www.youtube.com/watch?v=jU_b8WBTUew <------ watch this video
 
 class bcolors:
@@ -14,16 +13,6 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
-# def getc(size, timeout=1):
-#      return ser.read(size) or None
-
-# def putc(data, timeout=1):
-#      return ser.write(data)  # note that this ignores the timeout
-
-# modem = XMODEM(getc, putc)
-
-
 
 def get_port_paths():
     ports = list(serial.tools.list_ports.comports())
