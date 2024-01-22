@@ -22,11 +22,11 @@ void BAJA_EMBEDDED::DataModule::SendFile(){
 
     while (dataFile.available() > 0) {
         String buffer = dataFile.readStringUntil('\n');
+        buffer.trim();
         Serial.println(buffer);
     }
     dataFile.close();
     Serial.println("Finished");
-
 }
 
 /* 
@@ -41,7 +41,6 @@ void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileN
     }
     fileName.toUpperCase();
     this->fileName = fileName;
-    SD.remove(fileName);
 }
 
 void BAJA_EMBEDDED::DataModule::StartSDReading() {
@@ -49,8 +48,9 @@ void BAJA_EMBEDDED::DataModule::StartSDReading() {
         Serial.println("Card failed, or not present");
         while(1);
     }
-    Serial.println("SD Card Initialized");
 
+    Serial.println("SD Card Initialized");
+    SD.remove(fileName);
     dataFile = SD.open(fileName, FILE_WRITE);
 }
 

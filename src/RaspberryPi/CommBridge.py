@@ -19,14 +19,14 @@ def get_port_paths():
     ports = list(serial.tools.list_ports.comports())
     port_paths = []
     for p in ports:
-        print(p.device)
+        print(f"Device detected: {p.device}")
         port_paths.append(p.device)
     return port_paths
 
 def get_serial_devices(port_paths):
     serial_devices = []
     for path in port_paths:
-        ser = serial.Serial(path, 9600)
+        ser = serial.Serial(path, 115200)
         serial_devices.append(ser)
     time.sleep(3)
     for device in serial_devices:
@@ -47,10 +47,11 @@ def retrieve_logs(serial_devices):
     files = []
     # retrieve data from nano's SD cards
     for ser in serial_devices:
+        # Send command
         ser.write(b"Retrieve Logs")
 
+        # Get rid of all the other crap before.
         ser.flushInput()
-        ser.flushOutput()
 
         print("Waiting for device response...")
         while(ser.in_waiting == 0):
@@ -58,10 +59,11 @@ def retrieve_logs(serial_devices):
         print("Device Responded...")
 
         # get file name
-        file_name = "default_name.txt"
+        file_name = "DEFAULT.TXT"
         file_name = ser.readline().decode('utf-8').rstrip()
 
         file = open(file_name, 'w')
+        # try except so that the file gets closed in case of a forceful program close
         try:
             print("Writing to file...")
             while True:
@@ -73,24 +75,26 @@ def retrieve_logs(serial_devices):
             file.close()
         except KeyboardInterrupt:
             file.close()
+            exit_program(ser_devices)
 
         print(f"File {file_name} Created")
+        print(f"{bcolors.BOLD}Enter another command{bcolors.ENDC}")
 
 
-def receive_data(serial_devices):
-    print("Receiving Data")
-    try:
-        while True:
-            time.sleep(0.05)
-            for ser in serial_devices:
-                # ser.in_waiting is the num of bytes in the buffer. 
-                if ser.in_waiting > 0:
-                    data = ser.readline().decode('utf-8').rstrip()
-                    print(data)
-    except KeyboardInterrupt:
-        for ser in serial_devices:
-            ser.close()
-        print("\nSerial Devices Closed")
+# def receive_data(serial_devices):
+#     print("Receiving Data")
+#     try:
+#         while True:
+#             time.sleep(0.05)
+#             for ser in serial_devices:
+#                 # ser.in_waiting is the num of bytes in the buffer. 
+#                 if ser.in_waiting > 0:
+#                     data = ser.readline().decode('utf-8').rstrip()
+#                     print(data)
+#     except KeyboardInterrupt:
+#         for ser in serial_devices:
+#             ser.close()
+#         print("\nSerial Devices Closed")
 
 def get_input(serial_devices):
     print_commands()
