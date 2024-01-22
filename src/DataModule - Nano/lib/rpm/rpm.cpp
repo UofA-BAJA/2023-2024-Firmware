@@ -31,6 +31,9 @@ void RPM_DataModule::data_module_initialization_procedure()
     initialize_left_rpm_sensor();
     initialize_right_rpm_sensor();
 
+    InitializeSDReading(10, "rpmdata.txt");
+
+
 #if DEBUG_LEVEL == DEV
     Serial.println("initialized RPM data module");
 #endif
@@ -38,6 +41,7 @@ void RPM_DataModule::data_module_initialization_procedure()
 
 void RPM_DataModule::data_module_operating_procedure()
 {
+    StartSDReading();
 
     while (1)
     {
@@ -82,17 +86,26 @@ void RPM_DataModule::data_module_operating_procedure()
 
         speed = calculate_speed(rear_rpm);
 
-#if DEBUG_LEVEL == DEV
-        Serial.print(">rear_rpm: ");
-        Serial.println(rear_rpm);
-        Serial.print(">Speed: ");
-        Serial.println(speed);
-        // Serial.print(">left_rpm: ");
-        // Serial.println(left_rpm);
-        // Serial.print(">right_rpm: ");
-        // Serial.println(right_rpm);
-#endif
+        String dataString = "";
+        dataString += millis();
+        dataString += " ms | ";
+        dataString += speed;
+        dataString += " mph";
+        WriteToSD(dataString);
+
+    #if DEBUG_LEVEL == DEV
+            // Serial.println(speed);
+            // Serial.print(">rear_rpm: ");
+            // Serial.println(rear_rpm);
+            // Serial.print(">Speed: ");
+            // Serial.println(speed);
+            Serial.print(">left_rpm: ");
+            Serial.println(left_rpm_counter);
+            Serial.print(">right_rpm: ");
+            Serial.println(right_rpm_counter);
+    #endif
     }
+
 }
 
 void RPM_DataModule::initialize_left_rpm_sensor()

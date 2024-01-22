@@ -2,6 +2,10 @@
 #include "datamodule.h"
 #include "config.h"
 
+#include "rpm.h"
+
+#include "rpm.h"
+
 #include "imu.h"
 #include "rpm.h"
 
@@ -15,6 +19,8 @@ int main() {
   // not sure why this isn't working
   // DataModule* selected_data_module = create_data_module_type();
   DataModule* selected_data_module = new RPM_DataModule;
+  // DataModule* selected_data_module = create_data_module_type();
+  DataModule* selected_data_module = new RPM_DataModule();
 
   selected_data_module->data_module_initialization_procedure();
   

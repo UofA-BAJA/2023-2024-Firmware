@@ -52,6 +52,13 @@ void BAJA_EMBEDDED::DataModule::StartSDReading() {
     Serial.println("SD Card Initialized");
     SD.remove(fileName);
     dataFile = SD.open(fileName, FILE_WRITE);
+
+    if (dataFile) {
+        Serial.println("Data file successfully opened");
+    }
+    else{
+        while(1);
+    }
 }
 
 void BAJA_EMBEDDED::DataModule::WriteToSD(String dataString){
