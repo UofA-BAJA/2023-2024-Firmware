@@ -31,8 +31,7 @@ void RPM_DataModule::data_module_initialization_procedure()
     initialize_left_rpm_sensor();
     initialize_right_rpm_sensor();
 
-    pinMode(5, INPUT_PULLUP);
-    InitializeSDReading(10, "aaaa.txt");
+    InitializeSDReading(10, "rpmdata.txt");
 
 
 #if DEBUG_LEVEL == DEV
@@ -46,9 +45,6 @@ void RPM_DataModule::data_module_operating_procedure()
 
     while (1)
     {
-        if(digitalRead(5) == HIGH){
-            CloseSD();
-        }
         /*operating procedure
         1. wait RPM_SENSING_DURATION_PERIOD_MS to accumlate ticks
         2. shift data array left to make space for new array
@@ -95,19 +91,19 @@ void RPM_DataModule::data_module_operating_procedure()
         dataString += " ms | ";
         dataString += speed;
         dataString += " mph";
-        // WriteToSD(dataString);
+        WriteToSD(dataString);
 
-#if DEBUG_LEVEL == DEV
-        // Serial.println(speed);
-        // Serial.print(">rear_rpm: ");
-        // Serial.println(rear_rpm);
-        // Serial.print(">Speed: ");
-        // Serial.println(speed);
-        Serial.print(">left_rpm: ");
-        Serial.println(left_rpm_counter);
-        Serial.print(">right_rpm: ");
-        Serial.println(right_rpm_counter);
-#endif
+    #if DEBUG_LEVEL == DEV
+            // Serial.println(speed);
+            // Serial.print(">rear_rpm: ");
+            // Serial.println(rear_rpm);
+            // Serial.print(">Speed: ");
+            // Serial.println(speed);
+            Serial.print(">left_rpm: ");
+            Serial.println(left_rpm_counter);
+            Serial.print(">right_rpm: ");
+            Serial.println(right_rpm_counter);
+    #endif
     }
 
 }
