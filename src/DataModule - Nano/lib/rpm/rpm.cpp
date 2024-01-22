@@ -42,7 +42,7 @@ void RPM_DataModule::data_module_initialization_procedure()
 void RPM_DataModule::data_module_operating_procedure()
 {
     StartSDReading();
-
+    bool logging = false;
     while (1)
     {
         /*operating procedure
@@ -54,6 +54,29 @@ void RPM_DataModule::data_module_operating_procedure()
         - print to serial
         - write to sd card
         */
+
+           // Incoming command from raspberry pi!
+        //    void pollCommandFromPI()
+        if(Serial.available() > 0){
+        String command = Serial.readString();
+
+        if(command == "Begin Logging"){
+            logging = true;
+        }
+        else if(command == "End Logging"){
+            logging = false;
+            CloseSD();
+        }
+        else if(command == "Retrieve Logs"){
+            if(logging){
+            Serial.println("You are still logging. stop logging first");
+            }
+            else{
+            SendFile();
+            }
+        }
+        }
+
         _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
         rear_rpm_counter = left_rpm_counter + right_rpm_counter;
 
@@ -85,24 +108,24 @@ void RPM_DataModule::data_module_operating_procedure()
         // right_rpm = calculate_rpm(avg_right_rpm_count);
 
         speed = calculate_speed(rear_rpm);
-
-        String dataString = "";
-        dataString += millis();
-        dataString += " ms | ";
-        dataString += speed;
-        dataString += " mph";
-        WriteToSD(dataString);
-
+        if(logging){
+            String dataString = "";
+            dataString += millis();
+            dataString += " ms | ";
+            dataString += speed;
+            dataString += " mph";
+            WriteToSD(dataString);
+        }
     #if DEBUG_LEVEL == DEV
             // Serial.println(speed);
             // Serial.print(">rear_rpm: ");
             // Serial.println(rear_rpm);
             // Serial.print(">Speed: ");
             // Serial.println(speed);
-            Serial.print(">left_rpm: ");
-            Serial.println(left_rpm_counter);
-            Serial.print(">right_rpm: ");
-            Serial.println(right_rpm_counter);
+            // Serial.print(">left_rpm: ");
+            // Serial.println(left_rpm_counter);
+            // Serial.print(">right_rpm: ");
+            // Serial.println(right_rpm_counter);
     #endif
     }
 
