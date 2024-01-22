@@ -1,7 +1,8 @@
 import serial
 import serial.tools.list_ports
 import time
-# https://www.youtube.com/watch?v=jU_b8WBTUew <------ watch this video
+
+# https://www.youtube.com/watch?v=jU_b8WBTUew <------ watch this video for basic serial commmunication
 
 class bcolors:
     HEADER = '\033[95m'
@@ -36,20 +37,45 @@ def begin_logging(serial_devices):
     # send command to nano's to start logging onto their SD cards
     for ser in serial_devices:
         ser.write(b"Begin Logging")
-    print("Begin logging")
-
 
 def end_logging(serial_devices):
     # send command to nano's to stop logging onto their SD cards
     for ser in serial_devices:
         ser.write(b"End Logging")
-    print("End logging")
 
 def retrieve_logs(serial_devices):
+    files = []
     # retrieve data from nano's SD cards
     for ser in serial_devices:
         ser.write(b"Retrieve Logs")
-    print("Retrieving logs")
+
+        ser.flushInput()
+        ser.flushOutput()
+
+        print("Waiting for device response...")
+        while(ser.in_waiting == 0):
+            pass
+        print("Device Responded...")
+
+        # get file name
+        file_name = "default_name.txt"
+        file_name = ser.readline().decode('utf-8').rstrip()
+
+        file = open(file_name, 'w')
+        try:
+            print("Writing to file...")
+            while True:
+                if ser.in_waiting > 0:
+                    line = ser.readline().decode('utf-8')
+                    if line.strip() == "Finished":
+                        break
+                    file.write(line)
+            file.close()
+        except KeyboardInterrupt:
+            file.close()
+
+        print(f"File {file_name} Created")
+
 
 def receive_data(serial_devices):
     print("Receiving Data")

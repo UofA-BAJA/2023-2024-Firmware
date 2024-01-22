@@ -15,6 +15,20 @@ BAJA_EMBEDDED::DataModule::DataModule() {
 
 }
 
+void BAJA_EMBEDDED::DataModule::SendFile(){
+
+    dataFile = SD.open(fileName, FILE_READ);
+    Serial.println(fileName);
+
+    while (dataFile.available() > 0) {
+        String buffer = dataFile.readStringUntil('\n');
+        Serial.println(buffer);
+    }
+    dataFile.close();
+    Serial.println("Finished");
+
+}
+
 /* 
     Start of section for SD card reading
 */
@@ -25,7 +39,9 @@ void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileN
         Serial.println("Your code won't work and life is terrible and please just make the file name less than 13 characters ong");
         while(1);
     }
+    fileName.toUpperCase();
     this->fileName = fileName;
+    SD.remove(fileName);
 }
 
 void BAJA_EMBEDDED::DataModule::StartSDReading() {

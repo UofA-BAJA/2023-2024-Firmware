@@ -43,12 +43,10 @@ void IMU_DataModule::data_module_operating_procedure(){
   bool logging = false;
 
   while(true){
-
     // Incoming command from raspberry pi!
     if(Serial.available() > 0){
       String command = Serial.readString();
 
-      Serial.println(Serial.available());
       if(command == "Begin Logging"){
         logging = true;
       }
@@ -57,12 +55,16 @@ void IMU_DataModule::data_module_operating_procedure(){
         CloseSD();
       }
       else if(command == "Retrieve Logs"){
-
+        if(logging){
+          Serial.println("You are still logging. stop logging first");
+        }
+        else{
+          SendFile();
+        }
       }
     }
-
+    
     if(logging){
-      Serial.println("Logging now");
       /* Get a new sensor event */ 
       sensors_event_t event; 
       bno.getEvent(&event);
