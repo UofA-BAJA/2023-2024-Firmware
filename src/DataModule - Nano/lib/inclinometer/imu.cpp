@@ -40,26 +40,48 @@ void IMU_DataModule::data_module_initialization_procedure()
 void IMU_DataModule::data_module_operating_procedure(){
   StartSDReading();
 
+  bool logging = false;
+
   while(true){
-    if(digitalRead(5) == HIGH){
-      CloseSD();
+    // Incoming command from raspberry pi!
+    if(Serial.available() > 0){
+      String command = Serial.readString();
+
+      if(command == "Begin Logging"){
+        logging = true;
+      }
+      else if(command == "End Logging"){
+        logging = false;
+        CloseSD();
+      }
+      else if(command == "Retrieve Logs"){
+        if(logging){
+          Serial.println("You are still logging. stop logging first");
+        }
+        else{
+          SendFile();
+        }
+      }
     }
-    /* Get a new sensor event */ 
-    sensors_event_t event; 
-    bno.getEvent(&event);
-    /* Display the floating point data */
-    String dataString = "";
-    dataString += millis();
-    dataString += "ms  Y:";
-    dataString += event.orientation.y;
-    // Serial.print("X: ");
-    // Serial.print(event.orientation.x, 4);
-    // Serial.print("\tY: ");
-    // Serial.print(event.orientation.y, 4);
-    // Serial.print("\tZ: ");
-    // Serial.print(event.orientation.z, 4);
-    // Serial.println("");
-    WriteToSD(dataString);
+    
+    if(logging){
+      /* Get a new sensor event */ 
+      sensors_event_t event; 
+      bno.getEvent(&event);
+      /* Display the floating point data */
+      String dataString = "";
+      dataString += millis();
+      dataString += "ms  Y:";
+      dataString += event.orientation.y;
+      // Serial.print("X: ");
+      // Serial.print(event.orientation.x, 4);
+      // Serial.print("\tY: ");
+      // Serial.print(event.orientation.y, 4);
+      // Serial.print("\tZ: ");
+      // Serial.print(event.orientation.z, 4);
+      // Serial.println("");
+      WriteToSD(dataString);
+    }
     
     delay(20);
   }
