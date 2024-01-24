@@ -1,7 +1,7 @@
 import serial
 
 # Specify the COM port and baud rate
-com_port = 'COM4'
+com_port = 'COM3'
 baud_rate = 115200  # You may need to adjust this based on your Arduino sketch
 
 # Open the serial connection

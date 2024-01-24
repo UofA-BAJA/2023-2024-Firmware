@@ -1,7 +1,7 @@
-/* Heltec Automation send communication test example
+/* Heltec Automation Receive communication test example
  *
  * Function:
- * 1. Send data from a CubeCell device over hardware 
+ * 1. Receive the same frequency band lora signal program
  * 
  * 
  * this project also realess in GitHub:
@@ -47,56 +47,48 @@ char rxpacket[BUFFER_SIZE];
 
 static RadioEvents_t RadioEvents;
 
-double txNumber;
+int16_t txNumber;
 
 int16_t rssi,rxSize;
-void  DoubleToString( char *str, double double_num,unsigned int len);
+
+void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr);
 
 void setup() {
     Serial.begin(115200);
 
     txNumber=0;
     rssi=0;
-
+	
+	  RadioEvents.RxDone = OnRxDone;
     Radio.Init( &RadioEvents );
     Radio.SetChannel( RF_FREQUENCY );
-    Radio.SetTxConfig( MODEM_LORA, TX_OUTPUT_POWER, 0, LORA_BANDWIDTH,
-                                   LORA_SPREADING_FACTOR, LORA_CODINGRATE,
-                                   LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON,
-                                   true, 0, 0, LORA_IQ_INVERSION_ON, 3000 ); 
+	
+	Radio.SetRxConfig( MODEM_LORA, LORA_BANDWIDTH, LORA_SPREADING_FACTOR,
+                                   LORA_CODINGRATE, 0, LORA_PREAMBLE_LENGTH,
+                                   LORA_SYMBOL_TIMEOUT, LORA_FIX_LENGTH_PAYLOAD_ON,
+                                   0, true, 0, 0, LORA_IQ_INVERSION_ON, true );
+   turnOnRGB(COLOR_SEND,0); //change rgb color
+   Serial.println("into RX mode");
    }
 
 
 
 void loop()
 {
-	delay(100);
-	txNumber += 0.01;
-	sprintf(txpacket,"X:    Y:    Z:    %s","H");  //start a package
-	// sprintf(txpacket+strlen(txpacket),"%d",txNumber); //add to the end of package
-	
-	DoubleToString(txpacket,txNumber,3);	   //add to the end of package
-	
-	turnOnRGB(COLOR_SEND,0); //change rgb color
-
-	Serial.printf("\r\nsending packet \"%s\" , length %d\r\n",txpacket, strlen(txpacket));
-
-	Radio.Send( (uint8_t *)txpacket, strlen(txpacket) ); //send the package out	
+	Radio.Rx( 0 );
+  delay(100);
+  Radio.IrqProcess( );
 }
 
-/**
-  * @brief  Double To String
-  * @param  str: Array or pointer for storing strings
-  * @param  double_num: Number to be converted
-  * @param  len: Fractional length to keep
-  * @retval None
-  */
-void  DoubleToString( char *str, double double_num,unsigned int len) { 
-  double fractpart, intpart;
-  fractpart = modf(double_num, &intpart);
-  fractpart = fractpart * (pow(10,len));
-  sprintf(str + strlen(str),"%d", (int)(intpart)); //Integer part
-  sprintf(str + strlen(str), ".%d", (int)(fractpart)); //Decimal part
+void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr )
+{
+    rssi=rssi;
+    rxSize=size;
+    memcpy(rxpacket, payload, size );
+    rxpacket[size]='\0';
+    turnOnRGB(COLOR_RECEIVED,0);
+
+    Radio.Sleep( );
+    Serial.printf("\r\n %s\r\n",rxpacket);
+
 }
-
-

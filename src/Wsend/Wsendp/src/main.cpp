@@ -72,10 +72,17 @@ void loop()
 {
 	delay(100);
 	txNumber += 0.01;
-	sprintf(txpacket,"X:    Y:    Z:    %s","H");  //start a package
+	
+  while(Serial.available() == 0);
+  
+  // Read the input word until a newline character is encountered
+  String userInput = Serial.readStringUntil('\n');
+  userInput.trim(); // Remove leading and trailing whitespaces
+
+  // Build the txpacket
+  sprintf(txpacket,"%s", userInput.c_str());  //start a package
 	// sprintf(txpacket+strlen(txpacket),"%d",txNumber); //add to the end of package
 	
-	DoubleToString(txpacket,txNumber,3);	   //add to the end of package
 	
 	turnOnRGB(COLOR_SEND,0); //change rgb color
 
@@ -98,5 +105,4 @@ void  DoubleToString( char *str, double double_num,unsigned int len) {
   sprintf(str + strlen(str),"%d", (int)(intpart)); //Integer part
   sprintf(str + strlen(str), ".%d", (int)(fractpart)); //Decimal part
 }
-
 
