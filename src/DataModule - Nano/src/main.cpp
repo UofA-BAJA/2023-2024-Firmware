@@ -8,7 +8,6 @@ using namespace BAJA_EMBEDDED;
 
 int main() {
 
-  setup_debug();
 
   // not sure why this isn't working
   DataModule* selected_data_module = create_data_module_type();

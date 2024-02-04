@@ -1,6 +1,5 @@
 #include "i2c.h"
 #include <avr/io.h>
-#include "Arduino.h"
 
 #define wait_for_completion while(!(TWCR & (1 << TWINT)));
 

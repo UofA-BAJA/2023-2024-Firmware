@@ -20,68 +20,26 @@
 #define SL_TEMP_HIGH      0x41
 #define SL_TEMP_LOW       0x42
 
-// I'm not sure why these two includes have to be here. I would think that because it inherits from
-// The datamodule, it should be fine. However, it doesn't seem to work that way.
 
-
-
-void IMU_DataModule::data_module_specific_initialization_procedure() 
+void IMU_DataModule::data_module_setup_procedure() 
 {
   sei(); 
 
   initI2C(); 
-
-  pinMode(5, INPUT_PULLUP);
-
-  #if DEBUG_LEVEL == DEV
-    Serial.println("Initialized IMU data module");
-  #endif
-
-  // SD Reading setup
-  InitializeSDReading(10, "RotData.txt");
   
   /* Initialise the sensor */
   StartI2C_Trans(SLA);
   //status = TWSR & 0xF8;
   write(PWR_MGMT);// address on SLA for Power Management
   write(WAKEUP); // send data to Wake up from sleep mode
-
   StopI2C_Trans();
+
+  #if DEBUG_LEVEL == DEV
+    Serial.println("Initialized IMU data module");
+  #endif
 }
 
-void IMU_DataModule::data_module_specific_operating_procedure(){
-  StartSDReading();
-
-  bool logging = false;
-
-  while(true){
-    // Incoming command from raspberry pi!
-    if(Serial.available() > 0){
-      String command = Serial.readString();
-
-      if(command == "Begin Logging"){
-        logging = true;
-      }
-      else if(command == "End Logging"){
-        logging = false;
-        CloseSD();
-      }
-      else if(command == "Retrieve Logs"){
-        if(logging){
-          Serial.println("You are still logging. stop logging first");
-        }
-        else{
-          SendFile();
-        }
-      }
-    }
+void IMU_DataModule::data_module_logging_procedure(){
+  
     
-    if(logging){
-      /* Get a new sensor event */ 
-      
-      WriteToSD("a");
-    }
-    
-    delay(20);
-  }
 }

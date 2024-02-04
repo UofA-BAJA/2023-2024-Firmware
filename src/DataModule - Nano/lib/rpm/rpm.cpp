@@ -25,111 +25,63 @@ volatile int RPM_DataModule::right_rpm_counter = 0; // Define and initialize the
 volatile int RPM_DataModule::rear_rpm_counter = 0;  // Define and initialize the static member
 volatile float RPM_DataModule::speed = 0;           // volatile float RPM_DataModule::speed = 0; // Define and initialize the static member
 
-void RPM_DataModule::data_module_specific_initialization_procedure()
+void RPM_DataModule::data_module_setup_procedure()
 {
     sei(); // Enable interrupts
     initialize_left_rpm_sensor();
     initialize_right_rpm_sensor();
 
-    InitializeSDReading(10, "rpmdata.txt");
 
 
-#if DEBUG_LEVEL == DEV
-    Serial.println("initialized RPM data module");
-#endif
-}
-
-void RPM_DataModule::data_module_specific_operating_procedure()
-{
-    StartSDReading();
-    bool logging = false;
-    while (1)
-    {
-        /*operating procedure
-        1. wait RPM_SENSING_DURATION_PERIOD_MS to accumlate ticks
-        2. shift data array left to make space for new array
-        3. store new value in data array
-        4. avg data points in array
-        5. report rpm
-        - print to serial
-        - write to sd card
-        */
-
-           // Incoming command from raspberry pi!
-        //    void pollCommandFromPI()
-        if(Serial.available() > 0){
-        String command = Serial.readString();
-
-        if(command == "Begin Logging"){
-            logging = true;
-        }
-        else if(command == "End Logging"){
-            logging = false;
-            CloseSD();
-        }
-        else if(command == "Retrieve Logs"){
-            if(logging){
-            Serial.println("You are still logging. stop logging first");
-            }
-            else{
-            SendFile();
-            }
-        }
-        }
-
-        _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
-        rear_rpm_counter = left_rpm_counter + right_rpm_counter;
-
-        shift_data_array_left(rpm_rear_counts, RPM_NUM_OF_PERIODS_TO_AVG);
-        rpm_rear_counts[RPM_NUM_OF_PERIODS_TO_AVG - 1] = rear_rpm_counter;
-        rear_rpm_counter = 0;
-
-        left_rpm_counter = 0;
-        right_rpm_counter = 0;
-
-        avg_rear_rpm_count = get_average_of_data_array(rpm_rear_counts, RPM_NUM_OF_PERIODS_TO_AVG);
-
-        rear_rpm = calculate_rpm(avg_rear_rpm_count);
-
-        // shift_data_array_left(rpm_left_counts, RPM_NUM_OF_PERIODS_TO_AVG);
-        // rpm_left_counts[RPM_NUM_OF_PERIODS_TO_AVG - 1] = left_rpm_counter;
-        // left_rpm_counter = 0;
-
-        // avg_left_rpm_count = get_average_of_data_array(rpm_left_counts, RPM_NUM_OF_PERIODS_TO_AVG);
-
-        // left_rpm = calculate_rpm(avg_left_rpm_count);
-
-        // shift_data_array_left(rpm_right_counts, RPM_NUM_OF_PERIODS_TO_AVG);
-        // rpm_right_counts[RPM_NUM_OF_PERIODS_TO_AVG - 1] = right_rpm_counter;
-        // right_rpm_counter = 0;
-
-        // avg_right_rpm_count = get_average_of_data_array(rpm_right_counts, RPM_NUM_OF_PERIODS_TO_AVG);
-
-        // right_rpm = calculate_rpm(avg_right_rpm_count);
-
-        speed = calculate_speed(rear_rpm);
-        if(logging){
-            String dataString = "";
-            dataString += millis();
-            dataString += " ms | ";
-            dataString += speed;
-            dataString += " mph";
-            WriteToSD(dataString);
-        }
     #if DEBUG_LEVEL == DEV
-            // Serial.println(speed);
-            // Serial.print(">rear_rpm: ");
-            // Serial.println(rear_rpm);
-            // Serial.print(">Speed: ");
-            // Serial.println(speed);
-            // Serial.print(">left_rpm: ");
-            // Serial.println(left_rpm_counter);
-            // Serial.print(">right_rpm: ");
-            // Serial.println(right_rpm_counter);
+        Serial.println("initialized RPM data module");
     #endif
-    }
-
 }
+
+void RPM_DataModule::data_module_logging_procedure() {
+    /*operating procedure
+    1. wait RPM_SENSING_DURATION_PERIOD_MS to accumlate ticks
+    2. shift data array left to make space for new array
+    3. store new value in data array
+    4. avg data points in array
+    5. report rpm
+    - print to serial
+    - write to sd card
+    */
+
+        // Incoming command from raspberry pi!
+    //    void pollCommandFromPI()
+    
+    _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
+    rear_rpm_counter = left_rpm_counter + right_rpm_counter;
+
+    shift_data_array_left(rpm_rear_counts, RPM_NUM_OF_PERIODS_TO_AVG);
+    rpm_rear_counts[RPM_NUM_OF_PERIODS_TO_AVG - 1] = rear_rpm_counter;
+    rear_rpm_counter = 0;
+
+    left_rpm_counter = 0;
+    right_rpm_counter = 0;
+
+    avg_rear_rpm_count = get_average_of_data_array(rpm_rear_counts, RPM_NUM_OF_PERIODS_TO_AVG);
+
+    rear_rpm = calculate_rpm(avg_rear_rpm_count);
+
+    speed = calculate_speed(rear_rpm);
+    
+    #if DEBUG_LEVEL == DEV
+        // Serial.println(speed);
+        // Serial.print(">rear_rpm: ");
+        // Serial.println(rear_rpm);
+        // Serial.print(">Speed: ");
+        // Serial.println(speed);
+        // Serial.print(">left_rpm: ");
+        // Serial.println(left_rpm_counter);
+        // Serial.print(">right_rpm: ");
+        // Serial.println(right_rpm_counter);
+    #endif
+}
+
+
 
 void RPM_DataModule::initialize_left_rpm_sensor()
 {
