@@ -1,16 +1,83 @@
 #include <datamodule.h>
 #include <imu.h>
+#include "rpm.h"
 
 #include <avr/io.h>
 #include <Arduino.h>
 
 #include "config.h"
 
-#include "rpm.h"
+
+#include <SPI.h>
+#include <SD.h>
 
 BAJA_EMBEDDED::DataModule::DataModule() {
 
 }
+
+void BAJA_EMBEDDED::DataModule::SendFile(){
+
+    dataFile = SD.open(fileName, FILE_READ);
+    Serial.println(fileName);
+
+    while (dataFile.available() > 0) {
+        String buffer = dataFile.readStringUntil('\n');
+        buffer.trim();
+        Serial.println(buffer);
+    }
+    dataFile.close();
+    Serial.println("Finished");
+}
+
+/* 
+    Start of section for SD card reading
+*/
+void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileName) {
+    this->chipSelect = chipSelect;
+
+    if(fileName.length() > 12){
+        Serial.println("Your code won't work and life is terrible and please just make the file name less than 13 characters ong");
+        while(1);
+    }
+    fileName.toUpperCase();
+    this->fileName = fileName;
+}
+
+void BAJA_EMBEDDED::DataModule::StartSDReading() {
+    if(!SD.begin(chipSelect)){
+        Serial.println("Card failed, or not present");
+        while(1);
+    }
+
+    Serial.println("SD Card Initialized");
+    SD.remove(fileName);
+    dataFile = SD.open(fileName, FILE_WRITE);
+
+    if (dataFile) {
+        Serial.println("Data file successfully opened");
+    }
+    else{
+        while(1);
+    }
+}
+
+void BAJA_EMBEDDED::DataModule::WriteToSD(String dataString){
+    if (dataFile){
+        dataFile.println(dataString);
+    }else{
+        Serial.println("error opening " + fileName);
+    }
+}
+
+void BAJA_EMBEDDED::DataModule::CloseSD(){
+    dataFile.close();
+    Serial.print("File Closed");
+}
+
+/* 
+    End of section for SD card reading
+*/
+
 
 BAJA_EMBEDDED::DataModule* create_data_module_type() {
     

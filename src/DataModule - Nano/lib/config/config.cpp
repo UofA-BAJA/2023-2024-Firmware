@@ -9,7 +9,7 @@
 
 void setup_debug() {
     #if DEBUG_LEVEL == DEV
-        Serial.begin(9600); // Initialize serial communication at 9600 baud rate
+        Serial.begin(115200); // Initialize serial communication at 9600 baud rate
         Serial.println("Debug Mode: DEV");
     #endif
 }
