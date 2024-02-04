@@ -13,6 +13,9 @@ namespace BAJA_EMBEDDED {
         void WriteToSD(String dataString);
         void CloseSD();
 
+        // Maybe change the return type to a bool to see if the file was successfully sent
+        void SendFile();
+
     private:
         int chipSelect = 10; // Where the CS Pin is plugged into
         String fileName = "data.txt";
