@@ -20,13 +20,17 @@ namespace BAJA_EMBEDDED {
         int chipSelect = 10; // Where the CS Pin is plugged into
         String fileName = "data.txt";
         File dataFile;
+
     public:
         virtual ~DataModule() {} // Virtual destructor is important for a class with virtual functions
         DataModule();
 
-        virtual void data_module_initialization_procedure() = 0; //ive never seen this =0 syntax but thats how u do it
+        void data_module_initialization_procedure();
+        void data_module_operating_procedure();
+
+        virtual void data_module_specific_initialization_procedure() = 0; //ive never seen this =0 syntax but thats how u do it
         
-        virtual void data_module_operating_procedure() = 0;
+        virtual void data_module_specific_operating_procedure() = 0;
     };
 
 }

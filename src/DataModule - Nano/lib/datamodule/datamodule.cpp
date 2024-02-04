@@ -15,6 +15,19 @@ BAJA_EMBEDDED::DataModule::DataModule() {
 
 }
 
+void BAJA_EMBEDDED::DataModule::data_module_initialization_procedure() {
+    InitializeSDReading(10, "data.txt");
+
+    data_module_specific_initialization_procedure();
+}
+
+void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
+    StartSDReading();
+    
+    data_module_specific_operating_procedure();
+}
+
+
 void BAJA_EMBEDDED::DataModule::SendFile(){
 
     dataFile = SD.open(fileName, FILE_READ);

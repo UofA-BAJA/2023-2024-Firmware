@@ -2,7 +2,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <Arduino.h>
+#include <HardwareSerial.h>
 
 // ! I feel like you shouldn't need to have this dependency in every single data module...?
 #include <SD.h>
@@ -25,7 +25,7 @@ volatile int RPM_DataModule::right_rpm_counter = 0; // Define and initialize the
 volatile int RPM_DataModule::rear_rpm_counter = 0;  // Define and initialize the static member
 volatile float RPM_DataModule::speed = 0;           // volatile float RPM_DataModule::speed = 0; // Define and initialize the static member
 
-void RPM_DataModule::data_module_initialization_procedure()
+void RPM_DataModule::data_module_specific_initialization_procedure()
 {
     sei(); // Enable interrupts
     initialize_left_rpm_sensor();
@@ -39,7 +39,7 @@ void RPM_DataModule::data_module_initialization_procedure()
 #endif
 }
 
-void RPM_DataModule::data_module_operating_procedure()
+void RPM_DataModule::data_module_specific_operating_procedure()
 {
     StartSDReading();
     bool logging = false;

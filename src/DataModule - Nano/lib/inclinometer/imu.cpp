@@ -1,43 +1,55 @@
-#include <Arduino.h>
-#include <imu.h>
-#include <config.h>
+#include <SD.h>
+#include <SPI.h>
+#include <HardwareSerial.h>
 
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BNO055.h>
-#include <utility/imumaths.h>
+#include "imu.h"
+#include "config.h"
+#include "i2c.h"
 
+#define SLA 0x68  // MPU_6050 address with PIN AD0 grounded
+
+//all the register addresses for the MPU6050
+#define PWR_MGMT  0x6B
+#define WAKEUP 0x00
+#define SL_MEMA_XAX_HIGH  0x3B
+#define SL_MEMA_XAX_LOW   0x3C
+#define SL_MEMA_YAX_HIGH  0x3D
+#define SL_MEMA_YAX_LOW   0x3E
+#define SL_MEMA_ZAX_HIGH  0x3F
+#define SL_MEMA_ZAX_LOW   0x40
+#define SL_TEMP_HIGH      0x41
+#define SL_TEMP_LOW       0x42
 
 // I'm not sure why these two includes have to be here. I would think that because it inherits from
 // The datamodule, it should be fine. However, it doesn't seem to work that way.
-#include <SD.h>
-#include <SPI.h>
 
-Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
-void IMU_DataModule::data_module_initialization_procedure() 
+
+void IMU_DataModule::data_module_specific_initialization_procedure() 
 {
-    pinMode(5, INPUT_PULLUP);
+  sei(); 
 
-    #if DEBUG_LEVEL == DEV
-        Serial.println("Initialized IMU data module");
-    #endif
+  initI2C(); 
+
+  pinMode(5, INPUT_PULLUP);
+
+  #if DEBUG_LEVEL == DEV
+    Serial.println("Initialized IMU data module");
+  #endif
 
   // SD Reading setup
   InitializeSDReading(10, "RotData.txt");
   
   /* Initialise the sensor */
-  if(!bno.begin())
-  {
-    /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while(1);
-  }
-  _delay_ms(1000);
-  bno.setExtCrystalUse(true);
+  StartI2C_Trans(SLA);
+  //status = TWSR & 0xF8;
+  write(PWR_MGMT);// address on SLA for Power Management
+  write(WAKEUP); // send data to Wake up from sleep mode
+
+  StopI2C_Trans();
 }
 
-void IMU_DataModule::data_module_operating_procedure(){
+void IMU_DataModule::data_module_specific_operating_procedure(){
   StartSDReading();
 
   bool logging = false;
@@ -66,21 +78,8 @@ void IMU_DataModule::data_module_operating_procedure(){
     
     if(logging){
       /* Get a new sensor event */ 
-      sensors_event_t event; 
-      bno.getEvent(&event);
-      /* Display the floating point data */
-      String dataString = "";
-      dataString += millis();
-      dataString += "ms  Y:";
-      dataString += event.orientation.y;
-      // Serial.print("X: ");
-      // Serial.print(event.orientation.x, 4);
-      // Serial.print("\tY: ");
-      // Serial.print(event.orientation.y, 4);
-      // Serial.print("\tZ: ");
-      // Serial.print(event.orientation.z, 4);
-      // Serial.println("");
-      WriteToSD(dataString);
+      
+      WriteToSD("a");
     }
     
     delay(20);
