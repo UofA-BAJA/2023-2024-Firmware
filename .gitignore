@@ -2,4 +2,4 @@
 **/c_cpp_properties.json
 **/launch.json
 **/ipch
-!/.gitignore
+**/.gitignore
