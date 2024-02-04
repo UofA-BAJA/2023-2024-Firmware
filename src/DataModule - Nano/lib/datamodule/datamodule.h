@@ -8,6 +8,9 @@ namespace BAJA_EMBEDDED {
     
     class DataModule {
 
+    protected:
+        virtual void data_module_setup_procedure() = 0;
+        virtual void data_module_logging_procedure() = 0;
 
     public:
         virtual ~DataModule() {} // Virtual destructor is important for a class with virtual functions
@@ -15,10 +18,6 @@ namespace BAJA_EMBEDDED {
 
         void data_module_initialization_procedure();
         void data_module_operating_procedure();
-
-        virtual void data_module_setup_procedure() = 0; //ive never seen this =0 syntax but thats how u do it
-        virtual void data_module_logging_procedure() = 0; //ive never seen this =0 syntax but thats how u do it
-        
     };
 
 }
