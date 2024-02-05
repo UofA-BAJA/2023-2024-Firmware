@@ -1,8 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-void setup_debug();
-
 #if DEBUG_LEVEL == DEV
     // If we are in development mode, define DEBUG_PRINT to output the variable
     #define DEBUG_PRINT(variable) \

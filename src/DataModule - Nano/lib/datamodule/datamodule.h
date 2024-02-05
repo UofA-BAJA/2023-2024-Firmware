@@ -1,7 +1,6 @@
 #ifndef DATAMODULE_H
 #define DATAMODULE_H
 
-#include "config.h"
 #include "sdcard.h"
 
 namespace BAJA_EMBEDDED {

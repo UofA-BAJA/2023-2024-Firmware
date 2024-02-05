@@ -3,7 +3,7 @@
 #include <HardwareSerial.h>
 
 #include "imu.h"
-#include "config.h"
+
 #include "i2c.h"
 
 #define SLA 0x68  // MPU_6050 address with PIN AD0 grounded

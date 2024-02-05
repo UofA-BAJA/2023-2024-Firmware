@@ -8,7 +8,7 @@
 #include <SD.h>
 #include <SPI.h>
 
-#include "config.h"
+
 #include "datamodule.h"
 
 #define RPM_SENSING_DURATION_PERIOD_MS 20 // time in ms for sensor to collect
