@@ -1,18 +1,14 @@
-#include <Arduino.h>
+#include <HardwareSerial.h>
 
-// put function declarations here:
-int myFunction(int, int);
+int main() {
+  Serial.begin(9600);
 
-void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
-}
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
+  Serial.println("Hello World");
+  Serial.flush();
+  for (int i = 0; i < 10; i++) {
+    Serial.println(i);
+  }
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  return 0;
 }
