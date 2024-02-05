@@ -1,3 +1,5 @@
+#include <HardwareSerial.h>
+
 #include "datamodule.h"
 #include "config.h"
 
@@ -7,7 +9,9 @@
 using namespace BAJA_EMBEDDED;
 
 int main() {
-
+  #if DEBUG_LEVEL == DEV
+    Serial.begin(115200);
+  #endif
 
   // not sure why this isn't working
   DataModule* selected_data_module = create_data_module_type();

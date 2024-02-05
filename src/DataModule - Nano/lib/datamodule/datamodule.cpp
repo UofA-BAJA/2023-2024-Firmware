@@ -67,8 +67,8 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
                             ((PINC & (1 << PINC0)) >> PINC0);
 
     #if DEBUG_LEVEL == DEV
-        Serial.print("DataModule select pins read: ");
-        Serial.println(data_module_select);
+        Serial.print("datamodule select pins read: ");
+        Serial.print(data_module_select);
     #endif
     
     if (data_module_select == 0b111) {
@@ -85,7 +85,7 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
         #endif
      
         return nullptr; 
-        }
+    }
 
 }
 
