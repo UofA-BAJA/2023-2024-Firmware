@@ -66,24 +66,20 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
                             ((PINC & (1 << PINC1)) >> PINC1) << 1 | 
                             ((PINC & (1 << PINC0)) >> PINC0);
 
-    #if DEBUG_LEVEL == DEV
-        Serial.print("datamodule select pins read: ");
-        Serial.print(data_module_select);
-    #endif
-    
+    DEBUG_PRINT("Data Module Select Pin Reads: ");
+    DEBUG_PRINTLN(data_module_select);
+
     if (data_module_select == 0b111) {
-        Serial.println("RPM Sensor Detected");
+        DEBUG_PRINTLN("RPM Module Initialized");
         return new RPM_DataModule;
     }
     else if(data_module_select == 0b110){
-        Serial.println("IMU Detected");
+        DEBUG_PRINTLN("IMU Detected");
         return new IMU_DataModule;
     }
     else {
-        #if DEBUG_LEVEL == DEV
-            Serial.print("No datamodule found for this pin selection");
-        #endif
-     
+        DEBUG_PRINTLN("No datamodule found for this pin selection");
+            
         return nullptr; 
     }
 
