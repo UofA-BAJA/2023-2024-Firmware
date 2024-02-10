@@ -1,18 +1,9 @@
-/* Heltec Automation send communication test example
- *
- * Function:
- * 1. Send data from a CubeCell device over hardware 
- * 
- * 
- * this project also realess in GitHub:
- * https://github.com/HelTecAutomation/ASR650x-Arduino
- * */
 
-#include "LoRaWan_APP.h"
-#include "Arduino.h"
+#include "LoRaWan_APP.h" // Include LoRaWAN application-specific header
+#include "Arduino.h"     // Include Arduino framework header
 
 /*
- * set LoraWan_RGB to 1,the RGB active in loraWan
+ * set LoraWan_RGB to 1, the RGB active in LoRaWAN
  * RGB red means sending;
  * RGB green means received done;
  */
@@ -20,89 +11,150 @@
 #define LoraWan_RGB 0
 #endif
 
-#define RF_FREQUENCY                                915000000 // Hz
+#define RF_FREQUENCY                                868000000 // Frequency in Hz
 
-#define TX_OUTPUT_POWER                             14        // dBm
+#define TX_OUTPUT_POWER                             5        // Transmit power in dBm
 
-#define LORA_BANDWIDTH                              0         // [0: 125 kHz,
-                                                              //  1: 250 kHz,
-                                                              //  2: 500 kHz,
-                                                              //  3: Reserved]
-#define LORA_SPREADING_FACTOR                       7         // [SF7..SF12]
-#define LORA_CODINGRATE                             1         // [1: 4/5,
-                                                              //  2: 4/6,
-                                                              //  3: 4/7,
-                                                              //  4: 4/8]
-#define LORA_PREAMBLE_LENGTH                        8         // Same for Tx and Rx
-#define LORA_SYMBOL_TIMEOUT                         0         // Symbols
-#define LORA_FIX_LENGTH_PAYLOAD_ON                  false
-#define LORA_IQ_INVERSION_ON                        false
+#define LORA_BANDWIDTH                              0        // [0: 125 kHz, 1: 250 kHz, 2: 500 kHz, 3: Reserved]
+#define LORA_SPREADING_FACTOR                       7        // [SF7..SF12]
+#define LORA_CODINGRATE                             1        // [1: 4/5, 2: 4/6, 3: 4/7, 4: 4/8]
+#define LORA_PREAMBLE_LENGTH                        8        // Preamble length for both Tx and Rx
+#define LORA_SYMBOL_TIMEOUT                         0        // Symbols
+#define LORA_FIX_LENGTH_PAYLOAD_ON                  false    // Fixed-length payload
+#define LORA_IQ_INVERSION_ON                        false    // Inversion of IQ signals
 
+#define RX_TIMEOUT_VALUE                            1000     // Timeout value for receiving
+#define BUFFER_SIZE                                 30       // Define the payload size here
 
-#define RX_TIMEOUT_VALUE                            1000
-#define BUFFER_SIZE                                 30 // Define the payload size here
+char txpacket[BUFFER_SIZE]; // Transmission packet buffer
+char rxpacket[BUFFER_SIZE]; // Reception packet buffer
 
-char txpacket[BUFFER_SIZE];
-char rxpacket[BUFFER_SIZE];
+static RadioEvents_t RadioEvents; // Struct to hold radio event functions
+void OnTxDone( void );            // Function called on transmission completion
+void OnTxTimeout( void );         // Function called on transmission timeout
+void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr ); // Function called on reception
+String userInput; // Declare userInput outside the switch
+unsigned long int mytime=0;
 
-static RadioEvents_t RadioEvents;
+long int diff;
+typedef enum
+{
+    LOWPOWER,
+    RX,
+    TX
+} States_t; // Enumeration for device states
 
-double txNumber;
-
-int16_t rssi,rxSize;
-void  DoubleToString( char *str, double double_num,unsigned int len);
+int16_t txNumber;    // Transmission number
+States_t state;      // Current device state
+bool sleepMode = false; // Device sleep mode
+int16_t Rssi, rxSize;   // Received signal strength indicator (RSSI) and received size
+void DoubleToString(char *str, double double_num, unsigned int len);
+bool indication = true;
+bool unsent;
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(115200); // Initialize serial communication
 
-    txNumber=0;
-    rssi=0;
+    txNumber = 0; // Initialize transmission number
+    Rssi = 0;     // Initialize RSSI
 
-    Radio.Init( &RadioEvents );
-    Radio.SetChannel( RF_FREQUENCY );
-    Radio.SetTxConfig( MODEM_LORA, TX_OUTPUT_POWER, 0, LORA_BANDWIDTH,
-                                   LORA_SPREADING_FACTOR, LORA_CODINGRATE,
-                                   LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON,
-                                   true, 0, 0, LORA_IQ_INVERSION_ON, 3000 ); 
-   }
+    RadioEvents.TxDone = OnTxDone;       // Set function callbacks for radio events
+    RadioEvents.TxTimeout = OnTxTimeout;
+    RadioEvents.RxDone = OnRxDone;
 
-
-
-void loop()
-{
-	delay(100);
-	txNumber += 0.01;
-	
-  while(Serial.available() == 0);
-  
-  // Read the input word until a newline character is encountered
-  String userInput = Serial.readStringUntil('\n');
-  userInput.trim(); // Remove leading and trailing whitespaces
-
-  // Build the txpacket
-  sprintf(txpacket,"%s", userInput.c_str());  //start a package
-	// sprintf(txpacket+strlen(txpacket),"%d",txNumber); //add to the end of package
-	
-	
-	turnOnRGB(COLOR_SEND,0); //change rgb color
-
-	Serial.printf("\r\nsending packet \"%s\" , length %d\r\n",txpacket, strlen(txpacket));
-
-	Radio.Send( (uint8_t *)txpacket, strlen(txpacket) ); //send the package out	
+    Radio.Init(&RadioEvents); // Initialize the radio module
+    Radio.SetChannel(RF_FREQUENCY); // Set radio channel frequency
+    // Set transmission configuration parameters
+    Radio.SetTxConfig(MODEM_LORA, TX_OUTPUT_POWER, 0, LORA_BANDWIDTH,
+                      LORA_SPREADING_FACTOR, LORA_CODINGRATE,
+                      LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON,
+                      true, 0, 0, LORA_IQ_INVERSION_ON, 3000 );
+    // Set reception configuration parameters
+    Radio.SetRxConfig(MODEM_LORA, LORA_BANDWIDTH, LORA_SPREADING_FACTOR,
+                      LORA_CODINGRATE, 0, LORA_PREAMBLE_LENGTH,
+                      LORA_SYMBOL_TIMEOUT, LORA_FIX_LENGTH_PAYLOAD_ON,
+                      0, true, 0, 0, LORA_IQ_INVERSION_ON, true);
+    state = TX; // Set the initial state to TX
 }
 
-/**
-  * @brief  Double To String
-  * @param  str: Array or pointer for storing strings
-  * @param  double_num: Number to be converted
-  * @param  len: Fractional length to keep
-  * @retval None
-  */
-void  DoubleToString( char *str, double double_num,unsigned int len) { 
-  double fractpart, intpart;
-  fractpart = modf(double_num, &intpart);
-  fractpart = fractpart * (pow(10,len));
-  sprintf(str + strlen(str),"%d", (int)(intpart)); //Integer part
-  sprintf(str + strlen(str), ".%d", (int)(fractpart)); //Decimal part
+void loop() {
+    if(indication){
+        turnOnRGB(COLOR_SEND,0);
+        delay(2000);
+        turnOnRGB(0,0);
+        indication = false;
+    }
+    switch(state) {
+        case TX:
+            delay(100);
+            txNumber += 0.01;
+            
+            while(Serial.available() == 0);
+            
+            // Read the input word until a newline character is encountered
+            userInput = Serial.readStringUntil('\n');
+
+            userInput.trim(); // Remove leading and trailing whitespaces
+
+            // Build the txpacket
+            sprintf(txpacket,"%s", userInput.c_str());  //start a package
+            // sprintf(txpacket+strlen(txpacket),"%d",txNumber); //add to the end of package
+            
+            
+            turnOnRGB(COLOR_SEND,0); //change rgb color
+
+            Serial.printf("\r\nCommand sent:\"%s\"\r\n",txpacket);
+
+            Radio.Send( (uint8_t *)txpacket, strlen(txpacket) ); //send the package out
+            state = LOWPOWER; // Change state to LOWPOWER
+            break;
+
+        case RX:
+    // Enter reception mode
+        Radio.Rx(0);
+        // Wait for reception or timeout
+        while (unsent) {
+        Radio.IrqProcess();
+        delay(10);
+        if (millis() - mytime > 2000) {
+            state = TX;
+            Serial.println("Transmission not confirmed, Check range and try again");
+            unsent =false;
+            }
+        }
+    break;
+
+
+        case LOWPOWER:
+            lowPowerHandler();
+            break;
+
+        default:
+            break;
+    }
+    Radio.IrqProcess(); // Process radio interrupts
 }
 
+void OnTxDone(void) {
+    turnOnRGB(0, 0); // Turn off RGB LED
+    mytime = millis();
+    unsent = true;
+    state = RX; // Change state to RX
+}
+
+void OnTxTimeout(void) {
+    Radio.Sleep(); // Put the radio to sleep on transmission timeout
+    state = TX; // Change state to TX
+}
+
+void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
+    Rssi = rssi; // Update RSSI value
+    rxSize = size; // Update received size
+    memcpy(rxpacket, payload, size); // Copy received payload to buffer
+    rxpacket[size] = '\0'; // Null- terminate the received packet
+    turnOnRGB(COLOR_RECEIVED, 0); // Function to turn on RGB LED for reception
+    Serial.printf("\r\n%s\r\n",rxpacket);
+    Radio.Sleep(); // Put the radio to sleep
+    unsent = false;
+    state = TX; // Change state to TX
+}
