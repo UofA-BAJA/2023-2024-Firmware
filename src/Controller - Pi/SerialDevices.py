@@ -2,6 +2,7 @@ import serial
 import serial.tools.list_ports
 from enum import Enum
 import time
+import sys
 
 class SerialDevices:
     def __init__(self):
@@ -66,7 +67,7 @@ class SerialDevices:
 
     # * idk if we need this but whatever. This will send a command to the pi to quit or something...?
     def _quit_program(self):
-        pass
+        sys.exit(1)
 
 
 class Commands(Enum):

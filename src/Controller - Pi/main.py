@@ -12,9 +12,11 @@ COMMANDS = {'b' : SerialDevices.Commands.BEGIN,
 def main():
     serial_devices = SerialDevices.SerialDevices()
 
-    stuff = input()
 
-    serial_devices.execute_command(COMMANDS[stuff])
+    while True:
+        command = input()
+        serial_devices.execute_command(COMMANDS[command])
+
 
 
 if __name__ == "__main__":
