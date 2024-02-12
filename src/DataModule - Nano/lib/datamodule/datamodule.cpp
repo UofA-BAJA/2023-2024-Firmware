@@ -2,7 +2,6 @@
 #include <HardwareSerial.h>
 
 #include "datamodule.h"
-
 #include "macros.h"
 #include "enums.h"
 
@@ -57,6 +56,7 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
             }
             
             DEBUG_PRINTLN("Waiting to start logging...");
+            _delay_ms(1000);
             break;
 
         case LOG_DATA:

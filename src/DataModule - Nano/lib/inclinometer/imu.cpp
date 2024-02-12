@@ -1,9 +1,8 @@
-#include <SD.h>
-#include <SPI.h>
-#include <HardwareSerial.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include "macros.h"
 
 #include "imu.h"
-
 #include "i2c.h"
 
 #define SLA 0x68  // MPU_6050 address with PIN AD0 grounded
@@ -34,12 +33,10 @@ void IMU_DataModule::data_module_setup_procedure()
   write(WAKEUP); // send data to Wake up from sleep mode
   StopI2C_Trans();
 
-  #if DEBUG_LEVEL == DEV
-    Serial.println("Initialized IMU data module");
-  #endif
+  
 }
 
 void IMU_DataModule::data_module_logging_procedure(){
   
-    
+  DEBUG_PRINTLN("Logging data");
 }
