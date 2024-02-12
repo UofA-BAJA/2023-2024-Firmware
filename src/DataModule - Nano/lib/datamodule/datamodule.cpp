@@ -8,6 +8,17 @@
 #include "rpm.h"
 #include "config.h"
 
+enum DataModuleState {
+    SD_CARD_INITIALIZATION,
+    DATAMODULE_SPECIFIC_INITIALIZATION,
+    WAIT_TO_START_LOGGING,
+    START_DATA_LOGGING,
+    DATA_LOGGING_UNTIL_STOPPED,
+    STOP_DATA_LOGGING,
+    SEND_FILE
+};
+
+DataModuleState data_module_state = SD_CARD_INITIALIZATION;
 
 BAJA_EMBEDDED::DataModule::DataModule() {
     //empty constructor
@@ -20,10 +31,35 @@ void BAJA_EMBEDDED::DataModule::data_module_initialization_procedure() {
 }
 
 void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
+    
+
     StartSDReading();
 
     bool logging = false;
 
+    while(1) {
+        switch (data_module_state)
+        {
+        case SD_CARD_INITIALIZATION:
+            InitializeSDCard();
+            data_module_state = DATAMODULE_SPECIFIC_INITIALIZATION;
+            break;
+        
+        case DATAMODULE_SPECIFIC_INITIALIZATION:
+            data_module_setup_procedure();
+            data_module_state = WAIT_TO_START_LOGGING;
+            break;
+        
+        case WAIT_TO_START_LOGGING:
+            if (Serial.available() > 0) {
+                String command = Serial.readString();
+                if (command == "Begin Logging") {
+                    data_module_state = START_DATA_LOGGING;
+                }
+            }
+            break;
+        }
+    }
 
     while(true){
         // Incoming command from raspberry pi!
