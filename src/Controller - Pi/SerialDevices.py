@@ -21,19 +21,16 @@ class SerialDevices:
         serial_devices = []
         for path in self._port_paths:
             ser = serial.Serial(path, 115200)
-            ser.reset_input_buffer()
-            ser.reset_output_buffer()
-
-            ser.write(b"Send Type")
-            
-            while(ser.in_waiting == 0):
-                pass
-            dev_type = ser.readline()
-            serial_devices.append((ser, dev_type))
+            serial_devices.append((ser, None))
 
         time.sleep(2)
-        # ? Why is this here??
         for ser in serial_devices:
+            # ser[0].write(b"Send Type")
+            
+            # while(ser[0].in_waiting == 0):
+            #     pass
+            # dev_type = ser[0].readline()
+            # ser[1] = dev_type
             ser[0].reset_input_buffer()
         return serial_devices
 
@@ -68,36 +65,36 @@ class SerialDevices:
 
         files = []
         # retrieve data from nano's SD cards
-        for ser in serial_devices:
+        for ser in self._serial_devices:
             # Send command
-            ser.write(b"Retrieve Logs")
+            ser[0].write(b"Retrieve Logs")
 
             # Get rid of all the other crap before.
-            ser.flushInput()
+            ser[0].flushInput()
 
             print("Waiting for device response...")
-            while(ser.in_waiting == 0):
+            while(ser[0].in_waiting == 0):
                 pass
             print("Device Responded...")
 
             # get file name
             file_name = "DEFAULT.TXT"
-            file_name = ser.readline().decode('utf-8').rstrip()
+            file_name = ser[0].readline().decode('utf-8').rstrip()
 
             file = open(file_name, 'w')
             # try except so that the file gets closed in case of a forceful program close
             try:
                 print("Writing to file...")
                 while True:
-                    if ser.in_waiting > 0:
-                        line = ser.readline().decode('utf-8')
+                    if ser[0].in_waiting > 0:
+                        line = ser[0].readline().decode('utf-8')
                         if line.strip() == "Finished":
                             break
                         file.write(line)
                 file.close()
             except KeyboardInterrupt:
                 file.close()
-                exit_program(ser_devices)
+                self._quit_program()
 
             print(f"File {file_name} Created")
             print(f"{bcolors.BOLD}Enter another command{bcolors.ENDC}")

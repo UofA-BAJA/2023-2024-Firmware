@@ -12,7 +12,6 @@ COMMANDS = {'b' : SerialDevices.Commands.BEGIN,
 def main():
     serial_devices = SerialDevices.SerialDevices()
 
-
     while True:
         command = input()
         serial_devices.execute_command(COMMANDS[command])
