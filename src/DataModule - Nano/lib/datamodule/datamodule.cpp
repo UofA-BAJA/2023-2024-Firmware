@@ -15,6 +15,37 @@ BAJA_EMBEDDED::DataModule::DataModule() {
 
 }
 
+void BAJA_EMBEDDED::DataModule::SetName(String name){
+    this->name = name;
+}
+
+void BAJA_EMBEDDED::DataModule::PollCommand(){
+    if(Serial.available() > 0){
+      String command = Serial.readString();
+
+      if(command == "Begin Logging"){
+        Serial.println("Beginning Logs");
+        logging = true;
+      }
+      else if(command == "End Logging"){
+        Serial.println("Ending Logs");
+        logging = false;
+        this->CloseSD();
+      }
+      else if(command == "Retrieve Logs"){
+        if(logging){
+          Serial.println("You are still logging. stop logging first");
+        }
+        else{
+          this->SendFile();
+        }
+      }
+      else if(command == "Send Type"){
+        Serial.println(name);
+      }
+    }
+}
+
 void BAJA_EMBEDDED::DataModule::SendFile(){
 
     dataFile = SD.open(fileName, FILE_READ);
@@ -35,7 +66,7 @@ void BAJA_EMBEDDED::DataModule::SendFile(){
 void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileName) {
     this->chipSelect = chipSelect;
 
-    if(fileName.length() > 12){
+    if(fileName.length() > 11){
         Serial.println("Your code won't work and life is terrible and please just make the file name less than 13 characters ong");
         while(1);
     }
@@ -45,7 +76,7 @@ void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileN
 
 void BAJA_EMBEDDED::DataModule::StartSDReading() {
     if(!SD.begin(chipSelect)){
-        Serial.println("Card failed, or not present");
+        Serial.println("Card failed, or not present"); // hiiiiii
         while(1);
     }
 
@@ -57,6 +88,8 @@ void BAJA_EMBEDDED::DataModule::StartSDReading() {
         Serial.println("Data file successfully opened");
     }
     else{
+        Serial.println("Hanging on opening the data file");
+        _delay_ms(100);
         while(1);
     }
 }
@@ -95,10 +128,14 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
     
     if (data_module_select == 0b111) {
         Serial.println("RPM Sensor Detected");
-        return new RPM_DataModule;
+        RPM_DataModule* dataModule = new RPM_DataModule;
+        dataModule->SetName("RPM"); 
+        return dataModule;
     }
     else if(data_module_select == 0b110){
         Serial.println("IMU Detected");
+        IMU_DataModule* dataModule = new IMU_DataModule;
+        dataModule->SetName("IMU");
         return new IMU_DataModule;
     }
     else {
