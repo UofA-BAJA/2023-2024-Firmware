@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef MACROS_H
+#define MACROS_H
 
 #if DEBUG_LEVEL == DEV
     // If we are in development mode, define DEBUG_PRINT to output the variable

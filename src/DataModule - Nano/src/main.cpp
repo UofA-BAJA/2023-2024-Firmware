@@ -1,7 +1,6 @@
 #include <HardwareSerial.h>
 
 #include "datamodule.h"
-#include "json_data.h"
 
 
 #define NONE 0 //no serial output, note that this will siginicantly reduce the size of the binary (FLASH)
@@ -17,8 +16,6 @@ int main() {
   #endif
 
   DataModule* selected_data_module = create_data_module_type();
-
-  selected_data_module->data_module_initialization_procedure();
   
   selected_data_module->data_module_operating_procedure();
 

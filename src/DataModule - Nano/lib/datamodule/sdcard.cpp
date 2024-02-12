@@ -1,7 +1,7 @@
 #include <SD.h>
 #include <SPI.h>
 
-#include "config.h"
+#include "macros.h"
 #include "datamodule.h"
 
 #define fileName "temp.csv"
@@ -14,8 +14,6 @@ void InitializeSDCard(){
         DEBUG_PRINTLN("Card failed, or not present");
         while(1);
     }
-
-    DEBUG_PRINTLN("Card initialized");
 
     if (SD.exists(fileName)) {
         SD.remove(fileName);
@@ -43,10 +41,7 @@ void StartSDReading() {
     
     dataFile = SD.open(fileName, FILE_WRITE);
 
-    if (dataFile) {
-        DEBUG_PRINTLN("Data file successfully opened");
-    }
-    else{
+    if (!dataFile) {
         DEBUG_PRINTLN("Failed to open file for writing");
         while(1);
     }
@@ -62,5 +57,4 @@ void StartSDReading() {
 
 void CloseSDFile(){
     dataFile.close();
-    DEBUG_PRINTLN("File Closed");
 }

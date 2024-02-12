@@ -3,7 +3,7 @@
 
 #include "datamodule.h"
 
-#include "config.h"
+#include "macros.h"
 #include "enums.h"
 
 #include "sdcard.h"
@@ -24,18 +24,10 @@ BAJA_EMBEDDED::DataModule::DataModule() {
     //empty constructor
 }
 
-void BAJA_EMBEDDED::DataModule::data_module_initialization_procedure() {
-    InitializeSDCard();
 
-    data_module_setup_procedure();
-}
 
 void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
     
-
-    StartSDReading();
-
-    bool logging = false;
 
     while(1) {
         switch (data_module_state)
@@ -43,20 +35,28 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
         case SD_CARD_INITIALIZATION:
             InitializeSDCard();
             data_module_state = DATAMODULE_SPECIFIC_INITIALIZATION;
+
+            DEBUG_PRINTLN("Card initialized");
             break;
         
         case DATAMODULE_SPECIFIC_INITIALIZATION:
             data_module_setup_procedure();
             data_module_state = WAIT_TO_START_LOGGING;
+            DEBUG_PRINTLN("Data Module Initialized");
             break;
         
         case WAIT_TO_START_LOGGING:
             if (Serial.available() > 0) {
                 String serial_input = Serial.readString();
+
                 if (serial_input == COMMANDS_BEGIN) {
+                    StartSDReading();
                     data_module_state = LOG_DATA;
+                    DEBUG_PRINTLN("Started data logging");
                 }
             }
+            
+            DEBUG_PRINTLN("Waiting to start logging...");
             break;
 
         case LOG_DATA:
@@ -66,6 +66,8 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
                 if (serial_input == COMMANDS_END) {
                     CloseSDFile();
                     data_module_state = WAIT_TO_SEND_FILE;
+                    DEBUG_PRINTLN("Stopped data logging...");
+
                 }
                 else {
                     data_module_logging_procedure();
