@@ -11,7 +11,7 @@ File dataFile;
 
 void InitializeSDCard(){
     if(!SD.begin(chipSelect)){
-        Serial.println("Card failed, or not present");
+        DEBUG_PRINTLN("Card failed, or not present");
         while(1);
     }
 
@@ -31,9 +31,10 @@ void SendFile(){
         String buffer = dataFile.readStringUntil('\n');
         buffer.trim();
         Serial.println(buffer);
+        Serial.flush();
     }
     dataFile.close();
-    Serial.println("Finished");
+    DEBUG_PRINTLN("Finished");
 }
 
 
@@ -59,7 +60,7 @@ void StartSDReading() {
 //     }
 // }
 
-void CloseSD(){
+void CloseSDFile(){
     dataFile.close();
-    Serial.print("File Closed");
+    DEBUG_PRINTLN("File Closed");
 }

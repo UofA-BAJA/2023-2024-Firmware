@@ -1,6 +1,7 @@
 #include <HardwareSerial.h>
 
 #include "datamodule.h"
+#include "json_data.h"
 
 
 #define NONE 0 //no serial output, note that this will siginicantly reduce the size of the binary (FLASH)

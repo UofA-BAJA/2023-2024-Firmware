@@ -23,7 +23,7 @@ def convert_json_to_header(source_json_path, output_header_path):
     with open(source_json_path, 'r') as json_file:
         data = json.load(json_file)
 
-    header_content = "#ifndef JSON_DATA_H\n#define JSON_DATA_H\n\n"
+    header_content = "#ifndef ENUMS_H\n#define ENUMS_H\n\n"
 
     # Process each key in the JSON data
     for key, values in data.items():
@@ -32,7 +32,7 @@ def convert_json_to_header(source_json_path, output_header_path):
             header_content += f'#define {define_key}_{value} "{value}"\n'
         header_content += "\n"  # Add a newline for readability between sections
 
-    header_content += "#endif // JSON_DATA_H\n"
+    header_content += "#endif // ENUMS_H\n"
 
     # Write the formatted data to a header file
     with open(output_header_path, 'w') as header_file:
@@ -40,7 +40,7 @@ def convert_json_to_header(source_json_path, output_header_path):
 
 # Specify the path to your JSON file and the desired output header file
 source_json_path = file_path_in_git_root
-output_header_path = Path(env['PROJECT_DIR']) / 'include' / 'json_data.h'
+output_header_path = Path(env['PROJECT_DIR']) / 'include' / 'enums.h'
 
 # Call the function to convert and write the JSON data to a header file
 convert_json_to_header(source_json_path, output_header_path)

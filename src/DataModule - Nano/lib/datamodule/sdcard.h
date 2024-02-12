@@ -7,6 +7,6 @@ void SendFile();
 void InitializeSDCard();
 void StartSDReading();
 // void WriteToSD(String dataString);
-void CloseSD();
+void CloseSDFile();
 
 #endif // BAJA_EMBEDDED_DATAMODULE_H

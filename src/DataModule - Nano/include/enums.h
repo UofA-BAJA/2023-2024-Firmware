@@ -1,5 +1,5 @@
-#ifndef JSON_DATA_H
-#define JSON_DATA_H
+#ifndef ENUMS_H
+#define ENUMS_H
 
 #define MODULE_TYPES_IMU "IMU"
 #define MODULE_TYPES_RPM_FRONT "RPM_FRONT"
@@ -15,4 +15,4 @@
 #define COMMANDS_HELP "HELP"
 #define COMMANDS_QUIT "QUIT"
 
-#endif // JSON_DATA_H
+#endif // ENUMS_H

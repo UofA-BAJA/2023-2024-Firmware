@@ -3,19 +3,19 @@
 
 #include "datamodule.h"
 
+#include "config.h"
+#include "enums.h"
+
 #include "sdcard.h"
 #include "imu.h"
 #include "rpm.h"
-#include "config.h"
 
 enum DataModuleState {
     SD_CARD_INITIALIZATION,
     DATAMODULE_SPECIFIC_INITIALIZATION,
     WAIT_TO_START_LOGGING,
-    START_DATA_LOGGING,
-    DATA_LOGGING_UNTIL_STOPPED,
-    STOP_DATA_LOGGING,
-    SEND_FILE
+    LOG_DATA,
+    WAIT_TO_SEND_FILE
 };
 
 DataModuleState data_module_state = SD_CARD_INITIALIZATION;
@@ -52,45 +52,42 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
         
         case WAIT_TO_START_LOGGING:
             if (Serial.available() > 0) {
-                String command = Serial.readString();
-                if (command == "Begin Logging") {
-                    data_module_state = START_DATA_LOGGING;
+                String serial_input = Serial.readString();
+                if (serial_input == COMMANDS_BEGIN) {
+                    data_module_state = LOG_DATA;
+                }
+            }
+            break;
+
+        case LOG_DATA:
+            if (Serial.available() > 0) {
+                String serial_input = Serial.readString();
+
+                if (serial_input == COMMANDS_END) {
+                    CloseSDFile();
+                    data_module_state = WAIT_TO_SEND_FILE;
+                }
+                else {
+                    data_module_logging_procedure();
+                }
+            }
+            break;
+
+        case WAIT_TO_SEND_FILE:
+            if (Serial.available() > 0) {
+                String serial_input = Serial.readString();
+
+                if (serial_input == COMMANDS_RETRIEVE) {
+                    SendFile();
+                    data_module_state = WAIT_TO_START_LOGGING;
                 }
             }
             break;
         }
-    }
 
-    while(true){
-        // Incoming command from raspberry pi!
-        if(Serial.available() > 0){
-            String command = Serial.readString();
-
-            if(command == "Begin Logging"){
-                logging = true;
-            }
-
-            else if(command == "End Logging"){
-                logging = false;
-                CloseSD();
-            }
-            
-            else if(command == "Retrieve Logs"){
-                if(logging){
-                    Serial.println("You are still logging. stop logging first");
-                }else{
-                    SendFile();
-                }
-            }
-        }
-        
-        if(logging){
-            data_module_logging_procedure();
-        }
-        
         
     }
-    
+
 
 }
 
