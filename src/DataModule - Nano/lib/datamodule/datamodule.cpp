@@ -76,7 +76,7 @@ void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileN
 
 void BAJA_EMBEDDED::DataModule::StartSDReading() {
     if(!SD.begin(chipSelect)){
-        Serial.println("Card failed, or not present");
+        Serial.println("Card failed, or not present"); // hiiiiii
         while(1);
     }
 
