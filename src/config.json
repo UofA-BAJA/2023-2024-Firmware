@@ -1,0 +1,4 @@
+{
+    "Sensor Types" : ["IMU", "RPM_FRONT", "RPM_REAR", "RPM_ENGINE", "BRK", "STEER", "PEDAL" ],
+    "Commands" : ["BEGIN", "END", "RETRIEVE", "HELP", "QUIT" ]
+}

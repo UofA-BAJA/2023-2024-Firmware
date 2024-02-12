@@ -4,6 +4,7 @@ from enum import Enum
 import time
 import sys
 
+
 class SerialDevices:
     def __init__(self):
         ports = list(serial.tools.list_ports.comports())
@@ -21,16 +22,22 @@ class SerialDevices:
         serial_devices = []
         for path in self._port_paths:
             ser = serial.Serial(path, 115200)
-            serial_devices.append((ser, None))
+            serial_devices.append([ser, None])
 
         time.sleep(2)
         for ser in serial_devices:
-            # ser[0].write(b"Send Type")
+            ser[0].flushOutput()
+            ser[0].flushInput()
+
+            ser[0].write(b"Send Type")
             
-            # while(ser[0].in_waiting == 0):
-            #     pass
-            # dev_type = ser[0].readline()
-            # ser[1] = dev_type
+            while(ser[0].in_waiting == 0):
+                pass
+            time.sleep(.5)
+            dev_type = type_mapping[ser[0].readline().decode('utf-8')]
+            
+            print(dev_type)
+            ser[1] = dev_type
             ser[0].reset_input_buffer()
         return serial_devices
 
@@ -110,6 +117,24 @@ class SerialDevices:
     def _quit_program(self):
         sys.exit(1)
 
+class ModuleTypes(Enum):
+    IMU = 0
+    RPM_FRONT = 1
+    RPM_REAR = 2
+    RPM_ENGINE = 3
+    BRK = 4
+    STEER = 5
+    PEDAL = 6
+
+type_mapping = {
+    "IMU" : ModuleTypes.IMU,
+    "RPM_FRONT" : ModuleTypes.RPM_FRONT,
+    "RPM_REAR" : ModuleTypes.RPM_REAR,
+    "RPM_ENGINE" : ModuleTypes.RPM_ENGINE,
+    "BRK" : ModuleTypes.BRK,
+    "STEER" : ModuleTypes.STEER,
+    "PEDAL" : ModuleTypes.PEDAL,
+}
 
 class Commands(Enum):
     BEGIN = 0

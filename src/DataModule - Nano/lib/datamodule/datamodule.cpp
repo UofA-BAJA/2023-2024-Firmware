@@ -24,11 +24,9 @@ void BAJA_EMBEDDED::DataModule::PollCommand(){
       String command = Serial.readString();
 
       if(command == "Begin Logging"){
-        Serial.println("Beginning Logs");
         logging = true;
       }
       else if(command == "End Logging"){
-        Serial.println("Ending Logs");
         logging = false;
         this->CloseSD();
       }
@@ -41,6 +39,7 @@ void BAJA_EMBEDDED::DataModule::PollCommand(){
         }
       }
       else if(command == "Send Type"){
+        // Serial.println("Sending " + name);
         Serial.println(name);
       }
     }
@@ -81,7 +80,10 @@ void BAJA_EMBEDDED::DataModule::StartSDReading() {
     }
 
     Serial.println("SD Card Initialized");
-    SD.remove(fileName);
+    if(SD.exists(fileName)){
+        SD.remove(fileName);
+    }
+
     dataFile = SD.open(fileName, FILE_WRITE);
 
     if (dataFile) {

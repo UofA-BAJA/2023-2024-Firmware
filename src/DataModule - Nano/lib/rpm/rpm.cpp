@@ -31,7 +31,7 @@ void RPM_DataModule::data_module_initialization_procedure()
     initialize_left_rpm_sensor();
     initialize_right_rpm_sensor();
 
-    InitializeSDReading(10, "p.txt");
+    InitializeSDReading(10, "pen.csv");
 
 
 #if DEBUG_LEVEL == DEV
