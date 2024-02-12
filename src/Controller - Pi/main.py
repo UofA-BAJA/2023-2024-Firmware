@@ -1,13 +1,14 @@
 import SerialDevices
 import time
-
+from util.ConfigParser import Commands
 # ! lily was here
 
-COMMANDS = {'b' : SerialDevices.Commands.BEGIN,
-            'e' : SerialDevices.Commands.END,
-            'r' : SerialDevices.Commands.RETRIEVE,
-            'q' : SerialDevices.Commands.QUIT,
-            'help' : SerialDevices.Commands.HELP}
+
+COMMANDS = {'b' : Commands.BEGIN,
+            'e' : Commands.END,
+            'r' : Commands.RETRIEVE,
+            'q' : Commands.QUIT,
+            'help' : Commands.HELP}
 
 def main():
     serial_devices = SerialDevices.SerialDevices()
