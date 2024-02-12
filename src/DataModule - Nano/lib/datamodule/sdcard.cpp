@@ -1,7 +1,7 @@
 #include <SD.h>
 #include <SPI.h>
-#include <HardwareSerial.h>
 
+#include "config.h"
 #include "datamodule.h"
 
 #define fileName "temp.csv"
@@ -15,9 +15,12 @@ void InitializeSDCard(){
         while(1);
     }
 
-    Serial.println("SD Card Initialized");
+    DEBUG_PRINTLN("Card initialized");
 
-    SD.remove(fileName);
+    if (SD.exists(fileName)) {
+        SD.remove(fileName);
+    }
+
 }
 
 void SendFile(){
@@ -40,10 +43,10 @@ void StartSDReading() {
     dataFile = SD.open(fileName, FILE_WRITE);
 
     if (dataFile) {
-        Serial.println("Data file successfully opened");
+        DEBUG_PRINTLN("Data file successfully opened");
     }
     else{
-        Serial.println("Failed to open file for writing");
+        DEBUG_PRINTLN("Failed to open file for writing");
         while(1);
     }
 }

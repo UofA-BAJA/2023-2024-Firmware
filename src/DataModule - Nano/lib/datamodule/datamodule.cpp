@@ -10,11 +10,13 @@
 
 
 BAJA_EMBEDDED::DataModule::DataModule() {
-
+    //empty constructor
 }
 
 void BAJA_EMBEDDED::DataModule::data_module_initialization_procedure() {
     InitializeSDCard();
+
+    data_module_setup_procedure();
 }
 
 void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
