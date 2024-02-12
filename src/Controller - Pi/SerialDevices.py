@@ -21,10 +21,20 @@ class SerialDevices:
         serial_devices = []
         for path in self._port_paths:
             ser = serial.Serial(path, 115200)
-            serial_devices.append(ser)
+            ser.reset_input_buffer()
+            ser.reset_output_buffer()
+
+            ser.write(b"Send Type")
+            
+            while(ser.in_waiting == 0):
+                pass
+            dev_type = ser.readline()
+            serial_devices.append((ser, dev_type))
+
         time.sleep(2)
-        for device in serial_devices:
-            device.reset_input_buffer()
+        # ? Why is this here??
+        for ser in serial_devices:
+            ser[0].reset_input_buffer()
         return serial_devices
 
     def execute_command(self, command):
@@ -45,18 +55,52 @@ class SerialDevices:
         print(f"Command Sent : -- {bcolors.OKBLUE}Begin Logging{bcolors.ENDC} --")
         # send command to nano's to start logging onto their SD cards
         for ser in self._serial_devices:
-            ser.write(b"Begin Logging")
+            ser[0].write(b"Begin Logging")
 
     def _end_logging(self):
         print(f"Command Sent : -- {bcolors.OKBLUE}End Logging{bcolors.ENDC} --")
         # send command to nano's to stop logging onto their SD cards
         for ser in self._serial_devices:
-            ser.write(b"End Logging")
+            ser[0].write(b"End Logging")
     
     def _retrieve_logs(self):
         print(f"Command Sent : -- {bcolors.OKBLUE}Retrieve Logs{bcolors.ENDC} --")
 
-        pass
+        files = []
+        # retrieve data from nano's SD cards
+        for ser in serial_devices:
+            # Send command
+            ser.write(b"Retrieve Logs")
+
+            # Get rid of all the other crap before.
+            ser.flushInput()
+
+            print("Waiting for device response...")
+            while(ser.in_waiting == 0):
+                pass
+            print("Device Responded...")
+
+            # get file name
+            file_name = "DEFAULT.TXT"
+            file_name = ser.readline().decode('utf-8').rstrip()
+
+            file = open(file_name, 'w')
+            # try except so that the file gets closed in case of a forceful program close
+            try:
+                print("Writing to file...")
+                while True:
+                    if ser.in_waiting > 0:
+                        line = ser.readline().decode('utf-8')
+                        if line.strip() == "Finished":
+                            break
+                        file.write(line)
+                file.close()
+            except KeyboardInterrupt:
+                file.close()
+                exit_program(ser_devices)
+
+            print(f"File {file_name} Created")
+            print(f"{bcolors.BOLD}Enter another command{bcolors.ENDC}")
     
     def _print_commands(self):
         print(f"{bcolors.OKBLUE}Command List{bcolors.ENDC}")
