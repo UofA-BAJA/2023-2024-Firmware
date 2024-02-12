@@ -1,6 +1,8 @@
 #ifndef MACROS_H
 #define MACROS_H
 
+#include <HardwareSerial.h>
+
 #if DEBUG_LEVEL == DEV
     // If we are in development mode, define DEBUG_PRINT to output the variable
     #define DEBUG_PRINT(variable) \

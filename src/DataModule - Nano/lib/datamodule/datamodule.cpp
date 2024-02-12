@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <util/delay.h>
 #include <HardwareSerial.h>
 
 #include "datamodule.h"
@@ -8,6 +9,13 @@
 #include "sdcard.h"
 #include "imu.h"
 #include "rpm.h"
+
+const char numChars = 32;
+char receivedChars[numChars];   // an array to store the received data
+
+bool newData = false;
+
+void recvWithEndMarker();
 
 enum DataModuleState {
     SD_CARD_INITIALIZATION,
@@ -46,17 +54,27 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
         
         case WAIT_TO_START_LOGGING:
             if (Serial.available() > 0) {
-                String serial_input = Serial.readString();
+                DEBUG_PRINTLN("got to there");
 
-                if (serial_input == COMMANDS_BEGIN) {
-                    StartSDReading();
-                    data_module_state = LOG_DATA;
-                    DEBUG_PRINTLN("Started data logging");
-                }
+                recvWithEndMarker();
+                DEBUG_PRINTLN("read in input: ");
+                DEBUG_PRINT(receivedChars);
+
+                // if (serial_input == COMMANDS_BEGIN) {
+                //     StartSDReading();
+                //     data_module_state = LOG_DATA;
+                //     DEBUG_PRINTLN("Started data logging");
+                // }
+                // else {
+                //     DEBUG_PRINTLN("Invalid command");
+                // }
+            }
+            else {
+                DEBUG_PRINTLN("Waiting to start logging...");
+                _delay_ms(5000);
             }
             
-            DEBUG_PRINTLN("Waiting to start logging...");
-            _delay_ms(1000);
+            
             break;
 
         case LOG_DATA:
@@ -87,7 +105,7 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
             break;
         }
 
-        
+    _delay_us(10); //delay for 10us
     }
 
 
@@ -133,3 +151,25 @@ void initialize_data_module_select_pins() {
     PORTC |= ( (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2));
 }
 
+void recvWithEndMarker() {
+    static char ndx = 0;
+    char endMarker = '\n';
+    char rc;
+    
+    while (Serial.available() > 0 && newData == false) {
+        rc = Serial.read();
+
+        if (rc != endMarker) {
+            receivedChars[ndx] = rc;
+            ndx++;
+            if (ndx >= numChars) {
+                ndx = numChars - 1;
+            }
+        }
+        else {
+            receivedChars[ndx] = '\0'; // terminate the string
+            ndx = 0;
+            newData = true;
+        }
+    }
+}
