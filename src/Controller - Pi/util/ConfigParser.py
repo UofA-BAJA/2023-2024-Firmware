@@ -30,7 +30,7 @@ Commands = create_enum_class("Commands", data["Commands"])
 
 
 # print("SensorTypes enum members:")
-# for member in SensorTypes.__members__:
+# for member in ModuleTypes.__members__:
 #     print(member)
 # print("SensorTypes enum members:")
 # for member in Commands.__members__:
