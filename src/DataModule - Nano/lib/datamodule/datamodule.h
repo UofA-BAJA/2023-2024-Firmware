@@ -8,7 +8,7 @@ namespace BAJA_EMBEDDED {
     
     class DataModule {
     protected:
-        String name;
+        String name = "RPM_REAR"; // delete this later.
         bool logging = false;
         void PollCommand();
         void StartSDReading();

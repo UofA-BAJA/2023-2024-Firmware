@@ -38,7 +38,7 @@ void BAJA_EMBEDDED::DataModule::PollCommand(){
           this->SendFile();
         }
       }
-      else if(command == "Send Type"){
+      else if(command == "SEND_TYPE"){
         // Serial.println("Sending " + name);
         Serial.println(name);
       }

@@ -20,83 +20,125 @@ class SerialDevices:
         """ 
             Gets the serial devices hahahahahahah
         """
-        serial_devices = []
+        serial_devices = {}
+        temp_devices = []
         for path in self._port_paths:
             ser = serial.Serial(path, 115200)
-            serial_devices.append([ser, None])
+            temp_devices.append(ser)
 
         time.sleep(2)
-        for ser in serial_devices:
-            ser[0].flushOutput()
-            ser[0].flushInput()
 
-            ser[0].write(b"Send Type")
-            
-            while(ser[0].in_waiting == 0):
+        for ser in temp_devices:
+            ser.flushInput()
+            ser.flushOutput()
+            time.sleep(1)
+            ser.write(Commands.SEND_TYPE.name.encode('utf-8'))
+            while(ser.in_waiting == 0):
                 pass
-            time.sleep(.5)
-            
-            dev_type = ser[0].readline().decode('utf-8').strip()
-            
+
+            dev_type = ser.readline().decode('utf-8').strip()
             print(dev_type)
-            ser[1] = dev_type
-            ser[0].reset_input_buffer()
+            dev_type_enum = None
+            try:
+                dev_type_enum = ModuleTypes[dev_type]
+                print(dev_type_enum)
+            except KeyError:
+                print(f"No enum member with the name '{dev_type}'")
+
+            ser.flushInput()
+            serial_devices[dev_type_enum] = ser
+            
         return serial_devices
 
-    def execute_command(self, command):
+    def execute_command(self, command, dev_type = None):
         """ 
-            Executes the commands hahahahahahaha
+            Executes the commands <---- very descriptive, I know =D
         """
-        commands = {
-                Commands.HELP     : lambda : self._print_commands(),
-                Commands.BEGIN    : lambda : self._begin_logging(),
-                Commands.END      : lambda : self._end_logging(),
-                Commands.RETRIEVE : lambda : self._retrieve_logs(),
-                Commands.QUIT     : lambda : self._quit_program()}
-            
-        commands[command]()
+
+        # If no parameter is passed for dev_type, that means the command is sent to every device.
+        if dev_type == None:
+            commands = {
+                    Commands.HELP     : lambda : self._print_commands(),
+                    Commands.BEGIN    : lambda : self._begin_logging(),
+                    Commands.END      : lambda : self._end_logging(),
+                    Commands.RETRIEVE : lambda : self._retrieve_logs(),
+                    Commands.QUIT     : lambda : self._quit_program()}
+                
+            commands[command]()
+        else:
+            commands = {
+                    Commands.HELP     : lambda : self._print_commands(),
+                    Commands.BEGIN    : lambda : self._begin_logging(dev_type),
+                    Commands.END      : lambda : self._end_logging(dev_type),
+                    Commands.RETRIEVE : lambda : self._retrieve_logs(dev_type),
+                    Commands.QUIT     : lambda : self._quit_program()}
+                
+            commands[command]()
 
 
-    def _begin_logging(self):
+
+
+# TODO: UPDATE THE SEND FUNCTIONS TO WORK USING THE ENUMS
+
+    def _begin_logging(self, dev_type = None):
         print(f"Command Sent : -- {bcolors.OKBLUE}Begin Logging{bcolors.ENDC} --")
-        # send command to nano's to start logging onto their SD cards
-        for ser in self._serial_devices:
-            ser[0].write(b"Begin Logging")
 
-    def _end_logging(self):
+        # If no parameter is passed for dev_type, that means the command is sent to every device.
+        if dev_type == None:
+            # send command to nano's to start logging onto their SD cards
+            for dev in self._serial_devices:
+                self._serial_devices[dev].write(b"Begin Logging")
+        else:
+            self._serial_devices[dev_type].write(b"Begin Logging")
+
+
+    def _end_logging(self, dev_type = None):
         print(f"Command Sent : -- {bcolors.OKBLUE}End Logging{bcolors.ENDC} --")
         # send command to nano's to stop logging onto their SD cards
-        for ser in self._serial_devices:
-            ser[0].write(b"End Logging")
+
+        # If no parameter is passed for dev_type, that means the command is sent to every device.
+        if dev_type == None:
+            for dev in self._serial_devices:
+                self._serial_devices[dev].write(b"End Logging")
+        else:
+            self._serial_devices[dev_type].write(b"End Logging")
+
     
-    def _retrieve_logs(self):
+    def _retrieve_logs(self,  dev_type = None):
         print(f"Command Sent : -- {bcolors.OKBLUE}Retrieve Logs{bcolors.ENDC} --")
 
-        files = []
         # retrieve data from nano's SD cards
-        for ser in self._serial_devices:
+
+        # If no parameter is passed for dev_type, that means the command is sent to every device.
+        if dev_type == None:
+            for dev in self._serial_devices:
+                self._retrieve_dev_log(dev)
+        else:
+            self._retrieve_dev_log(dev_type)
+    
+    def _retrieve_dev_log(self, dev_type):
             # Send command
-            ser[0].write(b"Retrieve Logs")
+            self._serial_devices[dev_type].write(b"Retrieve Logs")
 
             # Get rid of all the other crap before.
-            ser[0].flushInput()
+            self._serial_devices[dev_type].flushInput()
 
             print("Waiting for device response...")
-            while(ser[0].in_waiting == 0):
+            while(self._serial_devices[dev_type].in_waiting == 0):
                 pass
             print("Device Responded...")
 
             # get file name
             file_name = "DEFAULT.TXT"
-            file_name = ser[0].readline().decode('utf-8').rstrip()
+            file_name = self._serial_devices[dev_type].readline().decode('utf-8').rstrip()
 
             file = open(file_name, 'w')
             # try except so that the file gets closed in case of a forceful program close
             try:
                 print("Writing to file...")
                 while True:
-                    if ser[0].in_waiting > 0:
-                        line = ser[0].readline().decode('utf-8')
+                    if self._serial_devices[dev_type].in_waiting > 0:
+                        line = self._serial_devices[dev_type].readline().decode('utf-8')
                         if line.strip() == "Finished":
                             break
                         file.write(line)
@@ -107,7 +149,8 @@ class SerialDevices:
 
             print(f"File {file_name} Created")
             print(f"{bcolors.BOLD}Enter another command{bcolors.ENDC}")
-    
+
+
     def _print_commands(self):
         print(f"{bcolors.OKBLUE}Command List{bcolors.ENDC}")
 

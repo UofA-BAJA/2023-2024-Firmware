@@ -1,8 +1,7 @@
 import SerialDevices
 import time
-from util.ConfigParser import Commands
+from util.ConfigParser import Commands, ModuleTypes
 # ! lily was here
-
 
 COMMANDS = {'b' : Commands.BEGIN,
             'e' : Commands.END,
@@ -10,12 +9,20 @@ COMMANDS = {'b' : Commands.BEGIN,
             'q' : Commands.QUIT,
             'help' : Commands.HELP}
 
+
+lora_dev = None
+
 def main():
+
     serial_devices = SerialDevices.SerialDevices()
+
+    # Get the lora device so we know how to send stuff back to the computer.
+    # lora_dev = serial_devices.GetDevice(ModuleTypes.LORA_PI)
+
 
     while True:
         command = input()
-        serial_devices.execute_command(COMMANDS[command])
+        serial_devices.execute_command(COMMANDS[command], ModuleTypes.RPM_REAR)
 
 
 
