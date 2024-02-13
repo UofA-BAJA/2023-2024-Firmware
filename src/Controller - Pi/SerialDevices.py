@@ -31,7 +31,7 @@ class SerialDevices:
         for ser in temp_devices:
             ser.flushInput()
             ser.flushOutput()
-            time.sleep(1)
+            time.sleep(.3)
             ser.write(Commands.SEND_TYPE.name.encode('utf-8'))
             while(ser.in_waiting == 0):
                 pass
