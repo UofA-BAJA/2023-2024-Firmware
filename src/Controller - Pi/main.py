@@ -17,12 +17,12 @@ def main():
     serial_devices = SerialDevices.SerialDevices()
 
     # Get the lora device so we know how to send stuff back to the computer.
-    # lora_dev = serial_devices.GetDevice(ModuleTypes.LORA_PI)
+    lora_dev = serial_devices.get_device(ModuleTypes.LORA_PI)
 
 
     while True:
         command = input()
-        serial_devices.execute_command(COMMANDS[command], ModuleTypes.RPM_REAR)
+        serial_devices.execute_command(COMMANDS[command])
 
 
 

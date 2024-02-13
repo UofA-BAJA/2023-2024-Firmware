@@ -50,6 +50,13 @@ class SerialDevices:
             
         return serial_devices
 
+    def get_device(self, dev_type):
+        if not dev_type in self._serial_devices:
+            print(f"No device with type {dev_type} found.")
+            return
+        else:
+            self._serial_devices[dev_type]
+
     def execute_command(self, command, dev_type = None):
         """ 
             Executes the commands <---- very descriptive, I know =D
