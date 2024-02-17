@@ -31,7 +31,7 @@ void RPM_DataModule::data_module_initialization_procedure()
     initialize_left_rpm_sensor();
     initialize_right_rpm_sensor();
 
-    InitializeSDReading(10, "rpmdata.txt");
+    InitializeSDReading(10, "pen.csv");
 
 
 #if DEBUG_LEVEL == DEV
@@ -42,7 +42,6 @@ void RPM_DataModule::data_module_initialization_procedure()
 void RPM_DataModule::data_module_operating_procedure()
 {
     StartSDReading();
-    bool logging = false;
     while (1)
     {
         /*operating procedure
@@ -57,25 +56,7 @@ void RPM_DataModule::data_module_operating_procedure()
 
            // Incoming command from raspberry pi!
         //    void pollCommandFromPI()
-        if(Serial.available() > 0){
-        String command = Serial.readString();
-
-        if(command == "Begin Logging"){
-            logging = true;
-        }
-        else if(command == "End Logging"){
-            logging = false;
-            CloseSD();
-        }
-        else if(command == "Retrieve Logs"){
-            if(logging){
-            Serial.println("You are still logging. stop logging first");
-            }
-            else{
-            SendFile();
-            }
-        }
-        }
+        PollCommand();
 
         _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
         rear_rpm_counter = left_rpm_counter + right_rpm_counter;

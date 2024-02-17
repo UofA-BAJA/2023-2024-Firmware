@@ -40,30 +40,10 @@ void IMU_DataModule::data_module_initialization_procedure()
 void IMU_DataModule::data_module_operating_procedure(){
   StartSDReading();
 
-  bool logging = false;
-
   while(true){
     // Incoming command from raspberry pi!
-    if(Serial.available() > 0){
-      String command = Serial.readString();
+    PollCommand();
 
-      if(command == "Begin Logging"){
-        logging = true;
-      }
-      else if(command == "End Logging"){
-        logging = false;
-        CloseSD();
-      }
-      else if(command == "Retrieve Logs"){
-        if(logging){
-          Serial.println("You are still logging. stop logging first");
-        }
-        else{
-          SendFile();
-        }
-      }
-    }
-    
     if(logging){
       /* Get a new sensor event */ 
       sensors_event_t event; 
