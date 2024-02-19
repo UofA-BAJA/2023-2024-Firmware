@@ -51,6 +51,7 @@ static RadioEvents_t RadioEvents; // Struct to hold radio event functions
 void OnTxDone( void );            // Function called on transmission completion
 void OnTxTimeout( void );         // Function called on transmission timeout
 void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr ); // Function called on reception
+String userInput; // Declare userInput outside the switch
 
 typedef enum
 {
@@ -97,6 +98,11 @@ void loop() {
         delay(2000);
         turnOnRGB(0,0);
         indication = false;
+    }
+    userInput = Serial.readStringUntil('\n');
+    userInput.trim();
+    if (userInput == "CL"){
+        Serial.printf("Here");
     }
     switch(state) {
         case TX:
@@ -157,6 +163,8 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
     sendshit = true;
     turnOnRGB(COLOR_RECEIVED, 0); // Function to turn on RGB LED for reception
 }
+    Serial.printf("\r\n%s\r\n",rxpacket);
+
     Radio.Sleep(); // Put the radio to sleep
     state = TX; // Change state to TX
 }

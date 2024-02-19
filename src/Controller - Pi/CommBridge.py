@@ -33,6 +33,24 @@ def get_serial_devices(port_paths):
         device.reset_input_buffer()
     return serial_devices
 
+def find_LoRa(serial_devices):
+    lorapath = None
+    print("found1")
+    while lorapath is None:
+        print("found2")
+        for ser in serial_devices:
+            ser.write(b"CL")
+            print("found3")
+            response = ser.readline().decode('UTF-8').rstrip()  if ser.in_waiting > 0 else None
+            if response == "Here":
+                lorapath = ser
+                print("found4")
+                break  # Exit the inner loop as soon as a LoRa device is found
+        if lorapath is None:
+            print("LoRa not found. Retrying...")
+    return lorapath
+    
+
 def begin_logging(serial_devices):
     # send command to nano's to start logging onto their SD cards
     for ser in serial_devices:
@@ -96,7 +114,7 @@ def retrieve_logs(serial_devices):
 #             ser.close()
 #         print("\nSerial Devices Closed")
 
-def get_input(serial_devices):
+def get_input(serial_devices, lora):
     print_commands()
     # Input loop
     commands = {
@@ -107,7 +125,7 @@ def get_input(serial_devices):
                 'q': lambda : exit_program(serial_devices)}
 
     while True:   
-        command = str(input())
+        command = str(lora.readline().decode('utf-8').rstrip())
         # I tried using a match statement here, but I couldn't so this'll have to do.
         if command in commands:
             commands[command]()
@@ -136,8 +154,8 @@ def exit_program(serial_devices):
 def main():
     port_paths = get_port_paths()
     ser_devices = get_serial_devices(port_paths)
-
-    get_input(ser_devices)
+    lora = find_LoRa(ser_devices)
+    get_input(ser_devices,lora)
     # receive_data(ser_devices)
 
 if __name__ == "__main__":
