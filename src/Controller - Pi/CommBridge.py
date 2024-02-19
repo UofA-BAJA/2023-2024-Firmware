@@ -35,19 +35,6 @@ def get_serial_devices(port_paths):
 
 def find_LoRa(serial_devices):
     lorapath = None
-    print("found1")
-    while lorapath is None:
-        print("found2")
-        for ser in serial_devices:
-            ser.write(b"CL")
-            print("found3")
-            response = ser.readline().decode('UTF-8').rstrip()  if ser.in_waiting > 0 else None
-            if response == "Here":
-                lorapath = ser
-                print("found4")
-                break  # Exit the inner loop as soon as a LoRa device is found
-        if lorapath is None:
-            print("LoRa not found. Retrying...")
     return lorapath
     
 

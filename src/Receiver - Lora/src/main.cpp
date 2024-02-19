@@ -51,7 +51,7 @@ static RadioEvents_t RadioEvents; // Struct to hold radio event functions
 void OnTxDone( void );            // Function called on transmission completion
 void OnTxTimeout( void );         // Function called on transmission timeout
 void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr ); // Function called on reception
-String userInput; // Declare userInput outside the switch
+String checkInput; // Declare userInput outside the switch
 
 typedef enum
 {
@@ -68,6 +68,7 @@ bool sendshit = false;
 bool indication = true;
 
 void setup() {
+
     Serial.begin(115200); // Initialize serial communication
 
     txNumber = 0; // Initialize transmission number
@@ -93,17 +94,18 @@ void setup() {
 }
 
 void loop() {
-    if(indication){
+if (indication) {
+    while(Serial.available() == 0);
+    checkInput = Serial.readStringUntil('\n');
+    checkInput.trim();
+    if (checkInput == "SEND_TYPE"){
+        Serial.printf("LORA_PI");
         turnOnRGB(COLOR_RECEIVED,0);
         delay(2000);
         turnOnRGB(0,0);
-        indication = false;
     }
-    userInput = Serial.readStringUntil('\n');
-    userInput.trim();
-    if (userInput == "CL"){
-        Serial.printf("Here");
-    }
+    indication = false;
+}
     switch(state) {
         case TX:
             delay(100); // Delay before each transmission
