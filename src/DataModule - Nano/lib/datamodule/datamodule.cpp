@@ -11,6 +11,10 @@
 #include "imu.h"
 #include "rpm.h"
 
+// Define startMarker and endMarker as preprocessor macros
+#define startMarker '<'
+#define endMarker '>'
+
 #define fileName "temp.csv"
 #define chipSelect 10
 
@@ -25,6 +29,7 @@ bool newData = false;
 enum DataModuleState {
     SD_CARD_INITIALIZATION,
     DATAMODULE_SPECIFIC_INITIALIZATION,
+    RESPOND_WITH_TYPE,
     WAIT_TO_START_LOGGING,
     LOG_DATA,
     WAIT_TO_SEND_FILE
@@ -53,6 +58,19 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
             DEBUG_PRINTLN("Data Module Initialized");
             break;
         
+        case RESPOND_WITH_TYPE:
+
+            while(Serial.available() == 0);
+            
+            const char* cmmdString = COMMANDS_SEND_TYPE;
+            if (strcmp(receivedChars, cmmdString) == 0) {
+                // Exact match found
+                Serial.println("Target string received!");
+            }
+
+            DEBUG_PRINTLN("Data Module Type: ");
+            break;
+
         case WAIT_TO_START_LOGGING:
             if (Serial.available() > 0) {
         
@@ -154,28 +172,35 @@ void initialize_data_module_select_pins() {
 }
 
 ////////////////////////////////////////////////////////////////////////
-// void recvWithEndMarker() {
-//     static char ndx = 0;
-//     char endMarker = '\n';
-//     char rc;
-    
-//     while (Serial.available() > 0 && newData == false) {
-//         rc = Serial.read();
+void recvWithStartEndMarkers() {
+    static boolean recvInProgress = false;
+    static byte ndx = 0;
+    char rc;
+ 
+    while (Serial.available() > 0 && newData == false) {
+        rc = Serial.read();
 
-//         if (rc != endMarker) {
-//             receivedChars[ndx] = rc;
-//             ndx++;
-//             if (ndx >= numChars) {
-//                 ndx = numChars - 1;
-//             }
-//         }
-//         else {
-//             receivedChars[ndx] = '\0'; // terminate the string
-//             ndx = 0;
-//             newData = true;
-//         }
-//     }
-// }
+        if (recvInProgress == true) {
+            if (rc != endMarker) {
+                receivedChars[ndx] = rc;
+                ndx++;
+                if (ndx >= numChars) {
+                    ndx = numChars - 1;
+                }
+            }
+            else {
+                receivedChars[ndx] = '\0'; // terminate the string
+                recvInProgress = false;
+                ndx = 0;
+                newData = true;
+            }
+        }
+
+        else if (rc == startMarker) {
+            recvInProgress = true;
+        }
+    }
+}
 
 
 ////////////////////////////////////////////////////////////////////////

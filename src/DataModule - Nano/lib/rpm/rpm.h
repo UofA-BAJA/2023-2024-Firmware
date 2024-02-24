@@ -33,6 +33,8 @@ public:
     void data_module_setup_procedure() override;
     void data_module_logging_procedure() override;
 
+    void set_data_module_type() override;
+
     static void shift_data_array_left(int *data_array, int array_size);
     static float get_average_of_data_array(int *data_array, int array_size);
 };

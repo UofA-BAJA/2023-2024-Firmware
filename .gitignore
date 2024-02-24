@@ -3,3 +3,4 @@
 **/launch.json
 **/ipch
 **/.gitignore
+**/__pycache__/

@@ -8,8 +8,8 @@
 #include <SD.h>
 #include <SPI.h>
 
-
 #include "datamodule.h"
+#include "enums.h"
 
 #define RPM_SENSING_DURATION_PERIOD_MS 20 // time in ms for sensor to collect
 #define RPM_NUM_OF_PERIODS_TO_AVG 20      // number of periods to average for rpm calculation
@@ -24,6 +24,11 @@ volatile int RPM_DataModule::left_rpm_counter = 0;  // Define and initialize the
 volatile int RPM_DataModule::right_rpm_counter = 0; // Define and initialize the static member
 volatile int RPM_DataModule::rear_rpm_counter = 0;  // Define and initialize the static member
 volatile float RPM_DataModule::speed = 0;           // volatile float RPM_DataModule::speed = 0; // Define and initialize the static member
+
+void RPM_DataModule::set_data_module_type()
+{
+    strcpy(data_module_type, MODULE_TYPES_RPM_REAR);
+}
 
 void RPM_DataModule::data_module_setup_procedure()
 {

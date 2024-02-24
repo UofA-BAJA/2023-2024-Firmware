@@ -2,7 +2,7 @@
 #include <avr/interrupt.h>
 
 #include "macros.h"
-
+#include "enums.h"
 #include "imu.h"
 #include "i2c.h"
 
@@ -19,6 +19,11 @@
 #define SL_MEMA_ZAX_LOW   0x40
 #define SL_TEMP_HIGH      0x41
 #define SL_TEMP_LOW       0x42
+
+void IMU_DataModule::set_data_module_type()
+{
+    strcpy(data_module_type, MODULE_TYPES_IMU);
+}
 
 void IMU_DataModule::data_module_setup_procedure() {}
 void IMU_DataModule::data_module_logging_procedure(){}
