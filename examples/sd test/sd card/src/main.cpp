@@ -35,8 +35,10 @@ void setup() {
 
   Serial.print("Initializing SD card...");
 
+  delay(1000);
   // see if the card is present and can be initialized:
   if (!SD.begin(chipSelect)) {
+    delay(1000);
     Serial.println("Card failed, or not present");
     // don't do anything more:
     while (1);
