@@ -55,7 +55,7 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
         
         case WAIT_TO_START_LOGGING:
             if (Serial.available() > 0) {
-                DEBUG_PRINTLN("got to there");
+        
 
                 // recvWithEndMarker();
                 DEBUG_PRINTLN("read in input: ");

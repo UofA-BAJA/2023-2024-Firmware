@@ -11,7 +11,6 @@ namespace BAJA_EMBEDDED {
         virtual void data_module_logging_procedure() = 0;
 
     public:
-        void SetName(String name);
         virtual ~DataModule() {} // Virtual destructor is important for a class with virtual functions
         DataModule();
 

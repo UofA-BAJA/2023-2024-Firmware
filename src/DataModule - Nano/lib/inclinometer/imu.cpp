@@ -20,50 +20,52 @@
 #define SL_TEMP_HIGH      0x41
 #define SL_TEMP_LOW       0x42
 
+void IMU_DataModule::data_module_setup_procedure() {}
+void IMU_DataModule::data_module_logging_procedure(){}
 
-void IMU_DataModule::data_module_setup_procedure() 
-{
-  sei(); 
+// void IMU_DataModule::data_module_setup_procedure() 
+// {
+//   sei(); 
 
-  initI2C(); 
+//   initI2C(); 
   
-  /* Initialise the sensor */
-  if(!bno.begin())
-  {
-    /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while(1);
-  }
-  _delay_ms(1000);
-  bno.setExtCrystalUse(true);
-}
+//   /* Initialise the sensor */
+//   if(!bno.begin())
+//   {
+//     /* There was a problem detecting the BNO055 ... check your connections */
+//     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+//     while(1);
+//   }
+//   _delay_ms(1000);
+//   bno.setExtCrystalUse(true);
+// }
 
-void IMU_DataModule::data_module_operating_procedure(){
-  StartSDReading();
+// void IMU_DataModule::data_module_operating_procedure(){
+//   StartSDReading();
 
-  while(true){
-    // Incoming command from raspberry pi!
-    PollCommand();
+//   while(true){
+//     // Incoming command from raspberry pi!
+//     PollCommand();
 
-    if(logging){
-      /* Get a new sensor event */ 
-      sensors_event_t event; 
-      bno.getEvent(&event);
-      /* Display the floating point data */
-      String dataString = "";
-      dataString += millis();
-      dataString += "ms  Y:";
-      dataString += event.orientation.y;
-      // Serial.print("X: ");
-      // Serial.print(event.orientation.x, 4);
-      // Serial.print("\tY: ");
-      // Serial.print(event.orientation.y, 4);
-      // Serial.print("\tZ: ");
-      // Serial.print(event.orientation.z, 4);
-      // Serial.println("");
-      WriteToSD(dataString);
-    }
+//     if(logging){
+//       /* Get a new sensor event */ 
+//       sensors_event_t event; 
+//       bno.getEvent(&event);
+//       /* Display the floating point data */
+//       String dataString = "";
+//       dataString += millis();
+//       dataString += "ms  Y:";
+//       dataString += event.orientation.y;
+//       // Serial.print("X: ");
+//       // Serial.print(event.orientation.x, 4);
+//       // Serial.print("\tY: ");
+//       // Serial.print(event.orientation.y, 4);
+//       // Serial.print("\tZ: ");
+//       // Serial.print(event.orientation.z, 4);
+//       // Serial.println("");
+//       WriteToSD(dataString);
+//     }
     
-    delay(20);
-  }
-}
+//     delay(20);
+//   }
+// }
