@@ -21,8 +21,19 @@ def main():
 
 
     while True:
-        command = input()
-        serial_devices.execute_command(COMMANDS[command])
+        while lora_dev.in_waiting == 0:
+            pass
+        command = lora_dev.readline().decode('utf-8').strip()
+
+        command_type_enum = None
+        try:
+            command_type_enum = Commands[command]
+            print(command_type_enum)
+        except KeyError:
+            print(f"No enum member with the name '{command}'")
+
+        # command = input()
+        serial_devices.execute_command(COMMANDS[command_type_enum])
 
 
 
