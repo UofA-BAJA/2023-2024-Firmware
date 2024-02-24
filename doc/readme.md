@@ -7,3 +7,6 @@ To Get Setup for Firmware Development
 To Get Setup for CAD
 1. Make an account with autodesk with your school email
 2. Install [Fusion360](https://www.autodesk.com/products/fusion-360/overview?term=1-YEAR&tab=subscription)
+
+If it says "missing package git",
+run "pip install gitpython"
