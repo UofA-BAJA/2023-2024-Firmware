@@ -11,8 +11,13 @@ class SerialDevices:
         ports = list(serial.tools.list_ports.comports())
         port_paths = []
         for p in ports:
-            print(f"Device detected: {p.device}")
-            port_paths.append(p.device)
+            # Example of filtering out Bluetooth devices by checking for a keyword in the description
+            # Adjust the keyword according to your needs
+            if 'Bluetooth' not in p.description:
+                print(f"Device detected: {p.device}")
+                port_paths.append(p.device)
+            else:
+                print(f"Bluetooth device ignored: {p.device}")
         self._port_paths = port_paths
         self._serial_devices = self.get_serial_devices()
 
