@@ -1,118 +1,118 @@
-#include <datamodule.h>
-#include <imu.h>
+#include <avr/io.h>
+#include <util/delay.h>
+#include <HardwareSerial.h>
+#include <SD.h>
+#include <SPI.h>
+
+#include "datamodule.h"
+#include "macros.h"
+#include "enums.h"
+
+#include "imu.h"
 #include "rpm.h"
 
-#include <avr/io.h>
-#include <Arduino.h>
+#define fileName "temp.csv"
+#define chipSelect 10
 
-#include "config.h"
+File dataFile;
+const char numChars = 32;
+char receivedChars[numChars];   // an array to store the received data
 
+bool newData = false;
 
-#include <SPI.h>
-#include <SD.h>
+// void recvWithEndMarker();
+
+enum DataModuleState {
+    SD_CARD_INITIALIZATION,
+    DATAMODULE_SPECIFIC_INITIALIZATION,
+    WAIT_TO_START_LOGGING,
+    LOG_DATA,
+    WAIT_TO_SEND_FILE
+};
+
 
 BAJA_EMBEDDED::DataModule::DataModule() {
-
+    //empty constructor
 }
 
-void BAJA_EMBEDDED::DataModule::SetName(String name){
-    this->name = name;
-}
+void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
+    DataModuleState data_module_state = SD_CARD_INITIALIZATION; //initial state
 
-void BAJA_EMBEDDED::DataModule::PollCommand(){
-    if(Serial.available() > 0){
-      String command = Serial.readString();
+    while(1) {
+        switch (data_module_state)
+        {
+        case SD_CARD_INITIALIZATION:
+            InitializeSDCard();
+            data_module_state = DATAMODULE_SPECIFIC_INITIALIZATION;
 
-      if(command == "Begin Logging"){
-        logging = true;
-      }
-      else if(command == "End Logging"){
-        logging = false;
-        this->CloseSD();
-      }
-      else if(command == "Retrieve Logs"){
-        if(logging){
-          Serial.println("You are still logging. stop logging first");
+            break;
+        
+        case DATAMODULE_SPECIFIC_INITIALIZATION:
+            data_module_setup_procedure();
+            data_module_state = WAIT_TO_START_LOGGING;
+            DEBUG_PRINTLN("Data Module Initialized");
+            break;
+        
+        case WAIT_TO_START_LOGGING:
+            if (Serial.available() > 0) {
+                DEBUG_PRINTLN("got to there");
+
+                // recvWithEndMarker();
+                DEBUG_PRINTLN("read in input: ");
+                DEBUG_PRINT(receivedChars);
+
+                // if (serial_input == COMMANDS_BEGIN) {
+                //     StartSDReading();
+                //     data_module_state = LOG_DATA;
+                //     DEBUG_PRINTLN("Started data logging");
+                // }
+                // else {
+                //     DEBUG_PRINTLN("Invalid command");
+                // }
+            }
+            else {
+                DEBUG_PRINTLN("Waiting to start logging...");
+                _delay_ms(5000);
+            }
+            
+            
+            break;
+
+        case LOG_DATA:
+            if (Serial.available() > 0) {
+                String serial_input = Serial.readString();
+
+                if (serial_input == COMMANDS_END) {
+                    CloseSDFile();
+                    data_module_state = WAIT_TO_SEND_FILE;
+                    DEBUG_PRINTLN("Stopped data logging...");
+
+                }
+                else {
+                    data_module_logging_procedure();
+                }
+            }
+            break;
+
+        case WAIT_TO_SEND_FILE:
+            if (Serial.available() > 0) {
+                String serial_input = Serial.readString();
+
+                if (serial_input == COMMANDS_RETRIEVE) {
+                    SendFile();
+                    data_module_state = WAIT_TO_START_LOGGING;
+                }
+            }
+            break;
         }
-        else{
-          this->SendFile();
-        }
-      }
-      else if(command == "SEND_TYPE"){
-        // Serial.println("Sending " + name);
-        Serial.println(name);
-      }
+
+    _delay_us(10); //delay for 10us
     }
+
+
 }
-
-void BAJA_EMBEDDED::DataModule::SendFile(){
-
-    dataFile = SD.open(fileName, FILE_READ);
-    Serial.println(fileName);
-
-    while (dataFile.available() > 0) {
-        String buffer = dataFile.readStringUntil('\n');
-        buffer.trim();
-        Serial.println(buffer);
-    }
-    dataFile.close();
-    Serial.println("Finished");
-}
-
-/* 
-    Start of section for SD card reading
-*/
-void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileName) {
-    this->chipSelect = chipSelect;
-
-    if(fileName.length() > 11){
-        Serial.println("Your code won't work and life is terrible and please just make the file name less than 13 characters ong");
-        while(1);
-    }
-    fileName.toUpperCase();
-    this->fileName = fileName;
-}
-
-void BAJA_EMBEDDED::DataModule::StartSDReading() {
-    if(!SD.begin(chipSelect)){
-        Serial.println("Card failed, or not present"); // hiiiiii
-        while(1);
-    }
-
-    Serial.println("SD Card Initialized");
-    if(SD.exists(fileName)){
-        SD.remove(fileName);
-    }
-
-    dataFile = SD.open(fileName, FILE_WRITE);
-
-    if (dataFile) {
-        Serial.println("Data file successfully opened");
-    }
-    else{
-        Serial.println("Hanging on opening the data file");
-        _delay_ms(100);
-        while(1);
-    }
-}
-
-void BAJA_EMBEDDED::DataModule::WriteToSD(String dataString){
-    if (dataFile){
-        dataFile.println(dataString);
-    }else{
-        Serial.println("error opening " + fileName);
-    }
-}
-
-void BAJA_EMBEDDED::DataModule::CloseSD(){
-    dataFile.close();
-    Serial.print("File Closed");
-}
-
-/* 
-    End of section for SD card reading
-*/
-
+////////////////////////////////////////////////////////////////////////
+/////////////////////////initialization stuff/////////////////////////
 
 BAJA_EMBEDDED::DataModule* create_data_module_type() {
     
@@ -123,30 +123,22 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
                             ((PINC & (1 << PINC1)) >> PINC1) << 1 | 
                             ((PINC & (1 << PINC0)) >> PINC0);
 
-    #if DEBUG_LEVEL == DEV
-        Serial.print("DataModule select pins read: ");
-        Serial.println(data_module_select);
-    #endif
-    
+    DEBUG_PRINT("Data Module Select Pin Reads: ");
+    DEBUG_PRINTLN(data_module_select);
+
     if (data_module_select == 0b111) {
-        Serial.println("RPM Sensor Detected");
-        RPM_DataModule* dataModule = new RPM_DataModule;
-        dataModule->SetName("RPM"); 
-        return dataModule;
+        DEBUG_PRINTLN("RPM Module Detected");
+        return new RPM_DataModule;
     }
     else if(data_module_select == 0b110){
-        Serial.println("IMU Detected");
-        IMU_DataModule* dataModule = new IMU_DataModule;
-        dataModule->SetName("IMU");
+        DEBUG_PRINTLN("IMU Detected");
         return new IMU_DataModule;
     }
     else {
-        #if DEBUG_LEVEL == DEV
-            Serial.print("No datamodule found for this pin selection");
-        #endif
-     
+        DEBUG_PRINTLN("No datamodule found for this pin selection");
+            
         return nullptr; 
-        }
+    }
 
 }
 
@@ -161,3 +153,86 @@ void initialize_data_module_select_pins() {
     PORTC |= ( (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2));
 }
 
+////////////////////////////////////////////////////////////////////////
+// void recvWithEndMarker() {
+//     static char ndx = 0;
+//     char endMarker = '\n';
+//     char rc;
+    
+//     while (Serial.available() > 0 && newData == false) {
+//         rc = Serial.read();
+
+//         if (rc != endMarker) {
+//             receivedChars[ndx] = rc;
+//             ndx++;
+//             if (ndx >= numChars) {
+//                 ndx = numChars - 1;
+//             }
+//         }
+//         else {
+//             receivedChars[ndx] = '\0'; // terminate the string
+//             ndx = 0;
+//             newData = true;
+//         }
+//     }
+// }
+
+
+////////////////////////////////////////////////////////////////////////
+/////////////////////////sd card stuff//////////////////////////////////
+void InitializeSDCard(){
+    DEBUG_PRINT("Initializing SD card on PIN: ");
+    DEBUG_PRINTLN(chipSelect);
+
+    if(!SD.begin(chipSelect)){
+        DEBUG_PRINTLN("Card failed, or not present");
+        while(1);
+    }
+
+    DEBUG_PRINTLN("Card initialized");
+
+    if (SD.exists(fileName)) {
+        SD.remove(fileName);
+    }
+
+}
+
+void SendFile(){
+
+    dataFile = SD.open(fileName, FILE_READ);
+
+    while (dataFile.available() > 0) {
+        String buffer = dataFile.readStringUntil('\n');
+        buffer.trim();
+        Serial.println(buffer);
+        Serial.flush();
+    }
+    dataFile.close();
+    DEBUG_PRINTLN("Finished");
+}
+
+
+
+void StartSDReading() {
+    
+    dataFile = SD.open(fileName, FILE_WRITE);
+
+    if (!dataFile) {
+        DEBUG_PRINTLN("Failed to open file for writing");
+        while(1);
+    }
+}
+
+// void WriteDataToSD(String dataString){
+//     if (dataFile){
+//         dataFile.println(dataString);
+//     }else{
+//         Serial.println("error opening file");
+//     }
+// }
+
+void CloseSDFile(){
+    dataFile.close();
+}
+
+////////////////////////////////////////////////////////////////////////
