@@ -35,13 +35,14 @@ enum DataModuleState {
     WAIT_TO_SEND_FILE
 };
 
+DataModuleState data_module_state = SD_CARD_INITIALIZATION; //initial state
+
 
 BAJA_EMBEDDED::DataModule::DataModule() {
     //empty constructor
 }
 
 void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
-    DataModuleState data_module_state = SD_CARD_INITIALIZATION; //initial state
 
     while(1) {
         switch (data_module_state)
@@ -49,78 +50,62 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
         case SD_CARD_INITIALIZATION:
             InitializeSDCard();
             data_module_state = DATAMODULE_SPECIFIC_INITIALIZATION;
-
             break;
         
+
         case DATAMODULE_SPECIFIC_INITIALIZATION:
             data_module_setup_procedure();
+            set_data_module_type();
             data_module_state = RESPOND_WITH_TYPE;
             DEBUG_PRINTLN("Data Module Initialized");
             break;
         
-        case RESPOND_WITH_TYPE:
 
-            while(Serial.available() == 0); //wait for input
+        case RESPOND_WITH_TYPE:
             
-            const char* cmmdString = COMMANDS_SENDTYPE;
-            if (strcmp(receivedChars, cmmdString) == 0) {
-                // Exact match found
+            if (waitForCommand(COMMANDS_SENDTYPE)) {
                 Serial.println(data_module_type);
+                Serial.flush();
+                
+                data_module_state = WAIT_TO_START_LOGGING;
             }
 
-            DEBUG_PRINTLN("Data Module Type: ");
+
             break;
+
 
         case WAIT_TO_START_LOGGING:
-            if (Serial.available() > 0) {
-        
-
-                // recvWithEndMarker();
-                DEBUG_PRINTLN("read in input: ");
-                DEBUG_PRINT(receivedChars);
-
-                // if (serial_input == COMMANDS_BEGIN) {
-                //     StartSDReading();
-                //     data_module_state = LOG_DATA;
-                //     DEBUG_PRINTLN("Started data logging");
-                // }
-                // else {
-                //     DEBUG_PRINTLN("Invalid command");
-                // }
-            }
-            else {
-                DEBUG_PRINTLN("Waiting to start logging...");
-                _delay_ms(5000);
-            }
             
-            
+            if (waitForCommand(COMMANDS_BEGIN)) {
+                StartSDReading();
+                data_module_state = LOG_DATA;
+                DEBUG_PRINTLN("Started data logging");
+            }
             break;
 
-        case LOG_DATA:
-            if (Serial.available() > 0) {
-                String serial_input = Serial.readString();
 
-                if (serial_input == COMMANDS_END) {
+        case LOG_DATA:
+
+            if (Serial.available() > 0) {
+                if (waitForCommand(COMMANDS_END)) {
                     CloseSDFile();
                     data_module_state = WAIT_TO_SEND_FILE;
                     DEBUG_PRINTLN("Stopped data logging...");
-
                 }
-                else {
-                    data_module_logging_procedure();
-                }
+            }
+            else {
+                data_module_logging_procedure();
             }
             break;
 
-        case WAIT_TO_SEND_FILE:
-            if (Serial.available() > 0) {
-                String serial_input = Serial.readString();
 
-                if (serial_input == COMMANDS_RETRIEVE) {
-                    SendFile();
-                    data_module_state = WAIT_TO_START_LOGGING;
-                }
+        case WAIT_TO_SEND_FILE:
+            
+            if (waitForCommand(COMMANDS_RETRIEVE)) { 
+                SendFile();
+                data_module_state = WAIT_TO_START_LOGGING;
             }
+           
             break;
         }
 
@@ -172,6 +157,7 @@ void initialize_data_module_select_pins() {
 }
 
 ////////////////////////////////////////////////////////////////////////
+/////////////////////////serial communication/////////////////////////
 void recvWithStartEndMarkers() {
     static boolean recvInProgress = false;
     static byte ndx = 0;
@@ -202,6 +188,34 @@ void recvWithStartEndMarkers() {
     }
 }
 
+/*this function will wait for a command to be received and will return a boolean if the command is successfuly recieved
+    give the function a defined command from enums.h as input*/
+bool BAJA_EMBEDDED::DataModule::waitForCommand(const char* cmmdString) {
+    
+    recvWithStartEndMarkers();
+    if (newData) {
+
+        if (strcmp(receivedChars, cmmdString) == 0) {
+            receivedChars[0] = '\0'; //clear received chars
+            return true;
+        }
+        else if (receivedChars[0] != '\0')
+        {
+            DEBUG_PRINT("DataModule is in state: ");
+            DEBUG_PRINTLN(data_module_state);
+            DEBUG_PRINT("Incorrect Command: ");
+            DEBUG_PRINTLN(receivedChars);
+        }
+        else {
+            // The receivedChars array is empty, so do not print "command not recognized"
+        }
+
+        newData = false;
+    }
+    
+
+    return false;
+}
 
 ////////////////////////////////////////////////////////////////////////
 /////////////////////////sd card stuff//////////////////////////////////

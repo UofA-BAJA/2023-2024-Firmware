@@ -19,6 +19,9 @@ namespace BAJA_EMBEDDED {
         
         void data_module_initialization_procedure();
         void data_module_operating_procedure();
+
+        bool waitForCommand(const char* cmmdString);
+
     };
 
 }

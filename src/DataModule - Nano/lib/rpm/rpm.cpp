@@ -10,6 +10,7 @@
 
 #include "datamodule.h"
 #include "enums.h"
+#include "macros.h"
 
 #define RPM_SENSING_DURATION_PERIOD_MS 20 // time in ms for sensor to collect
 #define RPM_NUM_OF_PERIODS_TO_AVG 20      // number of periods to average for rpm calculation
@@ -37,10 +38,8 @@ void RPM_DataModule::data_module_setup_procedure()
     initialize_right_rpm_sensor();
 
 
-
-    #if DEBUG_LEVEL == DEV
-        Serial.println("initialized RPM data module");
-    #endif
+    DEBUG_PRINTLN("RPM Data Module Setup Complete");
+    
 }
 
 void RPM_DataModule::data_module_logging_procedure() {
