@@ -2,6 +2,7 @@ import SerialDevices
 import time
 from util.ConfigParser import Commands, ModuleTypes
 # ! lily was here
+# ayo
 
 COMMANDS = {'b' : Commands.BEGIN,
             'e' : Commands.END,
@@ -13,8 +14,10 @@ COMMANDS = {'b' : Commands.BEGIN,
 lora_dev = None
 
 def main():
-
+    print("Starting up...")
     serial_devices = SerialDevices.SerialDevices()
+
+    print("Waiting for devices to connect...")
 
     # Get the lora device so we know how to send stuff back to the computer.
     lora_dev = serial_devices.get_device(ModuleTypes.LORA_PI)
@@ -34,7 +37,6 @@ def main():
 
         # command = input()
         serial_devices.execute_command(COMMANDS[command_type_enum])
-
 
 
 if __name__ == "__main__":

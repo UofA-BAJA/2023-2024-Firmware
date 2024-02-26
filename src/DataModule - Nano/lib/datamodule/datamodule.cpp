@@ -54,18 +54,18 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
         
         case DATAMODULE_SPECIFIC_INITIALIZATION:
             data_module_setup_procedure();
-            data_module_state = WAIT_TO_START_LOGGING;
+            data_module_state = RESPOND_WITH_TYPE;
             DEBUG_PRINTLN("Data Module Initialized");
             break;
         
         case RESPOND_WITH_TYPE:
 
-            while(Serial.available() == 0);
+            while(Serial.available() == 0); //wait for input
             
-            const char* cmmdString = COMMANDS_SEND_TYPE;
+            const char* cmmdString = COMMANDS_SENDTYPE;
             if (strcmp(receivedChars, cmmdString) == 0) {
                 // Exact match found
-                Serial.println("Target string received!");
+                Serial.println(data_module_type);
             }
 
             DEBUG_PRINTLN("Data Module Type: ");

@@ -98,7 +98,7 @@ if (indication) {
     while(Serial.available() == 0);
     checkInput = Serial.readStringUntil('\n');
     checkInput.trim();
-    if (checkInput == "SEND_TYPE"){
+    if (checkInput == "SENDTYPE"){
         Serial.printf("LORA_PI");
         turnOnRGB(COLOR_RECEIVED,0);
         delay(2000);

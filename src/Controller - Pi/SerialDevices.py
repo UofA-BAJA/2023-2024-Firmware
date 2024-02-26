@@ -30,7 +30,7 @@ class SerialDevices:
         for path in self._port_paths:
             ser = serial.Serial(path, 115200)
             temp_devices.append(ser)
-
+        
         time.sleep(2)
 
         for ser in temp_devices:
@@ -38,9 +38,11 @@ class SerialDevices:
             ser.flushOutput()
             time.sleep(.3)
             ser.write(Commands.SENDTYPE.name.encode('utf-8'))
+            print("Test")
             while(ser.in_waiting == 0):
+                print(ser.name)
                 pass
-
+            print("Test2")
             dev_type = ser.readline().decode('utf-8').strip()
             print(dev_type)
             dev_type_enum = None
@@ -52,7 +54,7 @@ class SerialDevices:
 
             ser.flushInput()
             serial_devices[dev_type_enum] = ser
-            
+
         return serial_devices
 
     def get_device(self, dev_type):
