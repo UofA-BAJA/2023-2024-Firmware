@@ -29,10 +29,12 @@ void BAJA_EMBEDDED::DataModule::InitializeSDReading(int chipSelect, String fileN
 }
 
 void BAJA_EMBEDDED::DataModule::StartSDReading() {
+    SPI.begin();
     if(!SD.begin(chipSelect)){
         Serial.println("Card failed, or not present");
         while(1);
     }
+    _delay_ms(1000);
     Serial.println("SD Card Initialized");
 
     dataFile = SD.open(fileName, FILE_WRITE);
