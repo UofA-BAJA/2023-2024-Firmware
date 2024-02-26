@@ -65,27 +65,6 @@ void RPM_DataModule::data_module_operating_procedure()
         - write to sd card
         */
 
-           // Incoming command from raspberry pi!
-        //    void pollCommandFromPI()
-        if(Serial.available() > 0){
-        String command = Serial.readString();
-
-        if(command == "Begin Logging"){
-            logging = true;
-        }
-        else if(command == "End Logging"){
-            logging = false;
-            CloseSD();
-        }
-        else if(command == "Retrieve Logs"){
-            if(logging){
-            Serial.println("You are still logging. stop logging first");
-            }
-            else{
-            SendFile();
-            }
-        }
-        }
 
         _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
 
