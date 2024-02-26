@@ -57,12 +57,11 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
             data_module_setup_procedure();
             set_data_module_type();
             data_module_state = RESPOND_WITH_TYPE;
-            DEBUG_PRINTLN("Data Module Initialized");
+            DEBUG_PRINTLN("Ready");
             break;
         
 
         case RESPOND_WITH_TYPE:
-            
             if (waitForCommand(COMMANDS_SENDTYPE)) {
                 Serial.println(data_module_type);
                 Serial.flush();

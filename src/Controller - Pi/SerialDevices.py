@@ -26,25 +26,33 @@ class SerialDevices:
             Gets the serial devices hahahahahahah
         """
         serial_devices = {}
-        temp_devices = []
-        for path in self._port_paths:
-            ser = serial.Serial(path, 115200)
-            temp_devices.append(ser)
-        
-        time.sleep(2)
 
-        for ser in temp_devices:
+        time.sleep(1)
+
+        for path in self._port_paths:
+            ser = serial.Serial(path, 115200, timeout=5)
+
             ser.flushInput()
             ser.flushOutput()
             time.sleep(.3)
-            ser.write(Commands.SENDTYPE.name.encode('utf-8'))
-            print("Test")
-            while(ser.in_waiting == 0):
-                print(ser.name)
-                pass
-            print("Test2")
-            dev_type = ser.readline().decode('utf-8').strip()
-            print(dev_type)
+
+            is_device_ready = False
+            while not is_device_ready:
+                device_output =  ser.readline().decode('utf-8').strip()                
+                print(f"Deivce Output on {ser.port}:")
+                print(device_output)
+                if device_output == "Ready":
+                    is_device_ready = True
+                print(f"End of Device Output on {ser.port}\n")
+
+                    
+            ser.write(f"<{Commands.SENDTYPE.name}>".encode('utf-8'))
+            
+            dev_type = None
+            while ser.in_waiting == 0:
+                dev_type = ser.readline().decode('utf-8').strip()
+                break
+            
             dev_type_enum = None
             try:
                 dev_type_enum = ModuleTypes[dev_type]
@@ -54,6 +62,8 @@ class SerialDevices:
 
             ser.flushInput()
             serial_devices[dev_type_enum] = ser
+
+            ser.close()
 
         return serial_devices
 
