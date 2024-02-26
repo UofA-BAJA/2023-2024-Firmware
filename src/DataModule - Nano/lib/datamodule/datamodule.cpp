@@ -69,7 +69,6 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
                 data_module_state = WAIT_TO_START_LOGGING;
             }
 
-
             break;
 
 

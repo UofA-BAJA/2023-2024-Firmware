@@ -16,8 +16,7 @@ lora_dev = None
 def main():
     print("Starting up...")
     serial_devices = SerialDevices.SerialDevices()
-
-    print("Waiting for devices to connect...")
+    print(f"Found devices... \n{serial_devices._serial_devices}")
 
     # Get the lora device so we know how to send stuff back to the computer.
     lora_dev = serial_devices.get_device(ModuleTypes.LORA_PI)
