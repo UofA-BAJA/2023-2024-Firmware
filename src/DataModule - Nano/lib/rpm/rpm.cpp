@@ -85,7 +85,7 @@ void RPM_DataModule::data_module_operating_procedure()
             Serial.println(calculatedSpeed);
 
             if(logging){
-                dataString += time;
+                dataString += timeInMilis;
                 dataString += " ";
                 dataString += calculatedSpeed;
                 dataString += "\n";
