@@ -41,7 +41,7 @@ void RPM_DataModule::data_module_initialization_procedure()
     initialize_left_rpm_sensor();
     initialize_right_rpm_sensor();
 
-    InitializeSDReading(10, "rpmdata.txt");
+    InitializeSDReading(10, "pen.csv");
 
 
 #if DEBUG_LEVEL == DEV
@@ -52,7 +52,6 @@ void RPM_DataModule::data_module_initialization_procedure()
 void RPM_DataModule::data_module_operating_procedure()
 {
     StartSDReading();
-    bool logging = false;
     while (1)
     {
         /*operating procedure
@@ -65,6 +64,9 @@ void RPM_DataModule::data_module_operating_procedure()
         - write to sd card
         */
 
+           // Incoming command from raspberry pi!
+        //    void pollCommandFromPI()
+        PollCommand();
 
         _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
 

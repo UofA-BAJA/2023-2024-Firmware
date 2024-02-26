@@ -1,3 +1,8 @@
+#1. Read in command line input
+#2. print that command line on the serial
+#3. have the lora read-in that serial input and send it wirelessly
+
+
 import serial
 import serial.tools.list_ports
 import time
@@ -32,11 +37,6 @@ def get_serial_devices(port_paths):
     for device in serial_devices:
         device.reset_input_buffer()
     return serial_devices
-
-def find_LoRa(serial_devices):
-    lorapath = None
-    return lorapath
-    
 
 def begin_logging(serial_devices):
     # send command to nano's to start logging onto their SD cards
@@ -101,18 +101,18 @@ def retrieve_logs(serial_devices):
 #             ser.close()
 #         print("\nSerial Devices Closed")
 
-def get_input(serial_devices, lora):
+def get_input(serial_devices):
     print_commands()
     # Input loop
     commands = {
                 'help': lambda : print_commands(),
-                'b': lambda : begin_logging(serial_devices),
-                'e': lambda : end_logging(serial_devices),
-                'r': lambda : retrieve_logs(serial_devices),
-                'q': lambda : exit_program(serial_devices)}
+                'b': lambda : begin_logging(serial_devices), 
+                'e': lambda : end_logging(serial_devices), 
+                'r': lambda : retrieve_logs(serial_devices), 
+                'q': lambda : exit_program(serial_devices)} 
 
     while True:   
-        command = str(lora.readline().decode('utf-8').rstrip())
+        command = ser.readline()
         # I tried using a match statement here, but I couldn't so this'll have to do.
         if command in commands:
             commands[command]()
@@ -139,10 +139,9 @@ def exit_program(serial_devices):
 
 
 def main():
-    port_paths = get_port_paths()
-    ser_devices = get_serial_devices(port_paths)
-    lora = find_LoRa(ser_devices)
-    get_input(ser_devices,lora)
+    print_commands();
+    get_input(ser_devices)
+    ser.write("")
     # receive_data(ser_devices)
 
 if __name__ == "__main__":

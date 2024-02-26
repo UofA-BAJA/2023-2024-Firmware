@@ -8,6 +8,9 @@ namespace BAJA_EMBEDDED {
     
     class DataModule {
     protected:
+        String name = "RPM_REAR"; // delete this later.
+        bool logging = false;
+        void PollCommand();
         void StartSDReading();
         void InitializeSDReading(int chipSelect, String fileName);
         void WriteToSD(String dataString);
@@ -21,6 +24,7 @@ namespace BAJA_EMBEDDED {
         String fileName = "data.txt";
         File dataFile;
     public:
+        void SetName(String name);
         virtual ~DataModule() {} // Virtual destructor is important for a class with virtual functions
         DataModule();
 
