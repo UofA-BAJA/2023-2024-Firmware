@@ -43,6 +43,28 @@ void IMU_DataModule::data_module_logging_procedure(){}
 // void IMU_DataModule::data_module_operating_procedure(){
 //   StartSDReading();
 
+<<<<<<< HEAD
+  while(true){
+    if(digitalRead(5) == HIGH){
+      CloseSD();
+    }
+    /* Get a new sensor event */ 
+    sensors_event_t event; 
+    bno.getEvent(&event);
+    /* Display the floating point data */
+    String dataString = "";
+    dataString += millis();
+    dataString += "ms  Y:";
+    dataString += event.orientation.y;
+    // Serial.print("X: ");
+    // Serial.print(event.orientation.x, 4);
+    // Serial.print("\tY: ");
+    // Serial.print(event.orientation.y, 4);
+    // Serial.print("\tZ: ");
+    // Serial.print(event.orientation.z, 4);
+    // Serial.println("");
+    WriteToSD(dataString);
+=======
 //   while(true){
 //     // Incoming command from raspberry pi!
 //     PollCommand();
@@ -65,6 +87,7 @@ void IMU_DataModule::data_module_logging_procedure(){}
 //       // Serial.println("");
 //       WriteToSD(dataString);
 //     }
+>>>>>>> main
     
 //     delay(20);
 //   }
