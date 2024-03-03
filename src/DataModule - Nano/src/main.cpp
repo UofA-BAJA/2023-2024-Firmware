@@ -1,21 +1,21 @@
-#include <Arduino.h>
+#include <HardwareSerial.h>
+
 #include "datamodule.h"
-#include "config.h"
 
-#include "rpm.h"
 
+#define NONE 0 //no serial output, note that this will siginicantly reduce the size of the binary (FLASH)
+#define DEV 1 //all serial output, for development
+
+#define DEBUG_LEVEL DEV
 
 using namespace BAJA_EMBEDDED;
 
 int main() {
-  init(); // ! DO NOT FUCKING DELETE     please :)
+  #if DEBUG_LEVEL == DEV
+    Serial.begin(115200);
+  #endif
 
-  setup_debug();
-
-  // DataModule* selected_data_module = create_data_module_type();
-  DataModule* selected_data_module = new RPM_DataModule();
-
-  selected_data_module->data_module_initialization_procedure();
+  DataModule* selected_data_module = create_data_module_type();
   
   selected_data_module->data_module_operating_procedure();
 

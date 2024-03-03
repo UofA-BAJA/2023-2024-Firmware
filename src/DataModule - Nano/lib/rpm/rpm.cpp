@@ -2,13 +2,13 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <Arduino.h>
+#include <HardwareSerial.h>
 
 // ! I feel like you shouldn't need to have this dependency in every single data module...?
 #include <SD.h>
 #include <SPI.h>
 
-#include "config.h"
+
 #include "datamodule.h"
 
 #define RPM_SENSING_DURATION_PERIOD_MS 20 // time in ms for sensor to collect
@@ -44,9 +44,9 @@ void RPM_DataModule::data_module_initialization_procedure()
     InitializeSDReading(10, "rpmdata.txt");
 
 
-#if DEBUG_LEVEL == DEV
-    Serial.println("initialized RPM data module");
-#endif
+    #if DEBUG_LEVEL == DEV
+        Serial.println("initialized RPM data module");
+    #endif
 }
 
 void RPM_DataModule::data_module_operating_procedure()
@@ -113,9 +113,9 @@ void RPM_DataModule::data_module_operating_procedure()
             // Serial.print(">right_rpm: ");
             // Serial.println(right_rpm_counter);
     #endif
-    }
-
 }
+
+
 
 void RPM_DataModule::initialize_left_rpm_sensor()
 {

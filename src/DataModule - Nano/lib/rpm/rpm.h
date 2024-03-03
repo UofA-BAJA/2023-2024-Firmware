@@ -30,8 +30,8 @@ public:
     float calculate_rpm(float avg_rpm_count);
     float calculate_speed(float rpm);
 
-    void data_module_initialization_procedure() override;
-    void data_module_operating_procedure() override;
+    void data_module_setup_procedure() override;
+    void data_module_logging_procedure() override;
 
     static void shift_data_array_left(int *data_array, int array_size);
     static float get_average_of_data_array(int *data_array, int array_size);
