@@ -16,6 +16,8 @@
 #define RPM_NUM_OF_PERIODS_TO_AVG 20      // number of periods to average for rpm calculation
 #define NUM_MAGNETS 30                    // number of magnets on the wheel
 #define WHEEL_CIRCUMFERENCE 70.5          // circumference of the wheel in inches
+#define WHEEL_RADIUS .284998              // in meters
+#define ANGLE_BETWEEN_MAGNETS_RAD .4188   // in radians
 
 int rpm_left_counts[RPM_NUM_OF_PERIODS_TO_AVG] = {0};
 int rpm_rear_counts[RPM_NUM_OF_PERIODS_TO_AVG] = {0};
@@ -25,6 +27,12 @@ volatile int RPM_DataModule::left_rpm_counter = 0;  // Define and initialize the
 volatile int RPM_DataModule::right_rpm_counter = 0; // Define and initialize the static member
 volatile int RPM_DataModule::rear_rpm_counter = 0;  // Define and initialize the static member
 volatile float RPM_DataModule::speed = 0;           // volatile float RPM_DataModule::speed = 0; // Define and initialize the static member
+
+volatile float deltaTimes[40];
+volatile float prevTime = 0.0; // Prev time in microseconds
+volatile int currArrayIndex = 0;
+
+volatile float time = 0.0; // Time passed in microseconds
 
 void RPM_DataModule::set_data_module_type()
 {
@@ -52,37 +60,26 @@ void RPM_DataModule::data_module_logging_procedure() {
     - print to serial
     - write to sd card
     */
+    String dataString = "";
 
-        // Incoming command from raspberry pi!
-    //    void pollCommandFromPI()
-    
-    _delay_ms(RPM_SENSING_DURATION_PERIOD_MS);
-    rear_rpm_counter = left_rpm_counter + right_rpm_counter;
+    for(int i = 0; i < currArrayIndex; i++){
+        float deltaTime = deltaTimes[i];
+        time += deltaTime;
 
-    shift_data_array_left(rpm_rear_counts, RPM_NUM_OF_PERIODS_TO_AVG);
-    rpm_rear_counts[RPM_NUM_OF_PERIODS_TO_AVG - 1] = rear_rpm_counter;
-    rear_rpm_counter = 0;
+        deltaTime /= 1000000.0; // Convert from microseconds to seconds.
 
-    left_rpm_counter = 0;
-    right_rpm_counter = 0;
+        float calculatedSpeed = (ANGLE_BETWEEN_MAGNETS_RAD / deltaTime) * WHEEL_RADIUS;
+        calculatedSpeed *= 2.23694; // convert to mph.
 
-    avg_rear_rpm_count = get_average_of_data_array(rpm_rear_counts, RPM_NUM_OF_PERIODS_TO_AVG);
+        float timeInMilis = time / 1000.0;
 
-    rear_rpm = calculate_rpm(avg_rear_rpm_count);
+        DEBUG_PRINT(">mph: ");
+        DEBUG_PRINTLN(calculatedSpeed);
 
-    speed = calculate_speed(rear_rpm);
-    
-    #if DEBUG_LEVEL == DEV
-        // Serial.println(speed);
-        // Serial.print(">rear_rpm: ");
-        // Serial.println(rear_rpm);
-        // Serial.print(">Speed: ");
-        // Serial.println(speed);
-        // Serial.print(">left_rpm: ");
-        // Serial.println(left_rpm_counter);
-        // Serial.print(">right_rpm: ");
-        // Serial.println(right_rpm_counter);
-    #endif
+        recordDataToSDCard(timeInMilis, calculatedSpeed);
+    }
+    currArrayIndex = 0;
+
 }
 
 
@@ -148,7 +145,13 @@ float RPM_DataModule::calculate_speed(float rpm)
 
 ISR(INT0_vect)
 {
-    RPM_DataModule::left_rpm_counter++;
+    float currTime = micros();
+    float deltaTime = currTime - prevTime;
+    deltaTimes[currArrayIndex] = deltaTime;
+    currArrayIndex++;
+    prevTime = currTime;
+
+    // RPM_DataModule::left_rpm_counter++;
 }
 
 ISR(INT1_vect)

@@ -11,20 +11,24 @@
 #include "imu.h"
 #include "rpm.h"
 
+///serial stuff
 // Define startMarker and endMarker as preprocessor macros
 #define startMarker '<'
 #define endMarker '>'
 
-#define fileName "temp.csv"
-#define chipSelect 10
-
 File dataFile;
 const char numChars = 32;
 char receivedChars[numChars];   // an array to store the received data
-
 bool newData = false;
+////////////////////////////
 
-// void recvWithEndMarker();
+//sd card stuff
+#define fileName "temp.csv"
+#define chipSelect 10
+////////////////////////////
+
+
+
 
 enum DataModuleState {
     SD_CARD_INITIALIZATION,
@@ -257,6 +261,16 @@ void StartSDReading() {
     if (!dataFile) {
         DEBUG_PRINTLN("Failed to open file for writing");
         while(1);
+    }
+}
+
+void BAJA_EMBEDDED::DataModule::recordDataToSDCard(float time, float data){
+    if (dataFile){
+        dataFile.print(time);
+        dataFile.print(",");
+        dataFile.println(data);
+    }else{
+        DEBUG_PRINTLN("error opening file");
     }
 }
 
