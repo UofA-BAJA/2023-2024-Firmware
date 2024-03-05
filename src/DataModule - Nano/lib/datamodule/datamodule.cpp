@@ -95,6 +95,7 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
         case WAIT_TO_START_LOGGING:
             
             if (waitForCommand(COMMANDS_BEGIN)) {
+                resetLifetimeTimer();
                 startLifetimeTimer();
                 StartSDReading();
                 data_module_state = LOG_DATA;
@@ -108,7 +109,6 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
             if (Serial.available() > 0) {
                 if (waitForCommand(COMMANDS_END)) {
                     stopLifetimeTimer();
-                    resetLifetimeTimer();
                     CloseSDFile();
                     data_module_state = WAIT_TO_SEND_FILE;
                     DEBUG_PRINTLN("Stopped data logging...");
@@ -349,32 +349,39 @@ void SendFile(){
 
 void StartSDReading() {
     
-    // dataFile = SD.open(fileName, FILE_WRITE);
-
+    dataFile = SD.open(fileName, FILE_WRITE);
+    
     // _delay_ms(100); //delay for 100ms
 
-    if (!dataFile) {
-        DEBUG_PRINTLN("Failed to open file for writing, trying  again...");
+    // if (!dataFile) {
+    //     DEBUG_PRINTLN("Failed to open file for writing, trying  again...");
 
-        dataFile = SD.open(fileName, FILE_WRITE);
+    //     dataFile = SD.open(fileName, FILE_WRITE);
 
-         if (!dataFile) {
-            DEBUG_PRINTLN("Failed to open file again");
-            while(1);
-         }
-    }
+    //     if (!dataFile) {
+    //         DEBUG_PRINTLN("Failed to open file again");
+    //         while(1);
+    //      }
+    // }
 }
 
 void BAJA_EMBEDDED::DataModule::SetupFileAsCSV() {
     dataFile = SD.open(fileName, FILE_WRITE);
 
-    dataFile.print("Microseconds,");
+    
+    dataFile.print("Micros,");
 
     for (int i = 0; i < arraySize; ++i) {
         // Use strcmp to compare strings. If the result is not 0, the strings are not equal.
         if (strcmp(dataHeaderArray[i], "EMPTY") != 0) {
             dataFile.print(dataHeaderArray[i]);
             dataFile.print(",");
+        }
+
+        if (i == arraySize - 1) {
+            dataFile.println();
+            dataFile.flush();
+
         }
     }
 

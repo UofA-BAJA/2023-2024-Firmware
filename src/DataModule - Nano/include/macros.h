@@ -3,6 +3,11 @@
 
 #include <HardwareSerial.h>
 
+#define NONE 0 //no serial output, note that this will siginicantly reduce the size of the binary (FLASH)
+#define DEV 1 //all serial output, for development
+
+#define DEBUG_LEVEL DEV
+
 #if DEBUG_LEVEL == DEV
     // If we are in development mode, define DEBUG_PRINT to output the variable
     #define DEBUG_PRINT(variable) \

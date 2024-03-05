@@ -14,10 +14,10 @@
 #include "macros.h"
 #include "timer.h"
 
-#define RPM_SENSING_DURATION_PERIOD_MS 20 // time in ms for sensor to collect
-#define RPM_NUM_OF_PERIODS_TO_AVG 20      // number of periods to average for rpm calculation
+// #define RPM_SENSING_DURATION_PERIOD_MS 20 // time in ms for sensor to collect
+// #define RPM_NUM_OF_PERIODS_TO_AVG 20      // number of periods to average for rpm calculation
 #define NUM_MAGNETS 30                    // number of magnets on the wheel
-#define WHEEL_CIRCUMFERENCE 70.5          // circumference of the wheel in inches
+// #define WHEEL_CIRCUMFERENCE 70.5          // circumference of the wheel in inches
 #define WHEEL_RADIUS .284998              // in meters
 #define ANGLE_BETWEEN_MAGNETS_RAD .4188   // in radians
 
@@ -56,7 +56,7 @@ void RPM_DataModule::data_module_setup_procedure()
 void RPM_DataModule::data_module_logging_procedure() {
     
     for(int i = 0; i < left_currArrayIndex; i++){
-        unsigned long leftDeltaTimeSeconds = left_deltatimes[i] / 1000000.0; // Convert from milliseconds to seconds.
+        float leftDeltaTimeSeconds = left_deltatimes[i] / 1000000.0; // Convert from milliseconds to seconds.
     
         leftSpeed = (ANGLE_BETWEEN_MAGNETS_RAD / leftDeltaTimeSeconds) * WHEEL_RADIUS; //angular velocity * radius = speed m/s
 
@@ -68,10 +68,11 @@ void RPM_DataModule::data_module_logging_procedure() {
         // DEBUG_PRINT(">left: ");
         // DEBUG_PRINTLN(leftSpeed);
         recordDataToSDCard();
-
     }
+
+
     for(int i = 0; i < right_currArrayIndex; i++){
-        unsigned long rightDeltaTimeSeconds = right_deltatimes[i] / 1000000.0; // Convert from milliseconds to seconds.
+        float rightDeltaTimeSeconds = right_deltatimes[i] / 1000000.0; // Convert from milliseconds to seconds.
     
         rightSpeed = (ANGLE_BETWEEN_MAGNETS_RAD / rightDeltaTimeSeconds) * WHEEL_RADIUS; //angular velocity * radius = speed m/s
 
@@ -83,6 +84,8 @@ void RPM_DataModule::data_module_logging_procedure() {
         recordDataToSDCard();
     }
 
+    left_currArrayIndex = 0;
+    right_currArrayIndex = 0;
 }
 
 
