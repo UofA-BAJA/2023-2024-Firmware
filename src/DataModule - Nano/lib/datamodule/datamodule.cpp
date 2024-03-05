@@ -1,5 +1,5 @@
 #include <avr/io.h>
-#include <util/delay.h>
+#include <avr/interrupt.h>
 #include <HardwareSerial.h>
 #include <SD.h>
 #include <SPI.h>
@@ -16,22 +16,26 @@
 #define startMarker '<'
 #define endMarker '>'
 
-File dataFile;
 const char numChars = 32;
 char receivedChars[numChars];   // an array to store the received data
 bool newData = false;
 ////////////////////////////
 
 //sd card stuff
+File dataFile;
 #define fileName "temp.csv"
 #define chipSelect 10
 ////////////////////////////
 
+//counter stuff
+volatile unsigned long BAJA_EMBEDDED::lifetime_overflow_counter = 0;
+unsigned long BAJA_EMBEDDED::lifetime_timeElapsed_microseconds = 0;
+volatile bool BAJA_EMBEDDED::lifetime_overflow_flag_change = false;
+////////////////////////////
 
-
-
+//state stuff
 enum DataModuleState {
-    SD_CARD_INITIALIZATION,
+    GENERAL_INITIALIZATION,
     DATAMODULE_SPECIFIC_INITIALIZATION,
     RESPOND_WITH_TYPE,
     WAIT_TO_START_LOGGING,
@@ -39,11 +43,22 @@ enum DataModuleState {
     WAIT_TO_SEND_FILE
 };
 
-DataModuleState data_module_state = SD_CARD_INITIALIZATION; //initial state
+DataModuleState data_module_state = GENERAL_INITIALIZATION; //initial state
+
 
 
 BAJA_EMBEDDED::DataModule::DataModule() {
-    //empty constructor
+    sei();
+
+    //initialize the dataToRecord array to have -1 values as default
+    for (int i = 0; i < arraySize; ++i) {
+        dataToRecord[i] = -1.0f; // Assuming -1.0f is never a valid data point
+    }
+
+    //initialize the dataHeaderArray to have "EMPTY" as default
+    for(int i = 0; i < arraySize; ++i) {
+        strcpy(dataHeaderArray[i], "EMPTY");
+    }
 }
 
 void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
@@ -51,7 +66,8 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
     while(1) {
         switch (data_module_state)
         {
-        case SD_CARD_INITIALIZATION:
+        case GENERAL_INITIALIZATION:
+            initLifetimeTimer();
             InitializeSDCard();
             data_module_state = DATAMODULE_SPECIFIC_INITIALIZATION;
             break;
@@ -60,6 +76,7 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
         case DATAMODULE_SPECIFIC_INITIALIZATION:
             data_module_setup_procedure();
             set_data_module_type();
+            SetupFileAsCSV();
             data_module_state = RESPOND_WITH_TYPE;
             DEBUG_PRINTLN("Ready");
             break;
@@ -71,14 +88,14 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
                 Serial.flush();
                 
                 data_module_state = WAIT_TO_START_LOGGING;
-            }
-
+            } 
             break;
 
 
         case WAIT_TO_START_LOGGING:
             
             if (waitForCommand(COMMANDS_BEGIN)) {
+                startLifetimeTimer();
                 StartSDReading();
                 data_module_state = LOG_DATA;
                 DEBUG_PRINTLN("Started data logging");
@@ -90,6 +107,8 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
 
             if (Serial.available() > 0) {
                 if (waitForCommand(COMMANDS_END)) {
+                    stopLifetimeTimer();
+                    resetLifetimeTimer();
                     CloseSDFile();
                     data_module_state = WAIT_TO_SEND_FILE;
                     DEBUG_PRINTLN("Stopped data logging...");
@@ -220,6 +239,79 @@ bool BAJA_EMBEDDED::DataModule::waitForCommand(const char* cmmdString) {
 }
 
 ////////////////////////////////////////////////////////////////////////
+///////////////////////////////lifetime timer///////////////////////////
+void initLifetimeTimer() {
+    // Clear Waveform Generation Mode bits for normal operation
+    TCCR1A &= ~((1 << COM1A1) | (1 << COM1A0) | (1 << COM1B1) | (1 << COM1B0));
+
+    TCCR1A &= ~((1 << WGM11) | (1 << WGM10));
+    TCCR1B &= ~(1 << WGM12);
+
+    TIMSK1 |= (1 << TOIE1); // Enable Timer1 overflow interrupt
+}
+
+void startLifetimeTimer() {
+    // Set prescaler to 1024 and starting the timer
+    TCCR1B |= (1 << CS12) | (1 << CS10);
+    TCCR1B &= ~(1 << CS11);
+}
+
+void stopLifetimeTimer() {
+    TCCR1B &= ~((1 << CS12) | (1 << CS11) | (1 << CS10)); // Stop the timer
+}
+
+void resetLifetimeTimer() {
+    BAJA_EMBEDDED::lifetime_overflow_counter = 0;
+
+    // Reset TCNT1 to 0; for demonstration, we'll use the method applicable for general values
+    uint16_t value = 0; // Assuming you want to reset the timer to 0
+    
+    // Split the 16-bit value into two 8-bit values and write them to TCNT1H and TCNT1L
+    TCNT1H = (unsigned char)(value >> 8); // Write high byte
+    TCNT1L = (unsigned char)(value & 0xFF); // Write low byte
+
+}
+
+unsigned long readMicrosecondsLifetimeTimer() {
+    cli(); //disable interrupts
+    unsigned int high = TCNT1H;
+    unsigned int low = TCNT1L;
+    unsigned long timer_count = (high << 8) | low;
+    unsigned long current_overflow_count = BAJA_EMBEDDED::lifetime_overflow_counter;
+    sei(); //enable 
+
+    if (BAJA_EMBEDDED::lifetime_overflow_flag_change) {
+        BAJA_EMBEDDED::lifetime_timeElapsed_microseconds = (current_overflow_count - 1) * 8388608; //8388608 = (2^16) * 128
+        BAJA_EMBEDDED::lifetime_overflow_flag_change = false;
+    }
+    else {
+        BAJA_EMBEDDED::lifetime_timeElapsed_microseconds = current_overflow_count * 8388608;
+    }
+    BAJA_EMBEDDED::lifetime_timeElapsed_microseconds += timer_count * 128;
+
+    // DEBUG_PRINT(">counter: ");
+    // DEBUG_PRINTLN(timer_count);
+    // DEBUG_PRINT(">ovf_count: ");
+    // DEBUG_PRINTLN(current_overflow_count);
+    // DEBUG_PRINT(">time: ");
+    // DEBUG_PRINTLN(BAJA_EMBEDDED::lifetime_timeElapsed_microseconds);
+
+    return BAJA_EMBEDDED::lifetime_timeElapsed_microseconds;
+}
+
+
+ISR(TIMER1_OVF_vect) {
+    // Timer1 overflow interrupt service routine
+    // This ISR is called whenever Timer1 overflows
+    // The timer overflows when TCNT1 goes from 0xFFFF to 0x0000
+    // This ISR is called every 8.388608 seconds
+    // Increment the counter
+    BAJA_EMBEDDED::lifetime_overflow_counter++;
+    BAJA_EMBEDDED::lifetime_overflow_flag_change = true;
+    TIFR1 |= (1 << TOV1); // Clear the overflow flag by writing a 1 to it
+}
+
+////////////////////////////////////////////////////////////////////////
 /////////////////////////sd card stuff//////////////////////////////////
 void InitializeSDCard(){
     DEBUG_PRINT("Initializing SD card on PIN: ");
@@ -233,6 +325,7 @@ void InitializeSDCard(){
     DEBUG_PRINTLN("Card initialized");
 
     if (SD.exists(fileName)) {
+        DEBUG_PRINTLN("Removed existing file...");
         SD.remove(fileName);
     }
 
@@ -256,34 +349,61 @@ void SendFile(){
 
 void StartSDReading() {
     
-    dataFile = SD.open(fileName, FILE_WRITE);
+    // dataFile = SD.open(fileName, FILE_WRITE);
+
+    // _delay_ms(100); //delay for 100ms
 
     if (!dataFile) {
-        DEBUG_PRINTLN("Failed to open file for writing");
-        while(1);
+        DEBUG_PRINTLN("Failed to open file for writing, trying  again...");
+
+        dataFile = SD.open(fileName, FILE_WRITE);
+
+         if (!dataFile) {
+            DEBUG_PRINTLN("Failed to open file again");
+            while(1);
+         }
     }
 }
 
-void BAJA_EMBEDDED::DataModule::recordDataToSDCard(float time, float data){
-    if (dataFile){
-        dataFile.print(time);
-        dataFile.print(",");
-        dataFile.println(data);
-    }else{
-        DEBUG_PRINTLN("error opening file");
+void BAJA_EMBEDDED::DataModule::SetupFileAsCSV() {
+    dataFile = SD.open(fileName, FILE_WRITE);
+
+    dataFile.print("Microseconds,");
+
+    for (int i = 0; i < arraySize; ++i) {
+        // Use strcmp to compare strings. If the result is not 0, the strings are not equal.
+        if (strcmp(dataHeaderArray[i], "EMPTY") != 0) {
+            dataFile.print(dataHeaderArray[i]);
+            dataFile.print(",");
+        }
     }
+
+    dataFile.close();
+
 }
 
-// void WriteDataToSD(String dataString){
-//     if (dataFile){
-//         dataFile.println(dataString);
-//     }else{
-//         Serial.println("error opening file");
-//     }
-// }
+void BAJA_EMBEDDED::DataModule::recordDataToSDCard(){
+
+    dataFile.print(readMicrosecondsLifetimeTimer());
+
+    for (int i = 0; i < arraySize; ++i) {
+        if (dataToRecord[i] != -1.0f) { // Check against sentinel value
+            // Write data[i] to the SD card
+            dataFile.print(",");
+            dataFile.print(dataToRecord[i]);
+        }
+
+        if (i == arraySize - 1) {
+            dataFile.println();
+        }
+    }
+    
+}
+
 
 void CloseSDFile(){
     dataFile.close();
 }
 
-////////////////////////////////////////////////////////////////////////
+
+
