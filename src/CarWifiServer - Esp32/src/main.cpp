@@ -12,6 +12,7 @@ void setup() {
 
   initializeWifi(); //dont include this in the lora code
   
+  
 }
 
 void loop() {

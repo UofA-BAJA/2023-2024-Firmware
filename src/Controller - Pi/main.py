@@ -16,16 +16,19 @@ lora_dev = None
 def main():
     print("Starting up...")
     serial_devices = SerialDevices.SerialDevices()
-    print(f"Found devices... \n{serial_devices._serial_devices}")
+    print(f"Found devices...\n")
+    for dev in serial_devices._serial_devices:
+        print(f"{dev.name} on {serial_devices._serial_devices[dev].port}\n")
 
     # Get the lora device so we know how to send stuff back to the computer.
     lora_dev = serial_devices.get_device(ModuleTypes.LORA_PI)
 
 
     while True:
-        while lora_dev.in_waiting == 0:
-            pass
-        command = lora_dev.readline().decode('utf-8').strip()
+        command = serial_devices._wait_for_lora_serial_input()
+        
+        command = command.replace(">", "").replace("<", "").strip()
+        print(f"Command received: {command}")
 
         command_type_enum = None
         try:

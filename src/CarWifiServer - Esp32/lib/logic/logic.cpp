@@ -19,16 +19,25 @@ bool newData = false;
 
 //state stuff
 enum WirelessTranscieverState {
+    DONE_INITIALIZING,
     RESPOND_WITH_TYPE,
     ATTEMPT_WIRELESS_CONNECT,
     LISTEN_WIRELESSLY_WHILE_WATING_FOR_COMMAND,
 };
 
-WirelessTranscieverState wireless_transciever_state = RESPOND_WITH_TYPE; //initial state
+WirelessTranscieverState wireless_transciever_state = DONE_INITIALIZING; //initial state
 
 void operatingProcedure() {
     switch (wireless_transciever_state)
     {
+    case DONE_INITIALIZING: {
+        Serial.println("Ready");
+        Serial.flush();
+        
+        wireless_transciever_state = RESPOND_WITH_TYPE;
+        break;
+    }
+
     case RESPOND_WITH_TYPE: {
         if (waitForCommand(COMMANDS_SENDTYPE)) {
             Serial.println("LORA_PI");

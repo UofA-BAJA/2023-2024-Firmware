@@ -72,7 +72,7 @@ class SerialDevices:
             print(f"No device with type {dev_type} found.")
             return
         else:
-            self._serial_devices[dev_type]
+            return self._serial_devices[dev_type]
 
     def execute_command(self, command, dev_type = None):
         """ 
@@ -102,7 +102,28 @@ class SerialDevices:
 
 
 
-# TODO: UPDATE THE SEND FUNCTIONS TO WORK USING THE ENUMS
+    # TODO: UPDATE THE SEND FUNCTIONS TO WORK USING THE ENUMS
+
+    def _wait_for_lora_serial_input(self):
+        lora_device = self.get_device(ModuleTypes.LORA_PI)
+        lora_device.open()
+        lora_device.flushInput()
+        lora_device.flushOutput()
+
+        commandInput = False
+        device_output = ""
+        while not commandInput:
+            device_output =  lora_device.readline().decode('utf-8').strip()                
+            
+            if "<" in device_output and ">" in device_output:
+                commandInput = True
+                break
+            else:
+                print("No command recieved")
+                time.sleep(2)
+        
+        return device_output
+    
 
     def _begin_logging(self, dev_type = None):
         print(f"Command Sent : -- {bcolors.OKBLUE}Begin Logging{bcolors.ENDC} --")
