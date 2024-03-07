@@ -3,19 +3,18 @@
 #include <WiFi.h>
 #include <WiFiMulti.h>
 
-#include "wifiTransmission.h"
+#include "logic.h"
 
 
 void setup() {
   Serial.begin(115200);
   delay(10);
 
-  initializeWifi(); //u dont have to keep this when porting over lora
 }
 
 
 void loop() {
-  connectToHost(); //u dont have to keep this when porting over lora
 
+  operatingProcedure();
   
 }
