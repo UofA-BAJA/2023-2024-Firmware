@@ -26,12 +26,26 @@ void initializeWifi() {
     Serial.println("Server started");
 }
 
-void connectClient() {
-    client = server.accept();   // listen for incoming clients
-    if (client) {                             // if you get a client,
-        Serial.println("New Client.");           // print a message out the serial port
-        String currentLine = "";
+bool connectClient() {
+    Serial.println("Waiting for a client...");
+    int max_attempts = 100;
+    int attempts = 0;
+    while (attempts < max_attempts) { // Infinite loop to wait for client
+        client = server.accept(); // Listen for incoming clients
+
+        if (client) { // If you get a client,
+            Serial.println("New Client."); // Print a message out the serial port
+            return true; // Return true as soon as a client connects
+        }
+
+        // Optional: delay to prevent the loop from running too fast,
+        // which might be useful to reduce CPU usage on some systems.
+        delay(100);
+        attempts++;
     }
+    // The function will never reach this point because of the infinite loop,
+    // but a return statement is needed to avoid compiler warnings.
+    return false;
 }
 
 String readWirelesslySingleLine() {

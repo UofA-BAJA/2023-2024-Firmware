@@ -5,7 +5,7 @@
 
 void initializeWifi();
 
-void connectClient();
+bool connectClient();
 
 String readWirelesslySingleLine();
 

@@ -27,10 +27,15 @@ enum WirelessTranscieverState {
 
 WirelessTranscieverState wireless_transciever_state = DONE_INITIALIZING; //initial state
 
+#define LED_BUILTIN 2
+
+
 void operatingProcedure() {
     switch (wireless_transciever_state)
     {
     case DONE_INITIALIZING: {
+        pinMode(LED_BUILTIN, OUTPUT);
+
         Serial.println("Ready");
         Serial.flush();
         
@@ -49,7 +54,9 @@ void operatingProcedure() {
     }
 
     case ATTEMPT_WIRELESS_CONNECT: {
-        connectClient();
+        if (connectClient()) {
+            FLASH_LED_TIMES(1);
+        }
 
         wireless_transciever_state = LISTEN_WIRELESSLY;
         break;
@@ -61,6 +68,7 @@ void operatingProcedure() {
         if (output != "") {
             DEBUG_PRINT("Received: ");
             DEBUG_PRINTLN(output);
+            FLASH_LED_TIMES(2);
         } else {
             DEBUG_PRINTLN("No data received.");
             delay(1000);
