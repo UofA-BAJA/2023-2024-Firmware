@@ -3,4 +3,5 @@
 
 void operatingProcedure();
 
+bool waitForCommand(const char* cmmdString); 
 #endif // LOGIC_H

@@ -40,7 +40,7 @@ void operatingProcedure() {
 
     case RESPOND_WITH_TYPE: {
         if (waitForCommand(COMMANDS_SENDTYPE)) {
-            Serial.println("LORA_PI");
+            Serial.println("LORA_PIT");
             Serial.flush();
             
             wireless_transciever_state = ATTEMPT_WIRELESS_CONNECT;

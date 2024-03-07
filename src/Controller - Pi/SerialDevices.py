@@ -32,6 +32,10 @@ class SerialDevices:
         for path in self._port_paths:
             ser = serial.Serial(path, 115200, timeout=5)
 
+            ser.setDTR(False) # Drop DTR
+            time.sleep(0.022)    # Read somewhere that 22ms is what the UI does.
+            ser.setDTR(True)  # UP the DTR back
+
             ser.flushInput()
             ser.flushOutput()
             time.sleep(.3)
@@ -63,7 +67,6 @@ class SerialDevices:
             ser.flushInput()
             serial_devices[dev_type_enum] = ser
 
-            ser.close()
 
         return serial_devices
 
@@ -106,9 +109,6 @@ class SerialDevices:
 
     def _wait_for_lora_serial_input(self):
         lora_device = self.get_device(ModuleTypes.LORA_PI)
-        lora_device.open()
-        lora_device.flushInput()
-        lora_device.flushOutput()
 
         commandInput = False
         device_output = ""
@@ -124,6 +124,21 @@ class SerialDevices:
         
         return device_output
     
+    def _send_command(self, command):
+
+        for dev in self._serial_devices:
+            
+            if (dev != ModuleTypes.LORA_PI):
+
+                serial_connection = self._serial_devices[dev]
+
+                #for testing
+                oupout = serial_connection.readline().decode('utf-8').strip()
+                print(oupout)
+
+                serial_connection.write(f"<{command}>".encode('utf-8'))
+
+
 
     def _begin_logging(self, dev_type = None):
         print(f"Command Sent : -- {bcolors.OKBLUE}Begin Logging{bcolors.ENDC} --")
@@ -132,7 +147,9 @@ class SerialDevices:
         if dev_type == None:
             # send command to nano's to start logging onto their SD cards
             for dev in self._serial_devices:
-                self._serial_devices[dev].write(b"Begin Logging")
+
+                if (dev != ModuleTypes.LORA_PI):
+                    self._serial_devices[dev].write(b"<BEGIN>")
         else:
             self._serial_devices[dev_type].write(b"Begin Logging")
 
@@ -162,38 +179,38 @@ class SerialDevices:
             self._retrieve_dev_log(dev_type)
     
     def _retrieve_dev_log(self, dev_type):
-            # Send command
-            self._serial_devices[dev_type].write(b"Retrieve Logs")
+        # Send command
+        self._serial_devices[dev_type].write(b"Retrieve Logs")
 
-            # Get rid of all the other crap before.
-            self._serial_devices[dev_type].flushInput()
+        # Get rid of all the other crap before.
+        self._serial_devices[dev_type].flushInput()
 
-            print("Waiting for device response...")
-            while(self._serial_devices[dev_type].in_waiting == 0):
-                pass
-            print("Device Responded...")
+        print("Waiting for device response...")
+        while(self._serial_devices[dev_type].in_waiting == 0):
+            pass
+        print("Device Responded...")
 
-            # get file name
-            file_name = "DEFAULT.TXT"
-            file_name = self._serial_devices[dev_type].readline().decode('utf-8').rstrip()
+        # get file name
+        file_name = "DEFAULT.TXT"
+        file_name = self._serial_devices[dev_type].readline().decode('utf-8').rstrip()
 
-            file = open(file_name, 'w')
-            # try except so that the file gets closed in case of a forceful program close
-            try:
-                print("Writing to file...")
-                while True:
-                    if self._serial_devices[dev_type].in_waiting > 0:
-                        line = self._serial_devices[dev_type].readline().decode('utf-8')
-                        if line.strip() == "Finished":
-                            break
-                        file.write(line)
-                file.close()
-            except KeyboardInterrupt:
-                file.close()
-                self._quit_program()
+        file = open(file_name, 'w')
+        # try except so that the file gets closed in case of a forceful program close
+        try:
+            print("Writing to file...")
+            while True:
+                if self._serial_devices[dev_type].in_waiting > 0:
+                    line = self._serial_devices[dev_type].readline().decode('utf-8')
+                    if line.strip() == "Finished":
+                        break
+                    file.write(line)
+            file.close()
+        except KeyboardInterrupt:
+            file.close()
+            self._quit_program()
 
-            print(f"File {file_name} Created")
-            print(f"{bcolors.BOLD}Enter another command{bcolors.ENDC}")
+        print(f"File {file_name} Created")
+        print(f"{bcolors.BOLD}Enter another command{bcolors.ENDC}")
 
 
     def _print_commands(self):
