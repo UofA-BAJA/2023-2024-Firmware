@@ -41,13 +41,13 @@ class SerialDevices:
             time.sleep(.3)
 
             is_device_ready = False
+            print(f"\nDevice Output on {ser.port}:")
             while not is_device_ready:
                 device_output =  ser.readline().decode('utf-8').strip()                
-                print(f"Deivce Output on {ser.port}:")
                 print(device_output)
                 if device_output == "Ready":
                     is_device_ready = True
-                print(f"End of Device Output on {ser.port}\n")
+            print(f"End of Device Output on {ser.port}\n")
 
                     
             ser.write(f"<{Commands.SENDTYPE.name}>".encode('utf-8'))
