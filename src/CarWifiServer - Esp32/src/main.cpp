@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #include "wifiTransmission.h"
-
+#include "logic.h"
 
 void setup() {
 
@@ -16,5 +16,5 @@ void setup() {
 
 void loop() {
 
-  
+  operatingProcedure();
 }

@@ -51,6 +51,7 @@ String readWirelesslySingleLine() {
 
     return currentLine;
 }
+
 void printWirelessly(String str) { //ik i shouldnt use strings in cpp projects but i am lazy
     client.print(str);
 }
@@ -58,24 +59,4 @@ void printWirelessly(String str) { //ik i shouldnt use strings in cpp projects b
 void disconnectClient() {
     client.stop();
     Serial.println("Client Disconnected.");
-}
-
-String readWirelesssSingleLine() {
-    int maxloops = 0;
-
-    //wait for the server's reply to become available
-    while (!client.available() && maxloops < 1000) {
-        maxloops++;
-        delay(1); //delay 1 msec
-    }
-
-    if (client.available() > 0) {
-        //read back one line from the server
-        String line = client.readStringUntil('\r');
-        return line;
-    } else {
-        Serial.println("client.available() timed out ");
-    }
-
-    return "";
 }

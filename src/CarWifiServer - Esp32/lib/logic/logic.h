@@ -3,4 +3,8 @@
 
 void operatingProcedure();
 
+bool waitForCommand(const char* cmmdString);
+
+void recvWithStartEndMarkers();
+
 #endif // LOGIC_H

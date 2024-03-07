@@ -4,7 +4,9 @@
 #include <HardwareSerial.h>
 
 #include "macros.h"
-#include "enums.h"s
+#include "enums.h"
+
+#include "wifiTransmission.h"
 ///serial stuff
 // Define startMarker and endMarker as preprocessor macros
 #define startMarker '<'
@@ -25,21 +27,39 @@ enum WirelessTranscieverState {
 WirelessTranscieverState wireless_transciever_state = RESPOND_WITH_TYPE; //initial state
 
 void operatingProcedure() {
-    Serial.println("Hello, world!");
-}
-
-void initializationProcedure() {
     switch (wireless_transciever_state)
     {
-    case RESPOND_WITH_TYPE:
+    case RESPOND_WITH_TYPE: {
         if (waitForCommand(COMMANDS_SENDTYPE)) {
             Serial.println("LORA_PI");
             Serial.flush();
             
             wireless_transciever_state = ATTEMPT_WIRELESS_CONNECT;
         } 
-            break;
-    
+        break;
+    }
+
+    case ATTEMPT_WIRELESS_CONNECT: {
+        connectClient();
+
+        wireless_transciever_state = LISTEN_WIRELESSLY_WHILE_WATING_FOR_COMMAND;
+        break;
+    }
+
+    case LISTEN_WIRELESSLY_WHILE_WATING_FOR_COMMAND: {
+        String output = readWirelesslySingleLine();
+
+        if (output != "") {
+            DEBUG_PRINT("Received: ");
+            DEBUG_PRINTLN(output);
+        } else {
+            DEBUG_PRINTLN("No data received.");
+            delay(1000);
+        }
+
+        break;
+    }
+
     default:
         break;
     }
