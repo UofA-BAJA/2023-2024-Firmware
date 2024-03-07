@@ -15,7 +15,6 @@
 // Define startMarker and endMarker as preprocessor macros
 #define startMarker '<'
 #define endMarker '>'
-
 const char numChars = 32;
 char receivedChars[numChars];   // an array to store the received data
 bool newData = false;

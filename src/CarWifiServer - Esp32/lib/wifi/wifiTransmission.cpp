@@ -34,6 +34,23 @@ void connectClient() {
     }
 }
 
+String readWirelesslySingleLine() {
+    String currentLine = "";              // to store the incoming line from the client
+    while (client.available()) {          // if there's bytes to read from the client,
+        char c = client.read();             // read a byte,
+        Serial.write(c);                    // (optional) echo the character to the Serial port
+        if (c == '\n') {                    // if the byte is a newline character,
+            // Newline character marks the end of a line,
+            // so process or print the currentLine here
+            Serial.println(currentLine);      // for example, print the line to the Serial port
+            currentLine = "";                 // then clear the currentLine for the next line
+        } else if (c != '\r') {             // if the byte is not a carriage return character,
+        currentLine += c;                 // add it to the currentLine
+        }
+    }
+
+    return currentLine;
+}
 void printWirelessly(String str) { //ik i shouldnt use strings in cpp projects but i am lazy
     client.print(str);
 }
