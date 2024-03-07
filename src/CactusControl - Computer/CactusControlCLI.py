@@ -1,6 +1,6 @@
 
 from util.ConfigParser import Commands, ModuleTypes 
-from SerialHandling import get_lora_pit_serial_device, send_string_over_serial
+from SerialHandling import get_lora_pit_serial_device
 '''
 plan
 - get LORA_PIT serial device
@@ -12,6 +12,9 @@ plan
 
 class CactusControlCLI:
     def __init__(self):
+
+        self.lora_device = None
+
         self.commands = {
             Commands.HELP.name     : self._print_commands,  # No argument required; directly reference the method
             Commands.BEGIN.name    : lambda: self._begin_logging(Commands.BEGIN.name),  # Use lambda for delayed execution with arguments
@@ -28,21 +31,23 @@ class CactusControlCLI:
         print(f"{bcolors.HEADER}Available commands:{bcolors.ENDC}")
         self._print_commands()
 
+    def _write_to_lora_device(self, command):
+        self.lora_device.write(f"<{command}>".encode('utf-8'))
+
     def _begin_logging(self, command):
-        print("Beginning logging...")
         
-        send_string_over_serial(command)
+        print("Beginning logging...")        
 
     def _end_logging(self, command):
         print("Ending logging...")
         # Implement your end logging logic here
-        send_string_over_serial(command)
+
+        print("Logging has ended.")
 
 
     def _retrieve_logs(self, command):
         print("Retrieving logs...")
         # Implement your retrieve logs logic here
-        send_string_over_serial(command)
 
 
     def _quit_program(self, command):
@@ -52,10 +57,14 @@ class CactusControlCLI:
     
     
     def run(self):
+        self.lora_device = get_lora_pit_serial_device()
+
         while True:
-            get_lora_pit_serial_device()
             self.display_commands_with_colors()
             choice = input("Please choose a command: ").upper()
+
+            self._write_to_lora_device(choice)
+
             action = self.commands.get(choice)
 
             if action:

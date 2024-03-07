@@ -22,7 +22,7 @@ enum WirelessTranscieverState {
     DONE_INITIALIZING,
     RESPOND_WITH_TYPE,
     ATTEMPT_WIRELESS_CONNECT,
-    LISTEN_WIRELESSLY_WHILE_WATING_FOR_COMMAND,
+    LISTEN_WIRELESSLY,
 };
 
 WirelessTranscieverState wireless_transciever_state = DONE_INITIALIZING; //initial state
@@ -51,11 +51,11 @@ void operatingProcedure() {
     case ATTEMPT_WIRELESS_CONNECT: {
         connectClient();
 
-        wireless_transciever_state = LISTEN_WIRELESSLY_WHILE_WATING_FOR_COMMAND;
+        wireless_transciever_state = LISTEN_WIRELESSLY;
         break;
     }
 
-    case LISTEN_WIRELESSLY_WHILE_WATING_FOR_COMMAND: {
+    case LISTEN_WIRELESSLY: {
         String output = readWirelesslySingleLine();
 
         if (output != "") {

@@ -19,7 +19,6 @@ def get_lora_pit_serial_device():
         else:
             print(f"Bluetooth device ignored: {p.device}")
 
-    print(f"Port Paths: {port_paths}")
     for path in port_paths:
         ser = serial.Serial(path, 115200, timeout=5)
 
@@ -49,15 +48,9 @@ def get_lora_pit_serial_device():
             break
 
         if dev_type == ModuleTypes.LORA_PIT.name:
-            lora_device = ser
             print(f"Found LORA_PIT device on {ser.port}")
-            
+            return ser
+
         else:
             print(f"Device type is not PIT LORA: {dev_type}")
             ser.close()   
-        
-            
-            
-
-def send_string_over_serial(string):
-    lora_device.write(string.encode('utf-8'))

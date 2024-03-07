@@ -16,13 +16,15 @@ char receivedChars[numChars];   // an array to store the received data
 bool newData = false;
 ////////////////////////////
 
+//led stuff
+#define LED_BUILTIN 2
 
 //state stuff
 enum WirelessTranscieverState {
     DONE_INITIALIZING,
     RESPOND_WITH_TYPE,
     ATTEMPT_WIRELESS_CONNECT,
-    LISTEN_WIRELESSLY_WHILE_WATING_FOR_COMMAND,
+    WAIT_FOR_SERIAL_COMMAND,
 };
 
 WirelessTranscieverState wireless_transciever_state = DONE_INITIALIZING; //initial state
@@ -31,6 +33,10 @@ void operatingProcedure() {
     switch (wireless_transciever_state)
     {
     case DONE_INITIALIZING: {
+        pinMode(LED_BUILTIN, OUTPUT);
+
+        FLASH_LED_TIMES(1);
+
         Serial.println("Ready");
         Serial.flush();
         
@@ -53,19 +59,22 @@ void operatingProcedure() {
 
         connectToHost(); //u dont have to keep this when porting over lora
 
-        wireless_transciever_state = LISTEN_WIRELESSLY_WHILE_WATING_FOR_COMMAND;
+        wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
         break;
     }
 
-    case LISTEN_WIRELESSLY_WHILE_WATING_FOR_COMMAND: {
-        String output = readWirelesssSingleLine();
+    case WAIT_FOR_SERIAL_COMMAND: {
+        recvWithStartEndMarkers();
 
-        if (output != "") {
-            DEBUG_PRINT("Received: ");
-            DEBUG_PRINTLN(output);
-        } else {
-            DEBUG_PRINTLN("No data received.");
-            delay(1000);
+        if (newData) {
+            // Make the onboard LED blink
+            FLASH_LED_TIMES(2);
+            Serial.println(receivedChars);
+            Serial.flush();
+            newData = false;
+
+            // Send the received data to the server
+            printWirelessly(convertToCommand(receivedChars));
         }
 
         break;
@@ -135,4 +144,10 @@ bool waitForCommand(const char* cmmdString) {
     
 
     return false;
+}
+
+String convertToCommand(char* receivedChars) {
+    String receivedString = String(receivedChars);
+    String formattedString = "<{" + receivedString + "}>";
+    return formattedString;
 }
