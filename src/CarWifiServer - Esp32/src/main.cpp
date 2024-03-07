@@ -2,44 +2,19 @@
 
 #include <Arduino.h>
 
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WiFiAP.h>
-
-#ifndef LED_BUILTIN
-#define LED_BUILTIN 2   // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
-#endif
-
-// Set these to your desired credentials.
-const char *ssid = "yourAP";
-const char *password = "yourPassword";
-
-WiFiServer server(80);
+#include "wifiTransmission.h"
 
 
 void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
 
   Serial.begin(115200);
-  Serial.println();
-  Serial.println("Configuring access point...");
+  Serial.flush();
 
-  // You can remove the password parameter if you want the AP to be open.
-  // a valid password must have more than 7 characters
-  if (!WiFi.softAP(ssid, password)) {
-    log_e("Soft AP creation failed.");
-    while(1);
-  }
-  IPAddress myIP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(myIP);
-  server.begin();
-
-  Serial.println("Server started");
+  initializeWifi(); //dont include this in the lora code
+  
 }
 
 void loop() {
-  WiFiClient client = server.accept();   // listen for incoming clients
 
   if (client) {                             // if you get a client,
     Serial.println("New Client.");           // print a message out the serial port
@@ -74,17 +49,9 @@ void loop() {
           currentLine += c;      // add it to the end of the currentLine
         }
 
-        // Check to see if the client request was "GET /H" or "GET /L":
-        if (currentLine.endsWith("GET /H")) {
-          digitalWrite(LED_BUILTIN, HIGH);               // GET /H turns the LED on
-        }
-        if (currentLine.endsWith("GET /L")) {
-          digitalWrite(LED_BUILTIN, LOW);                // GET /L turns the LED off
-        }
+        
       }
     }
-    // close the connection:
-    client.stop();
-    Serial.println("Client Disconnected.");
+   
   }
 }

@@ -6,17 +6,16 @@
 #include "wifiTransmission.h"
 
 
-void setup()
-{
-    Serial.begin(115200);
-    delay(10);
+void setup() {
+  Serial.begin(115200);
+  delay(10);
 
-    initializeWifi();
+  initializeWifi(); //u dont have to keep this when porting over lora
 }
 
 
 void loop() {
-  connectToHost();
+  connectToHost(); //u dont have to keep this when porting over lora
 
   
 }
