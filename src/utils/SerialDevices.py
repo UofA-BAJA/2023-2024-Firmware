@@ -1,9 +1,12 @@
 import serial
 import serial.tools.list_ports
-from util.ConfigParser import Commands, ModuleTypes 
+from serial.serialutil import SerialException
+
 from enum import Enum
 import time
 import sys
+
+from utils.ConfigParser import Commands, ModuleTypes 
 
 
 class SerialDevices:
@@ -18,10 +21,15 @@ class SerialDevices:
                 port_paths.append(p.device)
             else:
                 print(f"Bluetooth device ignored: {p.device}")
-        self._port_paths = port_paths
-        self._serial_devices = self.get_serial_devices()
 
-    def get_serial_devices(self):
+        self._port_paths = port_paths
+        self._serial_devices = self.get_all_serial_devices()
+
+        print(f"Found devices...\n")
+        for dev in self._serial_devices:
+            print(f"{dev.name} on {self._serial_devices[dev].port}")
+
+    def get_all_serial_devices(self):
         """ 
             Gets the serial devices hahahahahahah
         """
@@ -30,10 +38,16 @@ class SerialDevices:
         time.sleep(1)
 
         for path in self._port_paths:
-            ser = serial.Serial(path, 115200, timeout=5)
-
+            ser = None
+            try:
+                ser = serial.Serial(path, 115200, timeout=5)
+            except SerialException as e:
+                # Print the exception details
+                print(f"Failed to open serial port {path}: {e}")
+                continue
+            
             ser.setDTR(False) # Drop DTR
-            time.sleep(0.022)    # Read somewhere that 22ms is what the UI does.
+            time.sleep(0.023)    # Read somewhere that 22ms is what the UI does.
             ser.setDTR(True)  # UP the DTR back
 
             ser.flushInput()
@@ -70,10 +84,18 @@ class SerialDevices:
 
         return serial_devices
 
+    def close_all_serial_ports_except_for_device(self, device_type):
+
+        for dev in self._serial_devices:
+
+            if (dev != device_type):
+
+                dev.close()
+
     def get_device(self, dev_type):
         if not dev_type in self._serial_devices:
             print(f"No device with type {dev_type} found.")
-            return
+            return None
         else:
             return self._serial_devices[dev_type]
 
@@ -114,13 +136,16 @@ class SerialDevices:
         device_output = ""
         while not commandInput:
             device_output =  lora_device.readline().decode('utf-8').strip()                
-            
+            # print(f"this? {device_output}")
+            # print(type(device_output))
+                
+
             if "<" in device_output and ">" in device_output:
                 commandInput = True
                 break
             else:
                 print("No command recieved")
-                time.sleep(2)
+                time.sleep(.1)
         
         return device_output
     

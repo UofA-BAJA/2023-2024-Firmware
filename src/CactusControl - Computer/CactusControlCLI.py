@@ -1,6 +1,9 @@
+from utilsImporter import adding_utils_to_path
 
-from util.ConfigParser import Commands, ModuleTypes 
-from SerialHandling import get_lora_pit_serial_device
+adding_utils_to_path()
+
+from utils.ConfigParser import Commands, ModuleTypes
+from utils.SerialDevices import SerialDevices
 '''
 plan
 - get LORA_PIT serial device
@@ -57,7 +60,15 @@ class CactusControlCLI:
     
     
     def run(self):
-        self.lora_device = get_lora_pit_serial_device()
+        serial_devices = SerialDevices()
+
+        serial_devices.close_all_serial_ports_except_for_device(ModuleTypes.LORA_PIT)
+        self.lora_device = serial_devices.get_device(ModuleTypes.LORA_PIT)
+
+        if (self.lora_device) == None:
+
+            print("No LORA PIT DEVICE FOUND!!!!!!")
+            while(1): pass
 
         while True:
             self.display_commands_with_colors()

@@ -50,14 +50,23 @@ bool connectToHost() {
 }
 
 void printWirelessly(String str) { //ik i shouldnt use strings but i am lazy
-    client.print(str);
+    if (client.connected()) {
+        client.print(str);
+    } else {
+        Serial.println("Lost connection to the server. Waiting for reconnection...");
+
+        while (!connectToHost()) {};
+        
+        client.print(str); // Retry sending after successful reconnection
+            
+    }
 }
 
 String readWirelesssSingleLine() {
     int maxloops = 0;
 
     //wait for the server's reply to become available
-    while (!client.available() && maxloops < 1000) {
+    while (!client.available() && maxloops < 10000) {
         maxloops++;
         delay(1); //delay 1 msec
     }

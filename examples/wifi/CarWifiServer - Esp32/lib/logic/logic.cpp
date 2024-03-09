@@ -63,15 +63,21 @@ void operatingProcedure() {
     }
 
     case LISTEN_WIRELESSLY: {
+        int serial_printer_counter = 0;
         String output = readWirelesslySingleLine();
 
         if (output != "") {
-            DEBUG_PRINT("Received: ");
+            // DEBUG_PRINT("Received: ");
             DEBUG_PRINTLN(output);
             FLASH_LED_TIMES(2);
         } else {
-            DEBUG_PRINTLN("No data received.");
-            delay(1000);
+            serial_printer_counter++;
+            delay(10);
+        }
+
+        if (serial_printer_counter > 1000) {
+            DEBUG_PRINTLN("No data received for 10 seconds.");
+            serial_printer_counter = 0;
         }
 
         break;

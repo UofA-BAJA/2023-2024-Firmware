@@ -1,6 +1,10 @@
-import SerialDevices
+from utilsImporter import adding_utils_to_path
+
+adding_utils_to_path()
+
+from utils.SerialDevices import SerialDevices
+from utils.ConfigParser import Commands
 import time
-from util.ConfigParser import Commands, ModuleTypes
 # ! lily was here
 # ayo
 
@@ -23,22 +27,21 @@ def main():
         print(f"{dev.name} on {serial_devices._serial_devices[dev].port}")
 
 
-    serial_devices._send_command("Hello from the Pi")
     while True:
         command = serial_devices._wait_for_lora_serial_input()
-        
+        # print(f"idk {command}")
         command = command.replace(">", "").replace("<", "").strip()
         print(f"Command received: {command}")
 
         command_type_enum = None
-        try:
-            command_type_enum = Commands[command]
-            print(command_type_enum)
-        except KeyError:
-            print(f"No enum member with the name '{command}'")
+        # try:
+        #     command_type_enum = Commands[command]
+        #     print(command_type_enum)
+        # except KeyError:
+        #     print(f"No enum member with the name '{command}'")
 
-        # command = input()
-        serial_devices.execute_command(COMMANDS[command_type_enum])
+        # # command = input()
+        # serial_devices.execute_command(COMMANDS[command_type_enum])
 
 
 if __name__ == "__main__":

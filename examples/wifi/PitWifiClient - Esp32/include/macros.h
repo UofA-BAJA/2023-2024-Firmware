@@ -25,7 +25,7 @@
 #endif
 
 #define BUILTIN_LED 2
-#define FLASH_DELAY 700
+#define FLASH_DELAY 300
 
 inline void flashLED(int times) {
     for (int i = 0; i < times; i++) {

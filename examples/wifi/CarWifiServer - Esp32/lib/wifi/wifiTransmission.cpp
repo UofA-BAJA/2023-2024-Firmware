@@ -56,7 +56,7 @@ String readWirelesslySingleLine() {
         if (c == '\n') {                    // if the byte is a newline character,
             // Newline character marks the end of a line,
             // so process or print the currentLine here
-            Serial.println(currentLine);      // for example, print the line to the Serial port
+            // Serial.println(currentLine);      // for example, print the line to the Serial port
             currentLine = "";                 // then clear the currentLine for the next line
         } else if (c != '\r') {             // if the byte is not a carriage return character,
         currentLine += c;                 // add it to the currentLine
