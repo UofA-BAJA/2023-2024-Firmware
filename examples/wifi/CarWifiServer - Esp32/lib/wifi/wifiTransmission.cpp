@@ -28,31 +28,32 @@ void initializeWifi() {
 
 bool connectClient() {
     Serial.println("Waiting for a client...");
-    int max_attempts = 100;
-    int attempts = 0;
-    while (attempts < max_attempts) { // Infinite loop to wait for client
-        client = server.accept(); // Listen for incoming clients
+   
+    client = server.accept(); // Listen for incoming clients
 
-        if (client) { // If you get a client,
-            Serial.println("New Client."); // Print a message out the serial port
-            return true; // Return true as soon as a client connects
-        }
-
-        // Optional: delay to prevent the loop from running too fast,
-        // which might be useful to reduce CPU usage on some systems.
-        delay(333);
-        attempts++;
+    if (client) { // If you get a client,
+        Serial.println("New Client."); // Print a message out the serial port
+        return true; // Return true as soon as a client connects
     }
+
+    // Optional: delay to prevent the loop from running too fast,
+    // which might be useful to reduce CPU usage on some systems.
+    delay(333);
+    
     // The function will never reach this point because of the infinite loop,
     // but a return statement is needed to avoid compiler warnings.
     return false;
 }
 
 String readWirelesslySingleLine() {
+    if (!client.connected()) {
+        while (!connectClient()) {}
+    }
+
     String currentLine = "";              // to store the incoming line from the client
     while (client.available()) {          // if there's bytes to read from the client,
         char c = client.read();             // read a byte,
-        Serial.write(c);                    // (optional) echo the character to the Serial port
+        // Serial.write(c);                    // (optional) echo the character to the Serial port
         if (c == '\n') {                    // if the byte is a newline character,
             // Newline character marks the end of a line,
             // so process or print the currentLine here
@@ -67,7 +68,16 @@ String readWirelesslySingleLine() {
 }
 
 void printWirelessly(String str) { //ik i shouldnt use strings in cpp projects but i am lazy
-    client.print(str);
+    if (client.connected()) {
+        client.print(str);
+    } else {
+        Serial.println("Client Disconnected. Reconnecting...");
+
+        while (!connectClient()) {}; // Keep trying to reconnect until successful
+
+        client.print(str); // Retry sending after successful reconnection
+            
+    }
 }
 
 void disconnectClient() {

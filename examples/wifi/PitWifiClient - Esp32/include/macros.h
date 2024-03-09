@@ -40,6 +40,8 @@ inline void flashLED(int times) {
 
 #define FLASH_LED_TIMES(TIMES) flashLED(TIMES)
 
+#define TURN_LED_ON digitalWrite(BUILTIN_LED, HIGH)
+#define TURN_LED_OFF digitalWrite(BUILTIN_LED, LOW)
 
 #endif
 

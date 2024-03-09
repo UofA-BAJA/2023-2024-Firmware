@@ -62,7 +62,11 @@ class CactusControlCLI:
     def run(self):
         serial_devices = SerialDevices()
 
-        serial_devices.close_all_serial_ports_except_for_device(ModuleTypes.LORA_PIT)
+        for device in serial_devices._serial_devices:
+
+            if (device != ModuleTypes.LORA_PIT):
+                serial_devices.close_serial_port(device)
+                
         self.lora_device = serial_devices.get_device(ModuleTypes.LORA_PIT)
 
         if (self.lora_device) == None:
@@ -74,12 +78,15 @@ class CactusControlCLI:
             self.display_commands_with_colors()
             choice = input("Please choose a command: ").upper()
 
-            self._write_to_lora_device(choice)
-
             action = self.commands.get(choice)
 
             if action:
                 action()
+                self._write_to_lora_device(choice)
+
+                serial_devices.read_device(ModuleTypes.LORA_PIT)
+
+
             else:
                 print(f"{bcolors.FAIL}Invalid command. Please try again.{bcolors.ENDC}")
 

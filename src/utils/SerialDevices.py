@@ -84,13 +84,9 @@ class SerialDevices:
 
         return serial_devices
 
-    def close_all_serial_ports_except_for_device(self, device_type):
+    def close_serial_port(self, device_type):
 
-        for dev in self._serial_devices:
-
-            if (dev != device_type):
-
-                dev.close()
+        self._serial_devices[device_type].close()
 
     def get_device(self, dev_type):
         if not dev_type in self._serial_devices:
@@ -99,32 +95,14 @@ class SerialDevices:
         else:
             return self._serial_devices[dev_type]
 
-    def execute_command(self, command, dev_type = None):
+    def _execute_single_command(self, command, devtype):
         """ 
             Executes the commands <---- very descriptive, I know =D
         """
+        serial_connection = self._serial_devices[devtype]
 
-        # If no parameter is passed for dev_type, that means the command is sent to every device.
-        if dev_type == None:
-            commands = {
-                    Commands.HELP     : lambda : self._print_commands(),
-                    Commands.BEGIN    : lambda : self._begin_logging(),
-                    Commands.END      : lambda : self._end_logging(),
-                    Commands.RETRIEVE : lambda : self._retrieve_logs(),
-                    Commands.QUIT     : lambda : self._quit_program()}
-                
-            commands[command]()
-        else:
-            commands = {
-                    Commands.HELP     : lambda : self._print_commands(),
-                    Commands.BEGIN    : lambda : self._begin_logging(dev_type),
-                    Commands.END      : lambda : self._end_logging(dev_type),
-                    Commands.RETRIEVE : lambda : self._retrieve_logs(dev_type),
-                    Commands.QUIT     : lambda : self._quit_program()}
-                
-            commands[command]()
-
-
+        serial_connection.write(f"<{command}>".encode('utf-8'))
+        
 
 
     # TODO: UPDATE THE SEND FUNCTIONS TO WORK USING THE ENUMS
@@ -139,103 +117,109 @@ class SerialDevices:
             # print(f"this? {device_output}")
             # print(type(device_output))
                 
-
+            
             if "<" in device_output and ">" in device_output:
                 commandInput = True
                 break
-            else:
-                print("No command recieved")
-                time.sleep(.1)
+
+            if len(device_output) > 0:
+                print(f"No command but Serial Input: {device_output}")
         
         return device_output
     
-    def _send_command(self, command):
+    def sendCommandToAllDataModules(self, command):
+        print(f"Sending Command : -- {bcolors.OKBLUE} {command} {bcolors.ENDC} --")
 
         for dev in self._serial_devices:
             
-            if (dev != ModuleTypes.LORA_PI):
+            if (dev != ModuleTypes.LORA_PI) and (dev != ModuleTypes.LORA_PIT):
+                
+                self._execute_single_command(command, dev)
 
-                serial_connection = self._serial_devices[dev]
+    def read_device(self, device_type):
+        lora_device = self.get_device(device_type)
+        
+        device_output = "START"
+        while (device_output != ""):
+            device_output =  lora_device.readline().decode('utf-8').strip()
 
-                #for testing
-                oupout = serial_connection.readline().decode('utf-8').strip()
-                print(oupout)
-
-                serial_connection.write(f"<{command}>".encode('utf-8'))
-
-
-
-    def _begin_logging(self, dev_type = None):
-        print(f"Command Sent : -- {bcolors.OKBLUE}Begin Logging{bcolors.ENDC} --")
-
-        # If no parameter is passed for dev_type, that means the command is sent to every device.
-        if dev_type == None:
-            # send command to nano's to start logging onto their SD cards
-            for dev in self._serial_devices:
-
-                if (dev != ModuleTypes.LORA_PI):
-                    self._serial_devices[dev].write(b"<BEGIN>")
-        else:
-            self._serial_devices[dev_type].write(b"Begin Logging")
+            if (device_output != ""):
+                print(f"{bcolors.GRAYCOLOR}\nOUTPUT FOR {device_type.name}\n{device_output}{bcolors.ENDC}")
 
 
-    def _end_logging(self, dev_type = None):
-        print(f"Command Sent : -- {bcolors.OKBLUE}End Logging{bcolors.ENDC} --")
-        # send command to nano's to stop logging onto their SD cards
 
-        # If no parameter is passed for dev_type, that means the command is sent to every device.
-        if dev_type == None:
-            for dev in self._serial_devices:
-                self._serial_devices[dev].write(b"End Logging")
-        else:
-            self._serial_devices[dev_type].write(b"End Logging")
+
+
+    # def _begin_logging(self, dev_type = None):
+
+    #     # If no parameter is passed for dev_type, that means the command is sent to every device.
+    #     if dev_type == None:
+    #         # send command to nano's to start logging onto their SD cards
+    #         for dev in self._serial_devices:
+
+    #             if (dev != ModuleTypes.LORA_PI):
+    #                 self._serial_devices[dev].write(b"<BEGIN>")
+    #     else:
+    #         self._serial_devices[dev_type].write(b"Begin Logging")
+
+
+    # def _end_logging(self, dev_type = None):
+    #     print(f"Command Sent : -- {bcolors.OKBLUE}End Logging{bcolors.ENDC} --")
+    #     # send command to nano's to stop logging onto their SD cards
+
+    #     # If no parameter is passed for dev_type, that means the command is sent to every device.
+    #     if dev_type == None:
+    #         for dev in self._serial_devices:
+    #             self._serial_devices[dev].write(b"End Logging")
+    #     else:
+    #         self._serial_devices[dev_type].write(b"End Logging")
 
     
-    def _retrieve_logs(self,  dev_type = None):
-        print(f"Command Sent : -- {bcolors.OKBLUE}Retrieve Logs{bcolors.ENDC} --")
+    # def _retrieve_logs(self,  dev_type = None):
+    #     print(f"Command Sent : -- {bcolors.OKBLUE}Retrieve Logs{bcolors.ENDC} --")
 
-        # retrieve data from nano's SD cards
+    #     # retrieve data from nano's SD cards
 
-        # If no parameter is passed for dev_type, that means the command is sent to every device.
-        if dev_type == None:
-            for dev in self._serial_devices:
-                self._retrieve_dev_log(dev)
-        else:
-            self._retrieve_dev_log(dev_type)
+    #     # If no parameter is passed for dev_type, that means the command is sent to every device.
+    #     if dev_type == None:
+    #         for dev in self._serial_devices:
+    #             self._retrieve_dev_log(dev)
+    #     else:
+    #         self._retrieve_dev_log(dev_type)
     
-    def _retrieve_dev_log(self, dev_type):
-        # Send command
-        self._serial_devices[dev_type].write(b"Retrieve Logs")
+    # def _retrieve_dev_log(self, dev_type):
+    #     # Send command
+    #     self._serial_devices[dev_type].write(b"Retrieve Logs")
 
-        # Get rid of all the other crap before.
-        self._serial_devices[dev_type].flushInput()
+    #     # Get rid of all the other crap before.
+    #     self._serial_devices[dev_type].flushInput()
 
-        print("Waiting for device response...")
-        while(self._serial_devices[dev_type].in_waiting == 0):
-            pass
-        print("Device Responded...")
+    #     print("Waiting for device response...")
+    #     while(self._serial_devices[dev_type].in_waiting == 0):
+    #         pass
+    #     print("Device Responded...")
 
-        # get file name
-        file_name = "DEFAULT.TXT"
-        file_name = self._serial_devices[dev_type].readline().decode('utf-8').rstrip()
+    #     # get file name
+    #     file_name = "DEFAULT.TXT"
+    #     file_name = self._serial_devices[dev_type].readline().decode('utf-8').rstrip()
 
-        file = open(file_name, 'w')
-        # try except so that the file gets closed in case of a forceful program close
-        try:
-            print("Writing to file...")
-            while True:
-                if self._serial_devices[dev_type].in_waiting > 0:
-                    line = self._serial_devices[dev_type].readline().decode('utf-8')
-                    if line.strip() == "Finished":
-                        break
-                    file.write(line)
-            file.close()
-        except KeyboardInterrupt:
-            file.close()
-            self._quit_program()
+    #     file = open(file_name, 'w')
+    #     # try except so that the file gets closed in case of a forceful program close
+    #     try:
+    #         print("Writing to file...")
+    #         while True:
+    #             if self._serial_devices[dev_type].in_waiting > 0:
+    #                 line = self._serial_devices[dev_type].readline().decode('utf-8')
+    #                 if line.strip() == "Finished":
+    #                     break
+    #                 file.write(line)
+    #         file.close()
+    #     except KeyboardInterrupt:
+    #         file.close()
+    #         self._quit_program()
 
-        print(f"File {file_name} Created")
-        print(f"{bcolors.BOLD}Enter another command{bcolors.ENDC}")
+    #     print(f"File {file_name} Created")
+    #     print(f"{bcolors.BOLD}Enter another command{bcolors.ENDC}")
 
 
     def _print_commands(self):
@@ -259,3 +243,4 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+    GRAYCOLOR = "\033[38;5;240m"

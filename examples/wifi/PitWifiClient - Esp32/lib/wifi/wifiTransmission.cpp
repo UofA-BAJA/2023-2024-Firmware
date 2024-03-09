@@ -41,8 +41,7 @@ bool connectToHost() {
 
     if (!client.connect(host, port)) {
         Serial.println("Connection failed.");
-        Serial.println("Waiting 5 seconds before retrying...");
-        delay(1000);
+        delay(333);
         return false;
     }
     return true;

@@ -68,7 +68,8 @@ void operatingProcedure() {
 
         if (output != "") {
             // DEBUG_PRINT("Received: ");
-            DEBUG_PRINTLN(output);
+            Serial.println(output);
+            Serial.flush();
             FLASH_LED_TIMES(2);
         } else {
             serial_printer_counter++;

@@ -70,7 +70,7 @@ void operatingProcedure() {
 
         if (newData) {
             // Make the onboard LED blink
-            FLASH_LED_TIMES(2);
+            TURN_LED_ON;
             Serial.println(receivedChars);
             Serial.flush();
             newData = false;
