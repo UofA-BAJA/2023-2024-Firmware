@@ -57,7 +57,9 @@ void operatingProcedure() {
     case ATTEMPT_WIRELESS_CONNECT: {
         initializeWifi(); //u dont have to keep this when porting over lora
 
-        connectToHost(); //u dont have to keep this when porting over lora
+        while (!connectToHost()) {}; //wait until it is connected to the server
+
+        FLASH_LED_TIMES(1);
 
         wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
         break;

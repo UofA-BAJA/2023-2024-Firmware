@@ -40,7 +40,7 @@ bool connectClient() {
 
         // Optional: delay to prevent the loop from running too fast,
         // which might be useful to reduce CPU usage on some systems.
-        delay(100);
+        delay(333);
         attempts++;
     }
     // The function will never reach this point because of the infinite loop,

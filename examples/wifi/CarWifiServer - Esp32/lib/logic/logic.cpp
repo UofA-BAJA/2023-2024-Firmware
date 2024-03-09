@@ -21,7 +21,7 @@ bool newData = false;
 enum WirelessTranscieverState {
     DONE_INITIALIZING,
     RESPOND_WITH_TYPE,
-    ATTEMPT_WIRELESS_CONNECT,
+    WAIT_FOR_WIRELESS_CONNECTION,
     LISTEN_WIRELESSLY,
 };
 
@@ -48,16 +48,16 @@ void operatingProcedure() {
             Serial.println("LORA_PI");
             Serial.flush();
             
-            wireless_transciever_state = ATTEMPT_WIRELESS_CONNECT;
+            wireless_transciever_state = WAIT_FOR_WIRELESS_CONNECTION;
         } 
         break;
     }
 
-    case ATTEMPT_WIRELESS_CONNECT: {
-        if (connectClient()) {
-            FLASH_LED_TIMES(1);
+    case WAIT_FOR_WIRELESS_CONNECTION: {
+        while (!connectClient()) {
+            
         }
-
+        FLASH_LED_TIMES(1);
         wireless_transciever_state = LISTEN_WIRELESSLY;
         break;
     }

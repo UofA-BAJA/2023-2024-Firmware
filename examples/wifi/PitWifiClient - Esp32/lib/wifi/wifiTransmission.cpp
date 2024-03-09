@@ -28,7 +28,7 @@ void initializeWifi() {
     delay(500);
 }
 
-void connectToHost() {
+bool connectToHost() {
     const uint16_t port = 80;
     const char * host = "192.168.4.1"; // ip or dns
     // const uint16_t port = 1337;
@@ -42,9 +42,11 @@ void connectToHost() {
     if (!client.connect(host, port)) {
         Serial.println("Connection failed.");
         Serial.println("Waiting 5 seconds before retrying...");
-        delay(5000);
-        return;
+        delay(1000);
+        return false;
     }
+    return true;
+
 }
 
 void printWirelessly(String str) { //ik i shouldnt use strings but i am lazy

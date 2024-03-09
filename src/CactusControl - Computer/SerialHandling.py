@@ -23,7 +23,7 @@ def get_lora_pit_serial_device():
         ser = serial.Serial(path, 115200, timeout=5)
 
         ser.setDTR(False) # Drop DTR
-        time.sleep(0.022)    # Read somewhere that 22ms is what the UI does.
+        time.sleep(0.023)    # Read somewhere that 22ms is what the UI does.
         ser.setDTR(True)  # UP the DTR back
 
         ser.flushInput()
