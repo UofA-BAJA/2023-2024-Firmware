@@ -101,6 +101,7 @@ class SerialDevices:
         """
         serial_connection = self._serial_devices[devtype]
 
+        print(f"Sending Command to {bcolors.GRAYCOLOR} {devtype} {bcolors.GRAYCOLOR}: -- {bcolors.OKBLUE} {command} {bcolors.ENDC} --")
         serial_connection.write(f"<{command}>".encode('utf-8'))
         
 
@@ -128,7 +129,6 @@ class SerialDevices:
         return device_output
     
     def sendCommandToAllDataModules(self, command):
-        print(f"Sending Command : -- {bcolors.OKBLUE} {command} {bcolors.ENDC} --")
 
         for dev in self._serial_devices:
             
@@ -156,11 +156,16 @@ class SerialDevices:
 
                 print(f"{bcolors.GRAYCOLOR}{device_output}{bcolors.ENDC}")
 
-                device.flushInput()
-                device.flushOutput()
 
+    def read_file_data(self, device_type):
+        device = self.get_device(device_type)
 
+        print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nFILE DATA FOR {device_type.name}:{bcolors.ENDC}\n")
 
+        device_output = "START"
+
+        while (device_output != "<Finished>"):
+            device_output =  device.readline().decode('utf-8').strip()
 
 
     # def _begin_logging(self, dev_type = None):

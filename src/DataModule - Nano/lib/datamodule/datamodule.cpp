@@ -341,7 +341,7 @@ void SendFile(){
         Serial.flush();
     }
     dataFile.close();
-    DEBUG_PRINTLN("Finished");
+    DEBUG_PRINTLN("<Finished>");
 }
 
 

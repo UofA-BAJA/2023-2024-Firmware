@@ -9,6 +9,7 @@
 #include "wifiTransmission.h"
 //wireless stuff
 #define WIRELESS_RESPONSE_TIMEOUT_MS 1000
+int wireless_response_timer = 0;
 String response;
 ///////////////////////////
 
@@ -73,6 +74,7 @@ void operatingProcedure() {
     }
 
     case WAIT_FOR_SERIAL_COMMAND: {
+        TURN_LED_OFF;
         recvWithStartEndMarkers();
 
         if (newData) {
@@ -86,6 +88,7 @@ void operatingProcedure() {
             printWirelessly(convertToCommand(receivedChars));
 
             wireless_transciever_state = WAIT_FOR_WIRELESS_CONFIRMATION;
+            wireless_response_timer = millis();
         }
 
         break;
@@ -96,11 +99,18 @@ void operatingProcedure() {
         response = readWirelesssSingleLine();
         if (response.length() > 0) {
             TURN_LED_OFF;
-            FLASH_LED_TIMES(2);
             Serial.println(response);
             Serial.flush();
             wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
         }
+
+        if (millis() - wireless_response_timer > WIRELESS_RESPONSE_TIMEOUT_MS) {
+            Serial.println("Wireless response timeout");            
+            FLASH_LED_TIMES(2);
+            Serial.flush();
+            wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
+        }
+        
         break;
     }
 

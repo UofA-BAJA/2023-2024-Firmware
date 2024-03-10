@@ -5,19 +5,21 @@ adding_utils_to_path()
 from utils.SerialDevices import SerialDevices
 from utils.ConfigParser import Commands, ModuleTypes
 
+from db.databaseInterfacer import create_connection
+
 import time
 import re
 # ! lily was here
 # ayo
 
-COMMANDS = {'b' : Commands.BEGIN,
-            'e' : Commands.END,
-            'r' : Commands.RETRIEVE,
-            'q' : Commands.QUIT,
-            'help' : Commands.HELP}
-
-
+conn = None
 lora_dev = None
+
+def initialize():
+    print("Initializing...")
+
+    conn = create_connection()
+
 
 def main():
     print("Starting up...")
@@ -45,24 +47,26 @@ def main():
             # print(command_type_enum)
         except KeyError:
             print(f"No enum member with the name '{command}'")
+            continue
 
         # command = input()
             
-        # if command_type_enum != Commands.RETRIEVE:
-        serial_devices.sendCommandToAllDataModules(command_type_enum.name)
-        # else:
-        #     for device in serial_devices._serial_devices:
+        if command_type_enum != Commands.RETRIEVE:
+            serial_devices.sendCommandToAllDataModules(command_type_enum.name)
+        else:
+            for device in serial_devices._serial_devices:
 
-                
+                if (device != ModuleTypes.LORA_PIT) and (device != ModuleTypes.LORA_PI):
 
+                    serial_devices._execute_single_command(Commands.RETRIEVE.name, device)
 
-def parse_command(raw):
-    # print(f"idk {command}")
-    pattern = re.compile(r'{(.*?)}')
-    # Find all matches in the text
-    matches = pattern.findall(raw)
+                    # serial_devices.read_file_data(device)
+                    device_serial_obj = serial_devices._serial_devices[device]
+                    device_output = "START"
+                    while (device_output != "<Finished>"):
+                        device_output =  device_serial_obj.readline().decode('utf-8').strip()
+                        print(device_output)
 
-    return matches[0]
 
 if __name__ == "__main__":
     main()
