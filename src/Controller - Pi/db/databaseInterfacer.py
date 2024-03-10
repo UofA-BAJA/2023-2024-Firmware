@@ -16,9 +16,9 @@ def find_git_root(path='.'):
 def get_BajaCloud_connection():
     git_root = find_git_root()
 
-    data_db_path = os.path.join(git_root, 'src', 'Controller - Pi', 'db', 'BajaCloud.db') # New path in the 'db' directory
+    data_db = os.path.join(git_root, 'src', 'Controller - Pi', 'db', 'BajaCloud.db') # New path in the 'db' directory
 
-    conn = create_connection(data_db_path)
+    conn = create_connection(data_db)
     # Add your table creation and other database initialization steps here
     if conn is not None:
         # You can create tables here using conn
@@ -56,8 +56,8 @@ def create_table(conn, create_table_sql):
 def main():
     git_root = find_git_root()
 
-    data_db_path = os.path.join(git_root, 'src', 'Controller - Pi', 'db', 'BajaCloud.db') # New path in the 'db' directory
-    data_db_sql = '''
+    data_db = os.path.join(git_root, 'src', 'Controller - Pi', 'db', 'BajaCloud.db') # New path in the 'db' directory
+    data_table_sql = '''
     CREATE TABLE IF NOT EXISTS BajaCloudData (
         ID INTEGER,
         Time REAL,
@@ -73,11 +73,20 @@ def main():
         FOREIGN KEY (ID) REFERENCES BajaCloudSessions (ID)
     );'''
 
-    conn = create_connection(data_db_path)
+    sessions_table_sql = '''
+    CREATE TABLE IF NOT EXISTS BajaCloudSessions (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        DateOfSession TEXT NOT NULL,
+        Notes TEXT
+    );'''
+
+    conn = create_connection(data_db)
     # Add your table creation and other database initialization steps here
     if conn is not None:
         # You can create tables here using conn
-        create_table(conn, data_db_sql)
+        create_table(conn, sessions_table_sql)
+        # create_table(conn, data_db_sql)
+
         # print(f"Database created at: {data_db_path}")
         # Don't forget to close the connection when done
         conn.close()
