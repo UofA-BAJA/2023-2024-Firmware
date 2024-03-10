@@ -7,6 +7,12 @@
 #include "enums.h"
 
 #include "wifiTransmission.h"
+//wireless stuff
+#define WIRELESS_RESPONSE_TIMEOUT_MS 1000
+String response;
+///////////////////////////
+
+
 ///serial stuff
 // Define startMarker and endMarker as preprocessor macros
 #define startMarker '<'
@@ -25,6 +31,7 @@ enum WirelessTranscieverState {
     RESPOND_WITH_TYPE,
     ATTEMPT_WIRELESS_CONNECT,
     WAIT_FOR_SERIAL_COMMAND,
+    WAIT_FOR_WIRELESS_CONFIRMATION
 };
 
 WirelessTranscieverState wireless_transciever_state = DONE_INITIALIZING; //initial state
@@ -77,8 +84,23 @@ void operatingProcedure() {
 
             // Send the received data to the server
             printWirelessly(convertToCommand(receivedChars));
+
+            wireless_transciever_state = WAIT_FOR_WIRELESS_CONFIRMATION;
         }
 
+        break;
+    }
+
+    case WAIT_FOR_WIRELESS_CONFIRMATION: {
+        // Wait for the server's reply to become available
+        response = readWirelesssSingleLine();
+        if (response.length() > 0) {
+            TURN_LED_OFF;
+            FLASH_LED_TIMES(2);
+            Serial.println(response);
+            Serial.flush();
+            wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
+        }
         break;
     }
 

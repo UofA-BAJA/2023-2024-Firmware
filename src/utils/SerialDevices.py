@@ -137,14 +137,27 @@ class SerialDevices:
                 self._execute_single_command(command, dev)
 
     def read_device(self, device_type):
-        lora_device = self.get_device(device_type)
+        device = self.get_device(device_type)
         
         device_output = "START"
+        first_time_print_flag = True
         while (device_output != ""):
-            device_output =  lora_device.readline().decode('utf-8').strip()
+            device_output =  device.readline().decode('utf-8').strip()
+
+            if "<" in device_output and ">" in device_output:
+                break
 
             if (device_output != ""):
-                print(f"{bcolors.GRAYCOLOR}\nOUTPUT FOR {device_type.name}\n{device_output}{bcolors.ENDC}")
+
+                if (first_time_print_flag):
+                    print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nOUTPUT FOR {device_type.name}:{bcolors.ENDC}\n")
+
+                    device_has_output_flag = False
+
+                print(f"{bcolors.GRAYCOLOR}{device_output}{bcolors.ENDC}")
+
+                device.flushInput()
+                device.flushOutput()
 
 
 

@@ -410,6 +410,3 @@ void BAJA_EMBEDDED::DataModule::recordDataToSDCard(){
 void CloseSDFile(){
     dataFile.close();
 }
-
-
-

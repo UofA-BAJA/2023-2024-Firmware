@@ -9,4 +9,7 @@ bool connectClient();
 
 String readWirelesslySingleLine();
 
+void confirmCommandWirelessly();
+
+
 #endif // WIFITRANSMISSION_H

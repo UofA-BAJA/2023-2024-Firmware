@@ -34,6 +34,7 @@ def main():
         while(1): pass
  
     while True:
+        # serial_devices.read_device(ModuleTypes.LORA_PI)
         lora_serial_input = serial_devices._wait_for_lora_serial_input()
 
         command = parse_command(lora_serial_input)
@@ -46,7 +47,13 @@ def main():
             print(f"No enum member with the name '{command}'")
 
         # command = input()
+            
+        # if command_type_enum != Commands.RETRIEVE:
         serial_devices.sendCommandToAllDataModules(command_type_enum.name)
+        # else:
+        #     for device in serial_devices._serial_devices:
+
+                
 
 
 def parse_command(raw):

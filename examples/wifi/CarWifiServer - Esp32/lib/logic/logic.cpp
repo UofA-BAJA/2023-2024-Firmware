@@ -68,9 +68,10 @@ void operatingProcedure() {
 
         if (output != "") {
             // DEBUG_PRINT("Received: ");
+            FLASH_LED_TIMES(1);
             Serial.println(output);
             Serial.flush();
-            FLASH_LED_TIMES(2);
+            confirmCommandWirelessly();
         } else {
             serial_printer_counter++;
             delay(10);
