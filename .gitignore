@@ -5,3 +5,5 @@
 **/.gitignore
 **/__pycache__/
 **.VSCodeCounter
+.vscode
+.sql
