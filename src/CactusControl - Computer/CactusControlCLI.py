@@ -24,7 +24,7 @@ class CactusControlCLI:
             Commands.END.name      : lambda: self._end_logging(Commands.END.name),  # Ditto
             Commands.RETRIEVE.name : lambda: self._retrieve_logs(Commands.RETRIEVE.name),  # Ditto
             Commands.QUIT.name     : lambda: self._quit_program(Commands.QUIT.name),  # Ditto
-            "SETUP"    : lambda: self._setup_session() # Ditto
+            "SETUP"    : lambda: self._setup_session(), # Ditto
             "READ"     : lambda: self._read_data() # Ditto
         }
 
@@ -76,25 +76,24 @@ class CactusControlCLI:
         '''code to read data'''
         
         # Send the read command over serial
-        serial_devices.read_device(ModuleTypes.LORA_PIT)
+        self.serial_devices.read_device(ModuleTypes.LORA_PIT)
         
 
     def run(self):
-        serial_devices = SerialDevices()
+        self.serial_devices = SerialDevices()
 
-        for device in serial_devices._serial_devices:
+        for device in self.serial_devices._serial_devices:
 
             if (device != ModuleTypes.LORA_PIT):
-                serial_devices.close_serial_port(device)
+                self.serial_devices.close_serial_port(device)
                 
-        self.lora_device = serial_devices.get_device(ModuleTypes.LORA_PIT)
+        self.lora_device = self.serial_devices.get_device(ModuleTypes.LORA_PIT)
 
         if (self.lora_device) == None:
 
             print("No LORA PIT DEVICE FOUND!!!!!!")
             while(1): pass
 
-        self._setup_session()
         while True:
             self.display_commands_with_colors()
             choice = input("Please choose a command: ").upper()

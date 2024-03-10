@@ -38,7 +38,7 @@ bool connectClient() {
 
     // Optional: delay to prevent the loop from running too fast,
     // which might be useful to reduce CPU usage on some systems.
-    delay(333);
+    delay(1000);
     
     // The function will never reach this point because of the infinite loop,
     // but a return statement is needed to avoid compiler warnings.
