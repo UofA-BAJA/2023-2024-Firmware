@@ -47,8 +47,8 @@ void RPM_DataModule::data_module_setup_procedure()
 
     DEBUG_PRINTLN("RPM Data Module Setup Complete");
 
-    strcpy(dataHeaderArray[0], "Left(mph)");
-    strcpy(dataHeaderArray[1], "Right(mph)");
+    strcpy(dataHeaderArray[0], DATATYPES_RPM_FRONT_LEFT);
+    strcpy(dataHeaderArray[1], DATATYPES_RPM_FRONT_RIGHT);
 
     startTimer2();
 }
@@ -63,7 +63,7 @@ void RPM_DataModule::data_module_logging_procedure() {
         leftSpeed *= 2.23694; // convert to mph.
 
         dataToRecord[0] = leftSpeed;
-        dataToRecord[1] = -1.0;
+        dataToRecord[1] = -2.0;
 
         // DEBUG_PRINT(">left: ");
         // DEBUG_PRINTLN(leftSpeed);
@@ -78,7 +78,7 @@ void RPM_DataModule::data_module_logging_procedure() {
 
         rightSpeed *= 2.23694; // convert to mph.
 
-        dataToRecord[0] = -1.0;
+        dataToRecord[0] = -2.0;
         dataToRecord[1] = rightSpeed;
 
         recordDataToSDCard();

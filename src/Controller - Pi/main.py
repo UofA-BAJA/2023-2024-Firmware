@@ -19,6 +19,7 @@ class Controller:
     def __init__(self):
         self.serial_devices = SerialDevices()
         self.conn = get_BajaCloud_connection()
+        self.session_id = None
 
     def handleCommand(self, command_type_enum):
 
@@ -33,9 +34,14 @@ class Controller:
 
                     # serial_devices.read_file_data(device)
                     device_serial_obj = self.serial_devices._serial_devices[device]
+
                     device_output = "START"
                     while (device_output != "<Finished>"):
-                        device_output =  device_serial_obj.readline().decode('utf-8').strip()
+                        try:
+                            device_output =  device_serial_obj.readline().decode('utf-8').strip()
+                        except UnicodeDecodeError:
+                            print("UnicodeDecodeError")
+                            continue
                         print(device_output)
 
     def run(self):
@@ -61,10 +67,10 @@ class Controller:
             if "SESSION" in lora_serial_input:
                 actual_text = Controller.parse_input(lora_serial_input).replace("SESSION:", "")
 
-                insert_session(self.conn, actual_text)
+                self.session_id = insert_session(self.conn, actual_text)
 
                 print(f"ADDING SESSION: '{actual_text}' INTO DATABASE")
-                break
+                print(f"CURRENT SESSION ID IS: {self.session_id}")
         
         self.conn.close()
 
