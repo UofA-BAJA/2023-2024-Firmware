@@ -2,6 +2,8 @@ import git
 import sqlite3
 import os
 from sqlite3 import Error
+from datetime import datetime
+
 
 def find_git_root(path='.'):
     try:
@@ -25,7 +27,7 @@ def get_BajaCloud_connection():
         # For example: create_table(conn, sql_create_my_table)
         # print(f"Database created at: {data_db_path}")
         # Don't forget to close the connection when done
-        conn.close()
+        return conn
     else:
         print("Error! Cannot create the database connection.")
 
@@ -52,6 +54,21 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
 
+def insert_session(conn, notes):
+    """
+    Insert a new session into the BajaCloudSessions table
+    :param conn: Connection object
+    :param notes: Notes for the session
+    :return: The ID of the inserted session
+    """
+    sql = ''' INSERT INTO BajaCloudSessions(DateOfSession, Notes)
+              VALUES(?, ?) '''
+    cur = conn.cursor()
+    # Get the current date and time in the desired format
+    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cur.execute(sql, (current_datetime, notes))
+    conn.commit()
+    return cur.lastrowid
 
 def main():
     git_root = find_git_root()

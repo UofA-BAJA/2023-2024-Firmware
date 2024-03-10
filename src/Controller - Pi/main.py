@@ -5,7 +5,7 @@ adding_utils_to_path()
 from utils.SerialDevices import SerialDevices
 from utils.ConfigParser import Commands, ModuleTypes
 
-from db.databaseInterfacer import create_connection
+from db.databaseInterfacer import get_BajaCloud_connection, insert_session
 
 import time
 import re
@@ -18,7 +18,7 @@ class Controller:
 
     def __init__(self):
         self.serial_devices = SerialDevices()
-        self.conn = create_connection()
+        self.conn = get_BajaCloud_connection()
 
     def handleCommand(self, command_type_enum):
 
@@ -59,8 +59,14 @@ class Controller:
                 print(f"Serial input: {lora_serial_input} is not a valid command.")
 
             if "SESSION" in lora_serial_input:
-                actual_text = Controller.parse_input(lora_serial_input)
-                print(f"SESSION: {actual_text}")
+                actual_text = Controller.parse_input(lora_serial_input).replace("SESSION:", "")
+
+                insert_session(self.conn, actual_text)
+
+                print(f"ADDING SESSION: '{actual_text}' INTO DATABASE")
+                break
+        
+        self.conn.close()
 
 
     def parse_input(raw):
