@@ -24,6 +24,8 @@ class CactusControlCLI:
             Commands.END.name      : lambda: self._end_logging(Commands.END.name),  # Ditto
             Commands.RETRIEVE.name : lambda: self._retrieve_logs(Commands.RETRIEVE.name),  # Ditto
             Commands.QUIT.name     : lambda: self._quit_program(Commands.QUIT.name),  # Ditto
+            "SETUP"    : lambda: self._setup_session() # Ditto
+            "READ"     : lambda: self._read_data() # Ditto
         }
 
     def _print_commands(self):
@@ -57,8 +59,26 @@ class CactusControlCLI:
         print("Quitting program...")
         exit()
 
-    
-    
+    def _setup_session(self):
+        '''code to setup session'''
+        print(f"{bcolors.HEADER}Setup New Data Session{bcolors.ENDC}")
+        
+        # Ask the user for session name and notes
+        session_name = input(f"{bcolors.OKCYAN}Enter session name and/or notes: {bcolors.ENDC}")
+        
+        # Send the setup command over serial
+        self._write_to_lora_device(f"SESSION:{session_name}")
+        
+        # Confirmation message
+        print(f"{bcolors.OKGREEN}Session '{session_name}'{bcolors.ENDC}")
+
+    def _read_data(self):
+        '''code to read data'''
+        
+        # Send the read command over serial
+        serial_devices.read_device(ModuleTypes.LORA_PIT)
+        
+
     def run(self):
         serial_devices = SerialDevices()
 
@@ -74,6 +94,7 @@ class CactusControlCLI:
             print("No LORA PIT DEVICE FOUND!!!!!!")
             while(1): pass
 
+        self._setup_session()
         while True:
             self.display_commands_with_colors()
             choice = input("Please choose a command: ").upper()
@@ -83,9 +104,6 @@ class CactusControlCLI:
             if action:
                 action()
                 self._write_to_lora_device(choice)
-
-                serial_devices.read_device(ModuleTypes.LORA_PIT)
-
 
             else:
                 print(f"{bcolors.FAIL}Invalid command. Please try again.{bcolors.ENDC}")
