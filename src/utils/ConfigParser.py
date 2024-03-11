@@ -27,7 +27,7 @@ def create_enum_class(enum_name, enum_values):
 # Create Enums based on JSON data
 ModuleTypes = create_enum_class("Module Types", data["Module Types"])
 Commands = create_enum_class("Commands", data["Commands"])
-
+DataTypes = create_enum_class("Data Types", data["Data Types"])
 
 # print("SensorTypes enum members:")
 # for member in ModuleTypes.__members__:

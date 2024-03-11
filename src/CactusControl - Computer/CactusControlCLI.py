@@ -17,6 +17,7 @@ class CactusControlCLI:
     def __init__(self):
 
         self.lora_device = None
+        self.session_is_active = False
 
         self.commands = {
             Commands.HELP.name     : self._print_commands,  # No argument required; directly reference the method
@@ -72,6 +73,8 @@ class CactusControlCLI:
         # Confirmation message
         print(f"{bcolors.OKGREEN}Session '{session_name}'{bcolors.ENDC}")
 
+        self.session_is_active = True
+
     def _read_data(self):
         '''code to read data'''
         
@@ -102,7 +105,7 @@ class CactusControlCLI:
 
             if action:
                 action()
-                self._write_to_lora_device(choice)
+
 
             else:
                 print(f"{bcolors.FAIL}Invalid command. Please try again.{bcolors.ENDC}")

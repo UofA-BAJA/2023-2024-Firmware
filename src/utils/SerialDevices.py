@@ -57,7 +57,11 @@ class SerialDevices:
             is_device_ready = False
             print(f"\nDevice Output on {ser.port}:")
             while not is_device_ready:
-                device_output =  ser.readline().decode('utf-8').strip()                
+                try:
+                    device_output =  ser.readline().decode('utf-8').strip()
+                except UnicodeDecodeError:
+                    print("UnicodeDecodeError")
+                    break
                 print(device_output)
                 if device_output == "Ready":
                     is_device_ready = True

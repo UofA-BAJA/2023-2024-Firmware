@@ -15,7 +15,8 @@
                     "QUIT", 
                     "SENDTYPE" ],
 
-    "DataTypes" :   ["IMU",
+    "Data Types" :   ["PITCH",
+                    "ROLL",
                     "RPM_REAR_LEFT",
                     "RPM_REAR_RIGHT",
                     "RPM_FRONT_LEFT",
