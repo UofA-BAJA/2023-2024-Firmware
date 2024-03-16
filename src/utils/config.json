@@ -1,0 +1,28 @@
+{
+    "Module Types" :    ["IMU", 
+                        "RPM_FRONT", 
+                        "RPM_REAR", 
+                        "RPM_ENGINE", 
+                        "BRK", "STEER", 
+                        "PEDAL", 
+                        "LORA_PI", 
+                        "LORA_PIT"],
+
+    "Commands" :    ["BEGIN", 
+                    "END", 
+                    "RETRIEVE", 
+                    "HELP", 
+                    "QUIT", 
+                    "SENDTYPE" ],
+
+    "Data Types" :   ["PITCH",
+                    "ROLL",
+                    "RPM_REAR_LEFT",
+                    "RPM_REAR_RIGHT",
+                    "RPM_FRONT_LEFT",
+                    "RPM_FRONT_RIGHT",
+                    "BRAKE_PRESSURE",
+                    "GAS_ANGLE",
+                    "BRAKE_ANGLE",
+                    "ENGINE_RPM"]
+}

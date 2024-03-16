@@ -16,7 +16,7 @@ repo = git.Repo(Path(env['PROJECT_DIR']).resolve(), search_parent_directories=Tr
 git_root = repo.git.rev_parse("--show-toplevel")
 
 # Construct the path to the file you want to reference
-file_path_in_git_root = Path(git_root) / 'src' / 'utils' / 'config.json'
+file_path_in_git_root = Path(git_root) / 'src' / 'config.json'
 
 def convert_json_to_header(source_json_path, output_header_path):
     # Read the JSON data

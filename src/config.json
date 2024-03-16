@@ -1,4 +1,0 @@
-{
-    "Module Types" : ["IMU", "RPM_FRONT", "RPM_REAR", "RPM_ENGINE", "BRK", "STEER", "PEDAL", "LORA_PI", "LORA_PIT"],
-    "Commands" : ["BEGIN", "END", "RETRIEVE", "HELP", "QUIT", "SENDTYPE" ]
-}

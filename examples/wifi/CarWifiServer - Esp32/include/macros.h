@@ -24,6 +24,23 @@
     #define DEBUG_PRINTLN(variable)
 #endif
 
+#define BUILTIN_LED 2
+#define FLASH_DELAY 700
+
+inline void flashLED(int times) {
+    for (int i = 0; i < times; i++) {
+        digitalWrite(BUILTIN_LED, HIGH);
+        delay(FLASH_DELAY);
+        digitalWrite(BUILTIN_LED, LOW);
+        if (i < times - 1) { // Avoid an extra delay after the last flash
+            delay(FLASH_DELAY);
+        }
+    }
+}
+
+#define FLASH_LED_TIMES(TIMES) flashLED(TIMES)
+#define TURN_LED_ON digitalWrite(BUILTIN_LED, HIGH)
+#define TURN_LED_OFF digitalWrite(BUILTIN_LED, LOW)
 
 
 #endif
