@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
+// #include <string>
 
 #include "macros.h"
 #include "enums.h"
@@ -14,6 +15,9 @@
 const char numChars = 32;
 char receivedChars[numChars];   // an array to store the received data
 bool newData = false;
+const char numOfOutboundChars = 50;
+char outboundChars[numOfOutboundChars];   // an array to store the received data
+
 ////////////////////////////
 
 
@@ -23,6 +27,7 @@ enum WirelessTranscieverState {
     RESPOND_WITH_TYPE,
     WAIT_FOR_WIRELESS_CONNECTION,
     LISTEN_WIRELESSLY,
+    WAIT_FOR_SERIAL_COMMAND
 };
 
 WirelessTranscieverState wireless_transciever_state = DONE_INITIALIZING; //initial state
@@ -71,7 +76,18 @@ void operatingProcedure() {
             FLASH_LED_TIMES(1);
             Serial.println(output);
             Serial.flush();
-            confirmCommandWirelessly();
+
+            // if (output == "RETRIEVE")
+
+            if (output == "<{RETRIEVE}>") {
+                wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
+                confirmCommandWirelessly("<STANDY_BY>");
+
+            }
+            else {
+                confirmCommandWirelessly();
+            }
+
         } else {
             serial_printer_counter++;
             delay(10);
@@ -83,6 +99,48 @@ void operatingProcedure() {
         }
 
         break;
+    }
+
+    case WAIT_FOR_SERIAL_COMMAND: {
+        TURN_LED_OFF;
+        DEBUG_PRINTLN("ENTERING_WAITING_FOR_SERIAL_COMMAND_STATE");
+
+        recvWithStartEndMarkers();
+
+        char *ptr = strstr(receivedChars, "LISTENUP");
+
+        if (newData) {
+            
+            newData = false;
+
+            if (ptr != NULL) {
+                DEBUG_PRINTLN("LISTENING UP");
+
+                bool finished_recieving_datatypes = false;
+                while (!finished_recieving_datatypes) {
+                    recvWithStartEndMarkers();
+                
+                    if (newData) {
+                        newData = false;
+                        strcat(outboundChars, receivedChars);
+                        DEBUG_PRINTLN("ADDED TO OUTBOUND CHARS");
+
+                        if (strstr(receivedChars, "END") != NULL) {
+                            finished_recieving_datatypes = true;
+                        }
+                    }
+                }
+                DEBUG_PRINTLN("SENDING OUTBOUND CHARS WIRELESSLY");
+
+                printWirelessly(String(outboundChars));
+                
+                wireless_transciever_state = LISTEN_WIRELESSLY;
+            } else {
+                Serial.println("WRONG COMMAND");
+                Serial.flush();
+            }
+
+        }
     }
 
     default:

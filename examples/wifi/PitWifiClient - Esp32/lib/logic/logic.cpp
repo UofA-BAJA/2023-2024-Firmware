@@ -32,7 +32,8 @@ enum WirelessTranscieverState {
     RESPOND_WITH_TYPE,
     ATTEMPT_WIRELESS_CONNECT,
     WAIT_FOR_SERIAL_COMMAND,
-    WAIT_FOR_WIRELESS_CONFIRMATION
+    WAIT_FOR_WIRELESS_CONFIRMATION,
+    LISTEN_WIRELESSLY
 };
 
 WirelessTranscieverState wireless_transciever_state = DONE_INITIALIZING; //initial state
@@ -98,6 +99,11 @@ void operatingProcedure() {
         // Wait for the server's reply to become available
         response = readWirelesssSingleLine();
         if (response.length() > 0) {
+            
+            if (response == "<STANDBY>") {
+                wireless_transciever_state = LISTEN_WIRELESSLY;
+                DEBUG_PRINTLN("Entering listen mode");
+            } 
             TURN_LED_OFF;
             Serial.println(response);
             Serial.flush();
@@ -112,6 +118,26 @@ void operatingProcedure() {
         }
         
         break;
+    }
+
+    case LISTEN_WIRELESSLY: {
+        int serial_printer_counter = 0;
+        String output = readWirelesssSingleLine();
+
+        if (output != "") {
+            // DEBUG_PRINT("Received: ");
+            FLASH_LED_TIMES(1);
+            Serial.println(output);
+            Serial.flush();
+        } else {
+            serial_printer_counter++;
+            delay(10);
+        }
+
+        if (serial_printer_counter > 1000) {
+            DEBUG_PRINTLN("No data received for 10 seconds.");
+            serial_printer_counter = 0;
+        }
     }
 
     default:
