@@ -47,10 +47,9 @@ void RPM_DataModule::data_module_setup_procedure()
 
     DEBUG_PRINTLN("RPM Data Module Setup Complete");
 
-    strcpy(dataHeaderArray[0], DATATYPES_RPM_FRONT_LEFT);
-    strcpy(dataHeaderArray[1], DATATYPES_RPM_FRONT_RIGHT);
+    strcpy(dataHeaderArray[0], DATA_TYPES_RPM_FRONT_LEFT);
+    strcpy(dataHeaderArray[1], DATA_TYPES_RPM_FRONT_RIGHT);
 
-    int adcValue = analogRead(analogPin); // Read the ADC value from the specified pin
     startTimer2();
 }
 

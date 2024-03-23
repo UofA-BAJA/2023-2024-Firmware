@@ -1,5 +1,5 @@
-#ifndef IMU_H
-#define IMU_H
+#ifndef ANALOG_H
+#define ANALOG_H
 
 #include <datamodule.h>
 

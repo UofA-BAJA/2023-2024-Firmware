@@ -1,5 +1,8 @@
+#include "analog.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
+
+#include "Arduino.h"
 
 #include "macros.h"
 #include "enums.h"
@@ -12,9 +15,8 @@ void BRK_DataModule::set_data_module_type()
 }
 
 void BRK_DataModule::data_module_setup_procedure() {
-    strcpy(dataHeaderArray[0], DATA);
-    strcpy(dataHeaderArray[1], BRAKE_PRESSURE_REAR);
-    strcpy(dataHeaderArray[1], BRAKE_PRESSURE_FRONT);
+    strcpy(dataHeaderArray[0], DATA_TYPES_BRAKE_PRESSURE_REAR);
+    strcpy(dataHeaderArray[1], DATA_TYPES_BRAKE_PRESSURE_FRONT);
 
 }
 void BRK_DataModule::data_module_logging_procedure(){
