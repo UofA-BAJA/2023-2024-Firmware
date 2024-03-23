@@ -106,6 +106,8 @@ class CactusControlCLI:
             if action:
                 action()
 
+                self._write_to_lora_device(choice)
+
 
             else:
                 print(f"{bcolors.FAIL}Invalid command. Please try again.{bcolors.ENDC}")
