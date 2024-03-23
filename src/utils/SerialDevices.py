@@ -17,7 +17,7 @@ class SerialDevices:
             print(p.description)
             # Example of filtering out Bluetooth devices by checking for a keyword in the description
             # Adjust the keyword according to your needs
-            if 'Bluetooth' not in p.description or "n/a" in p.description:
+            if 'Bluetooth' not in p.description and "n/a" in p.description:
                 print(f"Device detected: {p.device}")
                 port_paths.append(p.device)
             else:
