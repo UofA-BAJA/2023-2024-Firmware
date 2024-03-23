@@ -8,7 +8,7 @@
 
 #include "wifiTransmission.h"
 //wireless stuff
-#define WIRELESS_RESPONSE_TIMEOUT_MS 1000
+#define WIRELESS_RESPONSE_TIMEOUT_MS 5000
 int wireless_response_timer = 0;
 String response;
 ///////////////////////////
@@ -88,8 +88,8 @@ void operatingProcedure() {
             // Send the received data to the server
             printWirelessly(convertToCommand(receivedChars));
 
-            wireless_transciever_state = WAIT_FOR_WIRELESS_CONFIRMATION;
             wireless_response_timer = millis();
+            wireless_transciever_state = WAIT_FOR_WIRELESS_CONFIRMATION;
         }
 
         break;
@@ -99,23 +99,34 @@ void operatingProcedure() {
         // Wait for the server's reply to become available
         response = readWirelesssSingleLine();
         if (response.length() > 0) {
-            
-            if (response == "<STANDBY>") {
-                wireless_transciever_state = LISTEN_WIRELESSLY;
-                DEBUG_PRINTLN("Entering listen mode");
-            } 
-            TURN_LED_OFF;
+            DEBUG_PRINT("Response:");
             Serial.println(response);
             Serial.flush();
-            wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
-        }
+            TURN_LED_OFF;
 
-        if (millis() - wireless_response_timer > WIRELESS_RESPONSE_TIMEOUT_MS) {
+            if (response.indexOf("STAND") != -1) { 
+                wireless_transciever_state = LISTEN_WIRELESSLY;
+                DEBUG_PRINTLN("Entering listen mode");
+                break;
+            }
+            else {
+                DEBUG_PRINTLN("received stuff, now going to WAIT_FOR_SERIAL");
+                wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;   
+            }
+
+            break;
+        }
+        else {
+            
             Serial.println("Wireless response timeout");            
             FLASH_LED_TIMES(2);
             Serial.flush();
+            DEBUG_PRINTLN("timed out so going to WAIT_FOR_SERIAL");
             wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
+            break;
+            
         }
+        
         
         break;
     }

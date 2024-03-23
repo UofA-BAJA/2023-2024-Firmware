@@ -103,14 +103,14 @@ void operatingProcedure() {
 
     case WAIT_FOR_SERIAL_COMMAND: {
         TURN_LED_OFF;
-        DEBUG_PRINTLN("ENTERING_WAITING_FOR_SERIAL_COMMAND_STATE");
 
         recvWithStartEndMarkers();
 
         char *ptr = strstr(receivedChars, "LISTENUP");
 
         if (newData) {
-            
+            DEBUG_PRINTLN("IN WAITING, TYPE LISTEN UP");
+
             newData = false;
 
             if (ptr != NULL) {
@@ -122,18 +122,22 @@ void operatingProcedure() {
                 
                     if (newData) {
                         newData = false;
-                        strcat(outboundChars, receivedChars);
-                        DEBUG_PRINTLN("ADDED TO OUTBOUND CHARS");
+                        
 
                         if (strstr(receivedChars, "END") != NULL) {
                             finished_recieving_datatypes = true;
+                        }
+                        else {
+                            strcat(outboundChars, receivedChars);
+                            DEBUG_PRINTLN("ADDED TO OUTBOUND CHARS");
                         }
                     }
                 }
                 DEBUG_PRINTLN("SENDING OUTBOUND CHARS WIRELESSLY");
 
                 printWirelessly(String(outboundChars));
-                
+
+                DEBUG_PRINTLN("going back to listening wirelessly");
                 wireless_transciever_state = LISTEN_WIRELESSLY;
             } else {
                 Serial.println("WRONG COMMAND");

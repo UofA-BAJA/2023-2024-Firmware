@@ -63,6 +63,21 @@ void printWirelessly(String str) { //ik i shouldnt use strings but i am lazy
 }
 
 String readWirelesssSingleLine() {
+    // Ensure WiFi is connected before proceeding
+    if (WiFiMulti.run() != WL_CONNECTED) {
+        Serial.println("WiFi not connected. Attempting to reconnect...");
+        initializeWifi();
+    }
+
+    // Ensure the client is connected to the host
+    if (!client.connected()) {
+        Serial.println("Client not connected to host. Attempting to connect...");
+        if (!connectToHost()) {
+            Serial.println("Failed to connect to host.");
+            return "";
+        }
+    }
+
     int maxloops = 0;
 
     //wait for the server's reply to become available
@@ -97,10 +112,6 @@ String readWirelesssSingleLine() {
         //read back one line from the server
         String line = client.readStringUntil('\r');
         return line;
-    } else {
-        Serial.println("client.available() timed out ");
-
-
     }
 
     return "";
