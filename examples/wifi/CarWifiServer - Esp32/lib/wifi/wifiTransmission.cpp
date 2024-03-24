@@ -80,8 +80,8 @@ void printWirelessly(String str) { //ik i shouldnt use strings in cpp projects b
     }
 }
 
-void confirmCommandWirelessly() {
-    printWirelessly("<OK>");
+void confirmCommandWirelessly(String command) {
+    printWirelessly(command);
 }
 
 void disconnectClient() {

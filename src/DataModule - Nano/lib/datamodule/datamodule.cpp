@@ -10,7 +10,7 @@
 
 #include "imu.h"
 #include "rpm.h"
-
+#include "analog.h"
 ///serial stuff
 // Define startMarker and endMarker as preprocessor macros
 #define startMarker '<'
@@ -156,6 +156,9 @@ BAJA_EMBEDDED::DataModule* create_data_module_type() {
     else if(data_module_select == 0b110){
         DEBUG_PRINTLN("IMU Detected");
         return new IMU_DataModule;
+    }
+    else if(data_module_select == 0b101) {
+        return new BRK_DataModule;
     }
     else {
         DEBUG_PRINTLN("No datamodule found for this pin selection");

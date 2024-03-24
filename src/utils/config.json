@@ -21,7 +21,8 @@
                     "RPM_REAR_RIGHT",
                     "RPM_FRONT_LEFT",
                     "RPM_FRONT_RIGHT",
-                    "BRAKE_PRESSURE",
+                    "BRAKE_PRESSURE_REAR",
+                    "BRAKE_PRESSURE_FRONT",
                     "GAS_ANGLE",
                     "BRAKE_ANGLE",
                     "ENGINE_RPM"]

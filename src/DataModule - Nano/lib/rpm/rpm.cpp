@@ -55,8 +55,8 @@ void RPM_DataModule::data_module_initialization_procedure()
 
     DEBUG_PRINTLN("RPM Data Module Setup Complete");
 
-    strcpy(dataHeaderArray[0], DATATYPES_RPM_FRONT_LEFT);
-    strcpy(dataHeaderArray[1], DATATYPES_RPM_FRONT_RIGHT);
+    strcpy(dataHeaderArray[0], DATA_TYPES_RPM_FRONT_LEFT);
+    strcpy(dataHeaderArray[1], DATA_TYPES_RPM_FRONT_RIGHT);
 
     startTimer2();
 }

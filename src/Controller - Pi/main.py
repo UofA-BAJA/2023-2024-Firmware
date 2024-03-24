@@ -40,6 +40,10 @@ class Controller:
 
                     self._insert_data_into_table(device_serial_obj)
 
+                    self.serial_devices._execute_single_command("LISTENUP", ModuleTypes.LORA_PI)
+                    for datatypes in self.datatypes:
+                        self.serial_devices._execute_single_command(datatypes, ModuleTypes.LORA_PI)
+                    self.serial_devices._execute_single_command("END", ModuleTypes.LORA_PI)
 
     def _get_datatypes_in_data(self, device_serial_obj):
 
@@ -133,7 +137,7 @@ class Controller:
                 parsed_input = Controller.parse_input(lora_serial_input)
                 command_type_enum = Commands[parsed_input]
                 self.handleCommand(command_type_enum=command_type_enum)
-                print("exit?")
+                print(f"Finished handling command: {command_type_enum} successfully.")
             except KeyError:
                 print(f"Serial input: {lora_serial_input} is not a valid command.")
 
