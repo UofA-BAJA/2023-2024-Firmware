@@ -3,13 +3,15 @@
 
 #include <Arduino.h>
 
-void initializeWifi();
+void tryToConnectToWifi();
 
-bool connectToHost();
+void connectToHost();
 
-String readWirelesssSingleLine();
+void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned long timeout);
 
-void printWirelessly(String str);
+// String readWirelesssSingleLine();
+
+void printWirelessly(const char* buffer);
 
 
 

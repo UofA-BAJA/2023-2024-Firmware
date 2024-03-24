@@ -7,10 +7,9 @@ void initializeWifi();
 
 bool connectClient();
 
-String readWirelesslySingleLine();
+void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned long timeout);
 
-void confirmCommandWirelessly(String command = "<OK>"); 
 
-void printWirelessly(String message);
+void printWirelessly(const char* buffer);
 
 #endif // WIFITRANSMISSION_H

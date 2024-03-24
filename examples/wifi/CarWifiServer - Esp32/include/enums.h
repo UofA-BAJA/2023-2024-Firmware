@@ -30,4 +30,12 @@
 #define DATA_TYPES_BRAKE_ANGLE "BRAKE_ANGLE"
 #define DATA_TYPES_ENGINE_RPM "ENGINE_RPM"
 
+#define MESSAGE_HEADERS_nxtdev ":nxtdev-"
+#define MESSAGE_HEADERS_mesg ":mesg-"
+
+#define WIRELESS_NODES_client "client"
+#define WIRELESS_NODES_server "server"
+#define WIRELESS_NODES_comput "comput"
+#define WIRELESS_NODES_rasbpi "rasbpi"
+
 #endif // ENUMS_H

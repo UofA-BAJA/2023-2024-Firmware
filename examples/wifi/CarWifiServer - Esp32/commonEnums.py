@@ -18,6 +18,9 @@ git_root = repo.git.rev_parse("--show-toplevel")
 # Construct the path to the file you want to reference
 file_path_in_git_root = Path(git_root) / 'src' / 'utils' / 'config.json'
 
+def sanitize_define_key(key):
+    return key.replace(" ", "_").replace(":", "").replace("-", "")
+
 def convert_json_to_header(source_json_path, output_header_path):
     # Read the JSON data
     with open(source_json_path, 'r') as json_file:
@@ -27,9 +30,10 @@ def convert_json_to_header(source_json_path, output_header_path):
 
     # Process each key in the JSON data
     for key, values in data.items():
+        sanitized_key = sanitize_define_key(key).upper()
         for i, value in enumerate(values, start=1):
-            define_key = key.upper().replace(" ", "_")
-            header_content += f'#define {define_key}_{value} "{value}"\n'
+            sanitized_value = sanitize_define_key(value)     
+            header_content += f'#define {sanitized_key}_{sanitized_value} "{value}"\n'
         header_content += "\n"  # Add a newline for readability between sections
 
     header_content += "#endif // ENUMS_H\n"
