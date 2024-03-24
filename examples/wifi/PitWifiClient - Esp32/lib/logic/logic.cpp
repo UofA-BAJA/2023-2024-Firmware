@@ -30,11 +30,12 @@ bool newData = false;
 enum WirelessTranscieverState {
     DONE_INITIALIZING,
     RESPOND_WITH_TYPE,
-    ATTEMPT_WIRELESS_CONNECT,
-    WAIT_FOR_SERIAL_COMMAND,
-    WAIT_FOR_WIRELESS_CONFIRMATION,
-    LISTEN_WIRELESSLY
+    SENDING_WIRELESS_MESSAGE,
+    WAITING_FOR_WIRELESS_RESPONSE,
+    SEND_SERIAL_TO_COMPUTER,
+    RECIEVING_SERIAL_FROM_COMPUTER,
 };
+
 
 WirelessTranscieverState wireless_transciever_state = DONE_INITIALIZING; //initial state
 
@@ -43,8 +44,6 @@ void operatingProcedure() {
     {
     case DONE_INITIALIZING: {
         pinMode(LED_BUILTIN, OUTPUT);
-
-        FLASH_LED_TIMES(1);
 
         Serial.println("Ready");
         Serial.flush();
@@ -65,27 +64,25 @@ void operatingProcedure() {
 
     case ATTEMPT_WIRELESS_CONNECT: {
         initializeWifi(); //u dont have to keep this when porting over lora
-
+        TURN_LED_ON;
         while (!connectToHost()) {}; //wait until it is connected to the server
-
-        FLASH_LED_TIMES(1);
+        TURN_LED_OFF;
 
         wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
         break;
     }
 
     case WAIT_FOR_SERIAL_COMMAND: {
-        TURN_LED_OFF;
         recvWithStartEndMarkers();
 
         if (newData) {
             // Make the onboard LED blink
-            TURN_LED_ON;
             Serial.println(receivedChars);
             Serial.flush();
             newData = false;
 
             // Send the received data to the server
+            TURN_LED_ON;
             printWirelessly(convertToCommand(receivedChars));
 
             wireless_response_timer = millis();
@@ -104,7 +101,8 @@ void operatingProcedure() {
             Serial.flush();
             TURN_LED_OFF;
 
-            if (response.indexOf("STAND") != -1) { 
+            if (response.indexOf("STAND") != -1) {
+                TURN_LED_ON; 
                 wireless_transciever_state = LISTEN_WIRELESSLY;
                 DEBUG_PRINTLN("Entering listen mode");
                 break;
@@ -118,9 +116,7 @@ void operatingProcedure() {
         }
         else {
             
-            Serial.println("Wireless response timeout");            
-            FLASH_LED_TIMES(2);
-            Serial.flush();
+            DEBUG_PRINTLN("Wireless response timeout");            
             DEBUG_PRINTLN("timed out so going to WAIT_FOR_SERIAL");
             wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
             break;
@@ -136,8 +132,8 @@ void operatingProcedure() {
         String output = readWirelesssSingleLine();
 
         if (output != "") {
+            TURN_LED_OFF; 
             // DEBUG_PRINT("Received: ");
-            FLASH_LED_TIMES(1);
             Serial.println(output);
             Serial.flush();
         } else {

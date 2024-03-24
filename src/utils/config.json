@@ -25,5 +25,17 @@
                     "BRAKE_PRESSURE_FRONT",
                     "GAS_ANGLE",
                     "BRAKE_ANGLE",
-                    "ENGINE_RPM"]
+                    "ENGINE_RPM"],
+
+    "Message Headers" : [
+        ":nxtdev-",
+        ":mes-"
+    ],
+
+    "Wireless Nodes" :  [
+        "client",
+        "server",
+        "comput",
+        "rasbpi"
+    ]
 }

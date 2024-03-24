@@ -59,10 +59,11 @@ void operatingProcedure() {
     }
 
     case WAIT_FOR_WIRELESS_CONNECTION: {
-        while (!connectClient()) {
-            
-        }
-        FLASH_LED_TIMES(1);
+        TURN_LED_ON;
+        while (!connectClient()) {}
+        TURN_LED_OFF;
+        delay(500);
+        TURN_LED_ON;
         wireless_transciever_state = LISTEN_WIRELESSLY;
         break;
     }
@@ -73,7 +74,7 @@ void operatingProcedure() {
 
         if (output != "") {
             // DEBUG_PRINT("Received: ");
-            FLASH_LED_TIMES(1);
+            TURN_LED_OFF;
             Serial.println(output);
             Serial.flush();
 
@@ -102,7 +103,6 @@ void operatingProcedure() {
     }
 
     case WAIT_FOR_SERIAL_COMMAND: {
-        TURN_LED_OFF;
 
         recvWithStartEndMarkers();
 
@@ -138,6 +138,7 @@ void operatingProcedure() {
                 printWirelessly(String(outboundChars));
 
                 DEBUG_PRINTLN("going back to listening wirelessly");
+                TURN_LED_ON;
                 wireless_transciever_state = LISTEN_WIRELESSLY;
             } else {
                 Serial.println("WRONG COMMAND");
