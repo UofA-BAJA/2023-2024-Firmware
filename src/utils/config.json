@@ -28,8 +28,10 @@
                     "ENGINE_RPM"],
 
     "Message Headers" : [
-        ":nxtdev-",
-        ":mesg-"
+        "-nxtdev:",
+        "-mesg:",
+        "ENDOFMSG",
+        "STARTMSG"
     ],
 
     "Wireless Nodes" :  [

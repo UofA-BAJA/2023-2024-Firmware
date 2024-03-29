@@ -70,29 +70,29 @@ bool isConnectedToWifiAndDevice() {
 
 void printWirelessly(const char* buffer) { 
     // Define the message header we're looking for
-    const char* messageHeader = ":mesg-";
+    // const char* messageHeader = ":mesg-";
 
-    // Find the message header in the buffer
-    const char* messageStart = strstr(buffer, messageHeader);
+    // // Find the message header in the buffer
+    // const char* messageStart = strstr(buffer, messageHeader);
     
-    if (messageStart != nullptr) {
-        // Adjust messageStart to point to the beginning of the actual message,
-        // skipping over the length of messageHeader
-        messageStart += strlen(messageHeader);
-    } else {
-        // If the header isn't found, we'll print the whole buffer as a fallback
-        messageStart = buffer;
-    }
+    // if (messageStart != nullptr) {
+    //     // Adjust messageStart to point to the beginning of the actual message,
+    //     // skipping over the length of messageHeader
+    //     messageStart += strlen(messageHeader);
+    // } else {
+    //     // If the header isn't found, we'll print the whole buffer as a fallback
+    //     messageStart = buffer;
+    // }
 
     if (client.connected()) {
-        client.print(messageStart);
+        client.print(buffer);
     } else {
         Serial.println("Lost connection to the server. Waiting for reconnection...");
 
         tryToConnectToWifi();
         connectToHost();
         
-        client.print(messageStart); // Retry sending after successful reconnection
+        client.print(buffer); // Retry sending after successful reconnection
             
     }
 }

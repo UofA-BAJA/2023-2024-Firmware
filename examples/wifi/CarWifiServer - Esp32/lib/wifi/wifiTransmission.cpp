@@ -27,21 +27,25 @@ void initializeWifi() {
 }
 
 bool connectClient() {
-    Serial.println("Waiting for a client...");
-   
-    client = server.accept(); // Listen for incoming clients
+    Serial.println("Trying for a client...");
 
-    if (client) { // If you get a client,
-        Serial.println("New Client."); // Print a message out the serial port
-        return true; // Return true as soon as a client connects
+    WiFiClient newClient = server.available(); // Check for incoming clients
+
+    if (newClient) { // If a new client has connected,
+        if (client.connected()) {
+            // If there was a previous client connected, close that connection.
+            Serial.println("Closing previous connection.");
+            client.stop();
+        }
+
+        // Update the 'client' with the new connection
+        client = newClient;
+        Serial.println("New client connected.");
+        return true; // Indicate that a new client has connected
     }
 
-    // Optional: delay to prevent the loop from running too fast,
-    // which might be useful to reduce CPU usage on some systems.
-    delay(500);
-    
-    // The function will never reach this point because of the infinite loop,
-    // but a return statement is needed to avoid compiler warnings.
+    // No new client has connected, return false.
+    // No delay here; manage delay externally if needed, to control how often to check for clients.
     return false;
 }
 
@@ -53,7 +57,7 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
     // Maximum index to write to, leaving space for null terminator
     size_t maxIndex = bufferSize - 1;
 
-    unsigned long startWaitTime = millis();
+    unsigned long lastStatusUpdateTime  = millis();
 
     while (true) {
         while (client.available() > 0 && index < maxIndex) {
@@ -66,18 +70,16 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
             break;
         }
 
-        if (millis() - startWaitTime > timeout) {
-            if (!connectClient()) {
-                // keep hoping for a client to connect
-                Serial.println("Client lost");
-                startWaitTime = millis(); // Reset waiting time
-
-                // break;
+        // Periodically print status messages
+        if (millis() - lastStatusUpdateTime > timeout) {
+            if (!client.connected()) {
+                Serial.println("Client disconnected, waiting for reconnection...");
+                // Attempt to reconnect here if necessary
+                connectClient();
             } else {
-                // Still connected, reset the timer and wait again
-                Serial.println("No data received, but still connected. Waiting again.");
-                startWaitTime = millis(); // Reset waiting time
+                Serial.println("Waiting for data...");
             }
+            lastStatusUpdateTime = millis(); // Update the time of the last status update
         }
 
         delay(1); // Small delay to prevent a tight loop
@@ -109,29 +111,29 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
 // }
 
 void printWirelessly(const char* buffer) { 
-    // Define the message header we're looking for
-    const char* messageHeader = ":mesg-";
+    // // Define the message header we're looking for
+    // const char* messageHeader = ":mesg-";
 
-    // Find the message header in the buffer
-    const char* messageStart = strstr(buffer, messageHeader);
+    // // Find the message header in the buffer
+    // const char* messageStart = strstr(buffer, messageHeader);
     
-    if (messageStart != nullptr) {
-        // Adjust messageStart to point to the beginning of the actual message,
-        // skipping over the length of messageHeader
-        messageStart += strlen(messageHeader);
-    } else {
-        // If the header isn't found, we'll print the whole buffer as a fallback
-        messageStart = buffer;
-    }
+    // if (messageStart != nullptr) {
+    //     // Adjust messageStart to point to the beginning of the actual message,
+    //     // skipping over the length of messageHeader
+    //     messageStart += strlen(messageHeader);
+    // } else {
+    //     // If the header isn't found, we'll print the whole buffer as a fallback
+    //     messageStart = buffer;
+    // }
 
     if (client.connected()) {
-        client.print(messageStart);
+        client.print(buffer);
     } else {
         Serial.println("Client Disconnected. Reconnecting...");
 
         while (!connectClient()) {}; // Keep trying to reconnect until successful
 
-        client.print(messageStart); // Retry sending after successful reconnection
+        client.print(buffer); // Retry sending after successful reconnection
             
     }
 }

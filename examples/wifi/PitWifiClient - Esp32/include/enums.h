@@ -30,8 +30,10 @@
 #define DATA_TYPES_BRAKE_ANGLE "BRAKE_ANGLE"
 #define DATA_TYPES_ENGINE_RPM "ENGINE_RPM"
 
-#define MESSAGE_HEADERS_nxtdev ":nxtdev-"
-#define MESSAGE_HEADERS_mesg ":mesg-"
+#define MESSAGE_HEADERS_nxtdev "-nxtdev:"
+#define MESSAGE_HEADERS_mesg "-mesg:"
+#define MESSAGE_HEADERS_ENDOFMSG "ENDOFMSG"
+#define MESSAGE_HEADERS_STARTMSG "STARTMSG"
 
 #define WIRELESS_NODES_client "client"
 #define WIRELESS_NODES_server "server"

@@ -14,7 +14,7 @@
 #define BUFFER_SIZE 1024
 #define WIRELESS_RESPONSE_TIMEOUT_MS 5000
 
-char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev WIRELESS_NODES_client MESSAGE_HEADERS_mesg;
+char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev WIRELESS_NODES_comput MESSAGE_HEADERS_mesg;
 char nextDevice[LEN_OF_DEVICE_NAME]; // Buffer for the next device, plus null terminator
 
 
@@ -68,19 +68,19 @@ void operatingProcedure() {
 
     case (WAITING_FOR_WIRELESS_RESPONSE): {
         ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
-
+        DEBUG_PRINTLN("Received: ");
+        DEBUG_PRINTLN(messageBuffer);
         printTextAfterHeader(messageBuffer, MESSAGE_HEADERS_mesg);
 
         getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
 
         if (strcmp(nextDevice, WIRELESS_NODES_client)) {
-            //the client wants the server to respond to its message
-            setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, "verified"); //we'll verify we got the message
-
-            //make the computer the next device so that the client starts waiting for serial commands from the computer
-            setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, WIRELESS_NODES_comput);
-
+            
+            DEBUG_PRINTLN("going to sending wireless state from waiting for response");
             wireless_transciever_state = SENDING_WIRELESS_MESSAGE;
+        }
+        else if (strcmp(nextDevice, WIRELESS_NODES_rasbpi)) {
+            wireless_transciever_state = SEND_SERIAL_TO_PI;
         }
 
         break;
@@ -91,14 +91,25 @@ void operatingProcedure() {
 
         if (strcmp(nextDevice, WIRELESS_NODES_client)) {
             //the host wants the client to respond to its message, weird
+            //the client wants the server to respond to its message
+            setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, "verified"); //we'll verify we got the message
+
+            //make the computer the next device so that the client starts waiting for serial commands from the computer
+            setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, WIRELESS_NODES_comput);
+
         }
 
         else if (strcmp(nextDevice, WIRELESS_NODES_comput)) {
             //the host wants the computer to respond to its message
-            printWirelessly(messageBuffer);
-
+            DEBUG_PRINTLN("going into sending wireless state agin from sending wireless");
+            DEBUG_PRINTLN(messageBuffer);
             wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
         }
+
+        DEBUG_PRINTLN("Sending message:");
+        DEBUG_PRINTLN(messageBuffer);
+        printWirelessly(messageBuffer);
+
 
         break;
     }
@@ -288,11 +299,11 @@ void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, con
             strcpy(insertPosition, newMessage);
         } else {
             // Handle the case where the new message would overflow the buffer
-            DEBUG_PRINTLN("Error: New message is too long to fit in the buffer after the header.");
+            DEBUG_PRINTLN("Editing Buffer: New message is too long to fit in the buffer after the header.");
         }
     } else {
         // Handle the case where the header is not found in the buffer
-        DEBUG_PRINTLN("Error: Header not found in the buffer.");
+        DEBUG_PRINTLN("Editing Buffer: Header not found in the buffer.");
     }
 }
 
@@ -307,6 +318,6 @@ void printTextAfterHeader(const char* buffer, const char* header) {
         Serial.println(messageStart);
     } else {
         // If the header is not found, print an error message
-        Serial.println("Error: Header not found in the buffer.");
+        Serial.println("Printing buffer: Header not found in the buffer.");
     }
 }

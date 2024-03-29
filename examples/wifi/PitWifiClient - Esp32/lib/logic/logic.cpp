@@ -13,7 +13,10 @@
 #define WIRELESS_RESPONSE_TIMEOUT_MS 5000
 
 char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev WIRELESS_NODES_client MESSAGE_HEADERS_mesg;
+//-nextdev:client-mesg:
 char nextDevice[LEN_OF_DEVICE_NAME]; // Buffer for the next device, plus null terminator
+
+bool onStartup = true;
 ///////////////////////////
 
 
@@ -63,6 +66,8 @@ void operatingProcedure() {
             Serial.flush();
             
             wireless_transciever_state = SENDING_WIRELESS_MESSAGE;
+            DEBUG_PRINTLN("inital message is:");
+            DEBUG_PRINTLN(messageBuffer);
         } 
         break;
     }
@@ -75,9 +80,11 @@ void operatingProcedure() {
 
             wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
             setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, "verify");
+            //-nextdev:client-mesg: -> -nextdev:client-mesg:verify
         }
 
-
+        DEBUG_PRINT("Sending message:");
+        DEBUG_PRINTLN(messageBuffer);
         printWirelessly(messageBuffer);
 
         break;
@@ -86,7 +93,15 @@ void operatingProcedure() {
     case WAITING_FOR_WIRELESS_RESPONSE: {
         ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
 
-        printTextAfterHeader(messageBuffer, MESSAGE_HEADERS_mesg);
+        if (onStartup) {
+            onStartup = false;
+            DEBUG_PRINTLN("Successfully recieved confirmation from host, now waiting for serial command from computer");
+            break;
+        }
+
+        DEBUG_PRINT("Received message:");
+        DEBUG_PRINTLN(messageBuffer);
+        // printTextAfterHeader(messageBuffer, MESSAGE_HEADERS_mesg);
 
         getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
 
@@ -97,6 +112,43 @@ void operatingProcedure() {
             //message is intended for the computer, so we will print out the message data serially
             wireless_transciever_state = SEND_SERIAL_TO_COMPUTER;
         }
+
+        break;
+    }
+
+    case SEND_SERIAL_TO_COMPUTER: {
+        
+        getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
+
+        if (strcmp(nextDevice, WIRELESS_NODES_comput)) {
+            //this message is intended for the computer, so we will wait for the computer to respond
+            setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, WIRELESS_NODES_client);
+            Serial.print(messageBuffer);
+            Serial.flush();
+        }
+
+        wireless_transciever_state = RECIEVING_SERIAL_FROM_COMPUTER;
+        break;
+    }
+
+    case RECIEVING_SERIAL_FROM_COMPUTER: {
+        recvWithStartEndMarkers();
+
+        if (newData) {
+            // DEBUG_PRINT("Received from computer: ");
+            // DEBUG_PRINTLN(receivedChars);
+            newData = false;
+
+            getNextDevice(receivedChars, nextDevice, LEN_OF_DEVICE_NAME);
+
+            setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, nextDevice);
+
+            if (strcmp(nextDevice, WIRELESS_NODES_server)) {
+                wireless_transciever_state = SENDING_WIRELESS_MESSAGE;
+
+            }
+        }
+        break;
     }
 
     // case ATTEMPT_WIRELESS_CONNECT: {
@@ -295,7 +347,7 @@ void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, con
         }
     } else {
         // Handle the case where the header is not found in the buffer
-        Serial.println("Error: Header not found in the buffer.");
+        Serial.println("EdtingBuffer: Header not found in the buffer.");
     }
 }
 
@@ -310,6 +362,6 @@ void printTextAfterHeader(const char* buffer, const char* header) {
         Serial.println(messageStart);
     } else {
         // If the header is not found, print an error message
-        Serial.println("Error: Header not found in the buffer.");
+        Serial.println("Printing: Header not found in the buffer.");
     }
 }
