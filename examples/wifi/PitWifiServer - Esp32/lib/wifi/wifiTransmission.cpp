@@ -27,7 +27,7 @@ void initializeWifi() {
 }
 
 bool connectClient() {
-    Serial.println("Trying for a client...");
+    Serial.println("Trying for a new client...");
 
     WiFiClient newClient = server.available(); // Check for incoming clients
 
@@ -72,12 +72,12 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
 
         // Periodically print status messages
         if (millis() - lastStatusUpdateTime > timeout) {
-            if (!client.connected()) {
-                Serial.println("Client disconnected, waiting for reconnection...");
+            if (!connectClient()) {
+                Serial.println("No client detected...");
                 // Attempt to reconnect here if necessary
-                connectClient();
+                // connectClient();
             } else {
-                Serial.println("Waiting for data...");
+                Serial.println("Client did not send any message, it is still connected, waiting for data...");
             }
             lastStatusUpdateTime = millis(); // Update the time of the last status update
         }

@@ -10,6 +10,10 @@ void recvWithStartEndMarkers();
 bool getNextDevice(const char* messageBuffer, char* output, size_t outputSize);
 String convertToCommand(char* receivedChars);
 void establishWirelessConnection();
+
 void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, const char* newMessage);
 void printTextAfterHeader(const char* buffer, const char* header);
+void setMessageInBufferTo(char* messageBuffer, const char* message);
+void setDeviceInBufferTo(char* messageBuffer, const char* device);
+
 #endif // LOGIC_H
