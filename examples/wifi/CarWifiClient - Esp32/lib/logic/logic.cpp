@@ -47,7 +47,6 @@ void operatingProcedure() {
     switch (wireless_transciever_state)
     {
     case DONE_INITIALIZING: {
-        tryToConnectToWifi(); //u dont have to keep this when porting over lora
 
         pinMode(LED_BUILTIN, OUTPUT);
 
@@ -70,24 +69,6 @@ void operatingProcedure() {
         break;
     }
 
-    // case SENDING_WIRELESS_MESSAGE: {
-    //     if (strstr(messageBuffer, WIRELESS_NODES_client) != NULL) {
-    //         // WIRELESS_NODES_client was found in messageBuffer
-    //         //this means that the message is intended for the client, which means that this is just a ping message to check if the client is still connected to the host
-    //         establishWirelessConnection();
-
-    //         wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
-    //         setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, "verify");
-    //         //-nextdev:client-mesg: -> -nextdev:client-mesg:verify
-    //     }
-
-    //     DEBUG_PRINT("Sending message:");
-    //     DEBUG_PRINTLN(messageBuffer);
-    //     printWirelessly(messageBuffer);
-
-    //     break;
-    // }
-
     case WAITING_FOR_WIRELESS_RESPONSE: {
         ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
 
@@ -101,10 +82,10 @@ void operatingProcedure() {
         
 
         getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
+        // DEBUG_PRINTLN(nextDevice);
 
         if (strcmp(nextDevice, WIRELESS_NODES_rasbpi)) {
             //message is intended for the computer, so we will print out the message data serially
-            DEBUG_PRINTLN("Received wireless message inteded for rasberry pi");
             Serial.println(messageBuffer);
             wireless_transciever_state = WAITING_FOR_SERIAL_FROM_PI;
         }
@@ -342,9 +323,9 @@ void establishWirelessConnection() {
 
 bool getNextDevice(const char* messageBuffer, char* output, size_t outputSize) {
 
-    const char* nxtdevLocation = strstr(messageBuffer, "nxtdev");
+    const char* nxtdevLocation = strstr(messageBuffer, "nxtdev:");
     if (nxtdevLocation != nullptr) {
-        const char* startOfInterest = nxtdevLocation + strlen("nxtdev");
+        const char* startOfInterest = nxtdevLocation + strlen("nxtdev:");
         
         if (startOfInterest - messageBuffer + 6 <= BUFFER_SIZE) {
             strncpy(output, startOfInterest, 6); // Copy the next 6 chars

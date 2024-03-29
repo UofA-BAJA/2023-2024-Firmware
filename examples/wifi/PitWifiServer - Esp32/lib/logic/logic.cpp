@@ -10,6 +10,8 @@
 #include "wifiTransmission.h"
 ///serial stuff
 #define WIRELESS_RESPONSE_TIMEOUT_MS 5000 // 5 seconds
+#define WIRELESS_HEARTBEAT_FREQUENCY_MS 5000 // 5 seconds
+
 //wireless stuff
 #define LEN_OF_DEVICE_NAME 7
 #define BUFFER_SIZE 255
@@ -32,7 +34,7 @@ bool newData = false;
 enum WirelessTranscieverState {
     DONE_INITIALIZING,
     WAITING_TO_RESPOND_WITH_TYPE,
-    WAITING_FOR_WIRELESS_RESPONSE,
+    HANDLE_WIRELESS_RESPONSE,
     WAITING_FOR_SERIAL_FROM_COMPUTER,
 };
 
@@ -57,16 +59,17 @@ void operatingProcedure() {
             Serial.println("LORA_PIT");
             Serial.flush();
             
-            wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
+            wireless_transciever_state = WAITING_FOR_SERIAL_FROM_COMPUTER;
         } 
         break;
     }
 
-    case (WAITING_FOR_WIRELESS_RESPONSE): {
+    case (HANDLE_WIRELESS_RESPONSE): {
         ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
         
         if (messageBuffer[0] == '\0') {
             isClientConnected = false;
+            DEBUG_PRINTLN("Client disconnected");
         }
 
         getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
@@ -83,11 +86,6 @@ void operatingProcedure() {
             isClientConnected = true;
             wireless_transciever_state = WAITING_FOR_SERIAL_FROM_COMPUTER;
         }
-
-        else {
-            DEBUG_PRINTLN("Received: ");
-            DEBUG_PRINTLN(messageBuffer);
-        }
         
 
         break;
@@ -102,28 +100,31 @@ void operatingProcedure() {
             DEBUG_PRINT("Received: ");
             DEBUG_PRINTLN(messageBuffer);
 
+            Serial.print("WSTATUS:");
+            Serial.println(isClientConnected);
+            Serial.flush();
+            
             getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
 
             if (strcmp(nextDevice, WIRELESS_NODES_rasbpi)) {
                 //the computer sent a message that it wants at the pi, so the server will send this message to client and wait for a response
                 printWirelessly(messageBuffer);
-                wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
+                wireless_transciever_state = HANDLE_WIRELESS_RESPONSE;
             }
         } else {
             // If no new data received, check if it's time to send a heartbeat
             static unsigned long lastHeartbeatTime = 0;
-            const long heartbeatInterval = 5000; // Time between heartbeats in milliseconds
 
             unsigned long currentMillis = millis();
-            if (currentMillis - lastHeartbeatTime >= heartbeatInterval) {
+            if (currentMillis - lastHeartbeatTime >= WIRELESS_HEARTBEAT_FREQUENCY_MS) {
                 lastHeartbeatTime = currentMillis;
                 
                 // Send heartbeat message to the computer
-                DEBUG_PRINTLN("Sending heartbeat to car...");
+                // DEBUG_PRINTLN("Sending heartbeat to car...");
                 setDeviceAndMessageInBufferTo(WIRELESS_NODES_client, "heartbeat");
                 printWirelessly(messageBuffer);
                 
-                wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
+                wireless_transciever_state = HANDLE_WIRELESS_RESPONSE;
 
             }
         }
@@ -146,7 +147,7 @@ void operatingProcedure() {
     //         //the host wants the computer to respond to its message
     //         DEBUG_PRINTLN("going into sending wireless state agin from sending wireless");
     //         DEBUG_PRINTLN(messageBuffer);
-    //         wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
+    //         wireless_transciever_state = HANDLE_WIRELESS_RESPONSE;
     //     }
 
     //     DEBUG_PRINTLN("Sending message:");

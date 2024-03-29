@@ -57,7 +57,7 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
     // Maximum index to write to, leaving space for null terminator
     size_t maxIndex = bufferSize - 1;
 
-    unsigned long lastStatusUpdateTime  = millis();
+    unsigned long startWaitTime  = millis();
     
     while (true) {
         while (client.available() > 0 && index < maxIndex) {
@@ -71,7 +71,7 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
         }
 
         // Periodically print status messages
-        if (millis() - lastStatusUpdateTime > timeout) {
+        if (millis() - startWaitTime > timeout) {
             if (!client.connected()) {
                 Serial.println("No client detected...");
                 // Attempt to reconnect here if necessary
@@ -79,7 +79,7 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
             } else {
                 Serial.println("Client did not send any message, it is still connected, waiting for data...");
             }
-            lastStatusUpdateTime = millis(); // Update the time of the last status update
+            break;
         }
 
         delay(5); // Small delay to prevent a tight loop
