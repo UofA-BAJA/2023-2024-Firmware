@@ -14,7 +14,7 @@
 #define BUFFER_SIZE 1024
 #define WIRELESS_RESPONSE_TIMEOUT_MS 5000
 
-char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev WIRELESS_NODES_comput MESSAGE_HEADERS_mesg;
+char wirelessMessageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev WIRELESS_NODES_comput MESSAGE_HEADERS_mesg;
 char nextDevice[LEN_OF_DEVICE_NAME]; // Buffer for the next device, plus null terminator
 
 
@@ -66,19 +66,19 @@ void operatingProcedure() {
     }
 
     case (WAITING_FOR_WIRELESS_RESPONSE): {
-        ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
+        ReadWirelessIntoBufferWithTimeout(wirelessMessageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
         DEBUG_PRINTLN("Received: ");
-        DEBUG_PRINTLN(messageBuffer);
+        DEBUG_PRINTLN(wirelessMessageBuffer);
 
-        getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
+        getNextDevice(wirelessMessageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
 
         if (strcmp(nextDevice, WIRELESS_NODES_client)) {
             //the client sent a message to which its intended device is the client, that means it just wants an acknowledgement
             //the server will go back to listening to the computer for serial input after the acknowledgement
             //the client will go back to listening to the server for a message after the acknowledgement
-            setDeviceInBufferTo(messageBuffer, WIRELESS_NODES_server);
-            setMessageInBufferTo(messageBuffer, "acknowledged");
-            printWirelessly(messageBuffer);
+            setDeviceInBufferTo(wirelessMessageBuffer, WIRELESS_NODES_server);
+            setMessageInBufferTo(wirelessMessageBuffer, "acknowledged");
+            printWirelessly(wirelessMessageBuffer);
 
             DEBUG_PRINTLN("going to sending wireless state from waiting for response");
             wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
@@ -92,6 +92,14 @@ void operatingProcedure() {
         break;
     }
 
+    case WAITING_FOR_SERIAL_FROM_COMPUTER:
+        recvWithStartEndMarkers();
+
+         if (newData) {
+            newData = false;
+
+            
+        }
     // case SENDING_WIRELESS_MESSAGE: {
     //     getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
 
@@ -276,13 +284,13 @@ bool waitForCommand(const char* cmmdString) {
     return false;
 }
 
-bool getNextDevice(const char* messageBuffer, char* output, size_t outputSize) {
+bool getNextDevice(const char* wirelessMessageBuffer, char* output, size_t outputSize) {
 
-    const char* nxtdevLocation = strstr(messageBuffer, "nxtdev");
+    const char* nxtdevLocation = strstr(wirelessMessageBuffer, "nxtdev");
     if (nxtdevLocation != nullptr) {
         const char* startOfInterest = nxtdevLocation + strlen("nxtdev");
         
-        if (startOfInterest - messageBuffer + 6 <= BUFFER_SIZE) {
+        if (startOfInterest -wirelessMessageBuffer + 6 <= BUFFER_SIZE) {
             strncpy(output, startOfInterest, 6); // Copy the next 6 chars
             output[6] = '\0'; // Ensure null termination
             return true;
@@ -341,10 +349,10 @@ void printTextAfterHeader(const char* buffer, const char* header) {
     }
 }
 
-void setMessageInBufferTo(char* messageBuffer, const char* message) {
-    setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, message);
+void setMessageInBufferTo(const char* message) {
+    setTextAfterHeader(wirelessMessageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, message);
 }
 
-void setDeviceInBufferTo(char* messageBuffer, const char* device) {
-    setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, device);
+void setDeviceInBufferTo(const char* device) {
+    setTextAfterHeader(wirelessMessageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, device);
 }

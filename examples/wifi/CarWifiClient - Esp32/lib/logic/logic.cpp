@@ -12,7 +12,7 @@
 #define BUFFER_SIZE 1024
 #define WIRELESS_RESPONSE_TIMEOUT_MS 5000
 
-char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev WIRELESS_NODES_client MESSAGE_HEADERS_mesg;
+char wirelessMessageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev WIRELESS_NODES_client MESSAGE_HEADERS_mesg;
 //-nextdev:client-mesg:
 char nextDevice[LEN_OF_DEVICE_NAME]; // Buffer for the next device, plus null terminator
 
@@ -67,11 +67,11 @@ void operatingProcedure() {
             establishWirelessConnection();
             // DEBUG_PRINTLN("inital message is:");
             // DEBUG_PRINTLN(messageBuffer);
-            setDeviceInBufferTo(messageBuffer, WIRELESS_NODES_client);
+            setDeviceInBufferTo(WIRELESS_NODES_client);
             // DEBUG_PRINTLN("device after modified device:");
             // DEBUG_PRINTLN(messageBuffer);
-            setMessageInBufferTo(messageBuffer, "Present.");
-            printWirelessly(messageBuffer);
+            setMessageInBufferTo("Present!");
+            printWirelessly(wirelessMessageBuffer);
 
             // DEBUG_PRINTLN("message being sent is:");
             // DEBUG_PRINTLN(messageBuffer);
@@ -100,7 +100,7 @@ void operatingProcedure() {
     // }
 
     case WAITING_FOR_WIRELESS_RESPONSE: {
-        ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
+        ReadWirelessIntoBufferWithTimeout(wirelessMessageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
 
         if (onStartup) {
             onStartup = false;
@@ -109,10 +109,10 @@ void operatingProcedure() {
         }
 
         DEBUG_PRINT("Received message:");
-        DEBUG_PRINTLN(messageBuffer);
+        DEBUG_PRINTLN(wirelessMessageBuffer);
         // printTextAfterHeader(messageBuffer, MESSAGE_HEADERS_mesg);
 
-        getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
+        getNextDevice(wirelessMessageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
 
         if (strcmp(nextDevice, WIRELESS_NODES_client)) {
             //this message is intended for the client, the host wants the client to respond with a message
@@ -388,10 +388,10 @@ void printTextAfterHeader(const char* buffer, const char* header) {
     }
 }
 
-void setMessageInBufferTo(char* messageBuffer, const char* message) {
-    setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, message);
+void setMessageInBufferTo(const char* message) {
+    setTextAfterHeader(wirelessMessageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, message);
 }
 
-void setDeviceInBufferTo(char* messageBuffer, const char* device) {
-    setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, device);
+void setDeviceInBufferTo(const char* device) {
+    setTextAfterHeader(wirelessMessageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, device);
 }
