@@ -81,17 +81,15 @@ void operatingProcedure() {
         }
         
 
-        getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
-        // DEBUG_PRINTLN(nextDevice);
-
-        if (strcmp(nextDevice, WIRELESS_NODES_rasbpi)) {
+        if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi)) {
             //message is intended for the computer, so we will print out the message data serially
             Serial.println(messageBuffer);
             wireless_transciever_state = WAITING_FOR_SERIAL_FROM_PI;
         }
-        else if (strcmp(nextDevice, WIRELESS_NODES_client)) {
+        else if (isMessageMeantForDevice(WIRELESS_NODES_client)) {
             //message is sent from the server, and it is intended to end at the client, the server probably is just sending a heart beat message
             //send back a present message
+            DEBUG_PRINTLN("Sending present message to server");
             setDeviceAndMessageInBufferTo(WIRELESS_NODES_server, "Present!");
             printWirelessly(messageBuffer);
         }
@@ -336,6 +334,15 @@ bool getNextDevice(const char* messageBuffer, char* output, size_t outputSize) {
     return false; // Return false if 'nxtdev' not found or there's insufficient space
 }
 
+bool isMessageMeantForDevice(const char* device) {
+    
+    getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
+    if (strcmp(nextDevice, device) == 0) {
+        return true;
+    }
+    return false;
+}
+
 void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, const char* newMessage) {
     // Find the header in the buffer
     char* headerLocation = strstr(buffer, header);
@@ -371,20 +378,6 @@ void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, con
     }
 }
 
-void printTextAfterHeader(const char* buffer, const char* header) {
-    // Find the header in the buffer
-    const char* headerLocation = strstr(buffer, header);
-    if (headerLocation != nullptr) {
-        // Calculate the start of the message content by skipping the header
-        const char* messageStart = headerLocation + strlen(header);
-        
-        // Print the message content to Serial
-        Serial.println(messageStart);
-    } else {
-        // If the header is not found, print an error message
-        Serial.println("Printing: Header not found in the buffer.");
-    }
-}
 
 void setDeviceAndMessageInBufferTo(const char* device, const char* message) {
     resetMessageBuffer();

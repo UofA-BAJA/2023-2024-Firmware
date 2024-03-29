@@ -76,9 +76,10 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
                 Serial.println("No client detected...");
                 // Attempt to reconnect here if necessary
                 connectClient();
-            } else {
-                Serial.println("Client did not send any message, it is still connected, waiting for data...");
-            }
+            } 
+                
+            // Serial.println("Client response timed out...");
+            
             break;
         }
 

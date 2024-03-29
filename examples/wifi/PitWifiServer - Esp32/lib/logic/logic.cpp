@@ -71,6 +71,10 @@ void operatingProcedure() {
             isClientConnected = false;
             DEBUG_PRINTLN("Client disconnected");
         }
+        else {
+            DEBUG_PRINT("Wirelessly Received: ");
+            DEBUG_PRINTLN(messageBuffer);
+        }
 
         getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
 
@@ -97,13 +101,13 @@ void operatingProcedure() {
         if (newData) {
             newData = false;
             Serial.flush();
-            DEBUG_PRINT("Received: ");
+            DEBUG_PRINT("Serially Received: ");
             DEBUG_PRINTLN(messageBuffer);
 
             Serial.print("WSTATUS:");
             Serial.println(isClientConnected);
             Serial.flush();
-            
+
             getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
 
             if (strcmp(nextDevice, WIRELESS_NODES_rasbpi)) {
@@ -120,7 +124,7 @@ void operatingProcedure() {
                 lastHeartbeatTime = currentMillis;
                 
                 // Send heartbeat message to the computer
-                // DEBUG_PRINTLN("Sending heartbeat to car...");
+                DEBUG_PRINTLN("Sending heartbeat to car...");
                 setDeviceAndMessageInBufferTo(WIRELESS_NODES_client, "heartbeat");
                 printWirelessly(messageBuffer);
                 
