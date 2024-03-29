@@ -13,6 +13,6 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
 
 void printWirelessly(const char* buffer);
 
-
+bool isThereWirelessDataToRead();
 
 #endif // WIFITRANSMISSION_H

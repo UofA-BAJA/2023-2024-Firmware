@@ -9,10 +9,10 @@
 #include "wifiTransmission.h"
 //wireless stuff
 #define LEN_OF_DEVICE_NAME 7
-#define BUFFER_SIZE 1024
-#define WIRELESS_RESPONSE_TIMEOUT_MS 5000
+#define BUFFER_SIZE 255
+#define WIRELESS_RESPONSE_TIMEOUT_MS 10000
 
-char wirelessMessageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev WIRELESS_NODES_client MESSAGE_HEADERS_mesg;
+char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev MESSAGE_HEADERS_mesg;
 //-nextdev:client-mesg:
 char nextDevice[LEN_OF_DEVICE_NAME]; // Buffer for the next device, plus null terminator
 
@@ -24,8 +24,7 @@ bool onStartup = true;
 // Define startMarker and endMarker as preprocessor macros
 #define startMarker '<'
 #define endMarker '>'
-const char numChars = 32;
-char receivedChars[numChars];   // an array to store the received data
+
 bool newData = false;
 ////////////////////////////
 
@@ -65,17 +64,7 @@ void operatingProcedure() {
             Serial.flush();
             
             establishWirelessConnection();
-            // DEBUG_PRINTLN("inital message is:");
-            // DEBUG_PRINTLN(messageBuffer);
-            setDeviceInBufferTo(WIRELESS_NODES_client);
-            // DEBUG_PRINTLN("device after modified device:");
-            // DEBUG_PRINTLN(messageBuffer);
-            setMessageInBufferTo("Present!");
-            printWirelessly(wirelessMessageBuffer);
-
-            // DEBUG_PRINTLN("message being sent is:");
-            // DEBUG_PRINTLN(messageBuffer);
-
+        
             wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
         } 
         break;
@@ -100,31 +89,59 @@ void operatingProcedure() {
     // }
 
     case WAITING_FOR_WIRELESS_RESPONSE: {
-        ReadWirelessIntoBufferWithTimeout(wirelessMessageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
+        ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
 
-        if (onStartup) {
-            onStartup = false;
-            DEBUG_PRINTLN("Successfully recieved confirmation from host, now waiting for serial command from computer");
-            break;
+        if (messageBuffer[0] == '\0') {
+            // DEBUG_PRINTLN("sending message to client to verify connection");
         }
-
-        DEBUG_PRINT("Received message:");
-        DEBUG_PRINTLN(wirelessMessageBuffer);
-        // printTextAfterHeader(messageBuffer, MESSAGE_HEADERS_mesg);
-
-        getNextDevice(wirelessMessageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
-
-        if (strcmp(nextDevice, WIRELESS_NODES_client)) {
-            //this message is intended for the client, the host wants the client to respond with a message
+        else {
+            DEBUG_PRINT("Received message:");
+            DEBUG_PRINTLN(messageBuffer);
         }
-        else if (strcmp(nextDevice, WIRELESS_NODES_comput)) {
+        
+
+        getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
+
+        if (strcmp(nextDevice, WIRELESS_NODES_rasbpi)) {
             //message is intended for the computer, so we will print out the message data serially
-            wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
+            DEBUG_PRINTLN("Received wireless message inteded for rasberry pi");
+            Serial.println(messageBuffer);
+            wireless_transciever_state = WAITING_FOR_SERIAL_FROM_PI;
+        }
+        else if (strcmp(nextDevice, WIRELESS_NODES_client)) {
+            //message is sent from the server, and it is intended to end at the client, the server probably is just sending a heart beat message
+            //send back a present message
+            setDeviceAndMessageInBufferTo(WIRELESS_NODES_server, "Present!");
+            printWirelessly(messageBuffer);
         }
 
         break;
     }
 
+    case WAITING_FOR_SERIAL_FROM_PI: {
+        recvWithStartEndMarkers();
+
+        if (isThereWirelessDataToRead()) {
+            wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
+
+        } else {
+            if (newData) {
+                DEBUG_PRINT("Received from pi: ");
+                DEBUG_PRINTLN(messageBuffer);
+                newData = false;
+
+                getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
+
+                if (strcmp(nextDevice, WIRELESS_NODES_comput)) {
+
+                    printWirelessly(messageBuffer);
+                    wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
+                }
+            } 
+        }
+        
+        break;
+    }
     // case SEND_SERIAL_TO_COMPUTER: {
         
     //     getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
@@ -261,14 +278,14 @@ void recvWithStartEndMarkers() {
 
         if (recvInProgress == true) {
             if (rc != endMarker) {
-                receivedChars[ndx] = rc;
+                messageBuffer[ndx] = rc;
                 ndx++;
-                if (ndx >= numChars) {
-                    ndx = numChars - 1;
+                if (ndx >= BUFFER_SIZE) {
+                    ndx = BUFFER_SIZE - 1;
                 }
             }
             else {
-                receivedChars[ndx] = '\0'; // terminate the string
+                messageBuffer[ndx] = '\0'; // terminate the string
                 recvInProgress = false;
                 ndx = 0;
                 newData = true;
@@ -288,16 +305,16 @@ bool waitForCommand(const char* cmmdString) {
     recvWithStartEndMarkers();
     if (newData) {
 
-        if (strcmp(receivedChars, cmmdString) == 0) {
-            receivedChars[0] = '\0'; //clear received chars
+        if (strcmp(messageBuffer, cmmdString) == 0) {
+            messageBuffer[0] = '\0'; //clear received chars
             return true;
         }
-        else if (receivedChars[0] != '\0')
+        else if (messageBuffer[0] != '\0')
         {
             DEBUG_PRINT("Currently is in state: ");
             DEBUG_PRINTLN(wireless_transciever_state);
             DEBUG_PRINT("Incorrect Command: ");
-            DEBUG_PRINTLN(receivedChars);
+            DEBUG_PRINTLN(messageBuffer);
         }
         else {
             // The receivedChars array is empty, so do not print "command not recognized"
@@ -388,10 +405,30 @@ void printTextAfterHeader(const char* buffer, const char* header) {
     }
 }
 
-void setMessageInBufferTo(const char* message) {
-    setTextAfterHeader(wirelessMessageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, message);
+void setDeviceAndMessageInBufferTo(const char* device, const char* message) {
+    resetMessageBuffer();
+
+    setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, device);
+
+    setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, message);
 }
 
-void setDeviceInBufferTo(const char* device) {
-    setTextAfterHeader(wirelessMessageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, device);
+
+// Function to reset the message buffer
+void resetMessageBuffer() {
+    // Ensure the buffer is clean before use
+    memset(messageBuffer, 0, BUFFER_SIZE);
+
+    // Calculate space left after adding MESSAGE_HEADERS_nxtdev
+    size_t spaceLeft = BUFFER_SIZE - strlen(MESSAGE_HEADERS_nxtdev) - 1; // -1 for null terminator
+
+    // Check if MESSAGE_HEADERS_mesg fits into the buffer alongside MESSAGE_HEADERS_nxtdev
+    if (strlen(MESSAGE_HEADERS_mesg) < spaceLeft) {
+        // Concatenate MESSAGE_HEADERS_nxtdev and MESSAGE_HEADERS_mesg into the buffer
+        strcpy(messageBuffer, MESSAGE_HEADERS_nxtdev);
+        strcat(messageBuffer, MESSAGE_HEADERS_mesg);
+    } else {
+        // Handle error: not enough space
+        Serial.println("Error: Not enough space in buffer for both headers.");
+    }
 }

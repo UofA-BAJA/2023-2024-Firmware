@@ -170,14 +170,18 @@ void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned
                 connectToHost();
                 // break;
             } else {
-                // Still connected, reset the timer and wait again
-                Serial.println("No data received, but still connected. Waiting again.");
-                startWaitTime = millis(); // Reset waiting time
+                // Still connected but no data was received within the timeout period
+                Serial.println("Timeout reached without receiving data.");
             }
+            break; // Break after handling timeout condition, regardless of connection status
         }
 
         delay(1); // Small delay to prevent a tight loop
     }
 
     buffer[index] = '\0'; // Null-terminate the buffer
+}
+
+bool isThereWirelessDataToRead() {
+    return client.available() > 0;
 }
