@@ -1,6 +1,6 @@
 {
     "name": "esp32-bajablast",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "description": "A library providing enhanced functionalities for the ESP32.",
     "keywords": [
       "esp32",
@@ -24,7 +24,7 @@
     "platforms": "espressif32",
 
     "scripts" : {
-      "postinstall" : "scripts/commonEnums.py"
+      "postinstall" : "scripts/test.py"
     }
   }
   
