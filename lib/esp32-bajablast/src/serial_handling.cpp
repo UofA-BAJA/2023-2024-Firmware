@@ -42,6 +42,8 @@ void recvWithStartEndMarkers(char* messageBuffer, const byte bufferSize) {
     }
 }
 
+/*this function will wait for a command to be received and will return a boolean if the command is successfuly recieved
+    give the function a defined command from enums.h as input*/
 bool waitForCommand(const char* cmmdString, char* messageBuffer, const byte bufferSize) {
     recvWithStartEndMarkers(messageBuffer, bufferSize);
     if (newData) {
