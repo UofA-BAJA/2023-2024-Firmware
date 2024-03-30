@@ -1,6 +1,6 @@
 {
     "name": "esp32-bajablast",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "A library providing enhanced functionalities for the ESP32.",
     "keywords": [
       "esp32",
