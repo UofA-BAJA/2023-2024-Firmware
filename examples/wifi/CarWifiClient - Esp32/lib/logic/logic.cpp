@@ -309,20 +309,20 @@ void establishWirelessConnection() {
     connectToHost();
 }
 
-bool getNextDevice(const char* messageBuffer, char* output, size_t outputSize) {
+// bool getNextDevice(const char* messageBuffer, char* output, size_t outputSize) {
 
-    const char* nxtdevLocation = strstr(messageBuffer, "nxtdev:");
-    if (nxtdevLocation != nullptr) {
-        const char* startOfInterest = nxtdevLocation + strlen("nxtdev:");
+//     const char* nxtdevLocation = strstr(messageBuffer, "nxtdev:");
+//     if (nxtdevLocation != nullptr) {
+//         const char* startOfInterest = nxtdevLocation + strlen("nxtdev:");
         
-        if (startOfInterest - messageBuffer + 6 <= BUFFER_SIZE) {
-            strncpy(output, startOfInterest, 6); // Copy the next 6 chars
-            output[6] = '\0'; // Ensure null termination
-            return true;
-        }
-    }
-    return false; // Return false if 'nxtdev' not found or there's insufficient space
-}
+//         if (startOfInterest - messageBuffer + 6 <= BUFFER_SIZE) {
+//             strncpy(output, startOfInterest, 6); // Copy the next 6 chars
+//             output[6] = '\0'; // Ensure null termination
+//             return true;
+//         }
+//     }
+//     return false; // Return false if 'nxtdev' not found or there's insufficient space
+// }
 
 bool isMessageMeantForDevice(const char* device) {
     

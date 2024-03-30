@@ -15,7 +15,7 @@
                     "QUIT", 
                     "SENDTYPE" ],
 
-    "Data Types" :   ["PITCH",
+    "Data Types" :   ["PITC",
                     "ROLL",
                     "RPM_REAR_LEFT",
                     "RPM_REAR_RIGHT",
