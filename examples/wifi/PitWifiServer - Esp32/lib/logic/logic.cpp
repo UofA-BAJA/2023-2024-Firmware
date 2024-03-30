@@ -15,7 +15,7 @@
 //wireless stuff
 #define LEN_OF_DEVICE_NAME 7
 #define BUFFER_SIZE 255
-char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev WIRELESS_NODES_comput MESSAGE_HEADERS_mesg; // the -3 is to account for the start and end markers and null terminator
+char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_fart MESSAGE_HEADERS_nxtdev WIRELESS_NODES_comput MESSAGE_HEADERS_mesg MESSAGE_HEADERS_bend; // the -3 is to account for the start and end markers and null terminator
 char nextDevice[LEN_OF_DEVICE_NAME]; // Buffer for the next device, plus null terminator
 bool isClientConnected = false;
 
@@ -371,20 +371,7 @@ void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, con
     }
 }
 
-void printTextAfterHeader(const char* buffer, const char* header) {
-    // Find the header in the buffer
-    const char* headerLocation = strstr(buffer, header);
-    if (headerLocation != nullptr) {
-        // Calculate the start of the message content by skipping the header
-        const char* messageStart = headerLocation + strlen(header);
-        
-        // Print the message content to Serial
-        Serial.println(messageStart);
-    } else {
-        // If the header is not found, print an error message
-        Serial.println("Printing buffer: Header not found in the buffer.");
-    }
-}
+
 void setDeviceAndMessageInBufferTo(const char* device, const char* message) {
     resetMessageBuffer();
 
@@ -404,8 +391,10 @@ void resetMessageBuffer() {
     // Check if MESSAGE_HEADERS_mesg fits into the buffer alongside MESSAGE_HEADERS_nxtdev
     if (strlen(MESSAGE_HEADERS_mesg) < spaceLeft) {
         // Concatenate MESSAGE_HEADERS_nxtdev and MESSAGE_HEADERS_mesg into the buffer
-        strcpy(messageBuffer, MESSAGE_HEADERS_nxtdev);
+        strcpy(messageBuffer, MESSAGE_HEADERS_fart);
+        strcat(messageBuffer, MESSAGE_HEADERS_nxtdev);
         strcat(messageBuffer, MESSAGE_HEADERS_mesg);
+        strcat(messageBuffer, MESSAGE_HEADERS_bend);
     } else {
         // Handle error: not enough space
         Serial.println("Error: Not enough space in buffer for both headers.");

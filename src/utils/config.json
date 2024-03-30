@@ -30,8 +30,8 @@
     "Message Headers" : [
         "-nxtdev:",
         "-mesg:",
-        "ENDOFMSG",
-        "STARTMSG"
+        "fart", 
+        "bend"
     ],
 
     "Wireless Nodes" :  [

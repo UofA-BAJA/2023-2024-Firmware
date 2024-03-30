@@ -32,8 +32,8 @@
 
 #define MESSAGE_HEADERS_nxtdev "-nxtdev:"
 #define MESSAGE_HEADERS_mesg "-mesg:"
-#define MESSAGE_HEADERS_ENDOFMSG "ENDOFMSG"
-#define MESSAGE_HEADERS_STARTMSG "STARTMSG"
+#define MESSAGE_HEADERS_fart "fart"
+#define MESSAGE_HEADERS_bend "bend"
 
 #define WIRELESS_NODES_client "client"
 #define WIRELESS_NODES_server "server"

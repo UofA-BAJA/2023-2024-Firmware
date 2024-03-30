@@ -23,7 +23,7 @@ def sanitize_define_key(key):
 
 def convert_json_to_header(source_json_path, output_header_path):
     # Read the JSON data
-    with open(source_json_path, 'r') as json_file:
+    with open(source_json_path, 'r', encoding="utf-8") as json_file:
         data = json.load(json_file)
 
     header_content = "#ifndef ENUMS_H\n#define ENUMS_H\n\n"

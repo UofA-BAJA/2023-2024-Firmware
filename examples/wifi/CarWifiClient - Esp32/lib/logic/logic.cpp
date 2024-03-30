@@ -12,7 +12,7 @@
 #define BUFFER_SIZE 255
 #define WIRELESS_RESPONSE_TIMEOUT_MS 10000
 
-char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_nxtdev MESSAGE_HEADERS_mesg;
+char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_fart MESSAGE_HEADERS_nxtdev MESSAGE_HEADERS_mesg MESSAGE_HEADERS_bend;
 //-nextdev:client-mesg:
 char nextDevice[LEN_OF_DEVICE_NAME]; // Buffer for the next device, plus null terminator
 
@@ -73,27 +73,15 @@ void operatingProcedure() {
         ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
 
         if (messageBuffer[0] == '\0') {
-            // DEBUG_PRINTLN("sending message to client to verify connection");
+            //received nothing
         }
         else {
             DEBUG_PRINT("Received message:");
             DEBUG_PRINTLN(messageBuffer);
         }
         
-
-        if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi)) {
-            //message is intended for the computer, so we will print out the message data serially
-            Serial.println(messageBuffer);
-            wireless_transciever_state = WAITING_FOR_SERIAL_FROM_PI;
-        }
-        else if (isMessageMeantForDevice(WIRELESS_NODES_client)) {
-            //message is sent from the server, and it is intended to end at the client, the server probably is just sending a heart beat message
-            //send back a present message
-            DEBUG_PRINTLN("Sending present message to server");
-            setDeviceAndMessageInBufferTo(WIRELESS_NODES_server, "Present!");
-            printWirelessly(messageBuffer);
-        }
-
+        parseMessage();
+        
         break;
     }
 
@@ -343,6 +331,7 @@ bool isMessageMeantForDevice(const char* device) {
     return false;
 }
 
+
 void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, const char* newMessage) {
     // Find the header in the buffer
     char* headerLocation = strstr(buffer, header);
@@ -399,10 +388,33 @@ void resetMessageBuffer() {
     // Check if MESSAGE_HEADERS_mesg fits into the buffer alongside MESSAGE_HEADERS_nxtdev
     if (strlen(MESSAGE_HEADERS_mesg) < spaceLeft) {
         // Concatenate MESSAGE_HEADERS_nxtdev and MESSAGE_HEADERS_mesg into the buffer
-        strcpy(messageBuffer, MESSAGE_HEADERS_nxtdev);
+        strcpy(messageBuffer, MESSAGE_HEADERS_fart);
+        strcat(messageBuffer, MESSAGE_HEADERS_nxtdev);
         strcat(messageBuffer, MESSAGE_HEADERS_mesg);
+        strcat(messageBuffer, MESSAGE_HEADERS_bend);
     } else {
         // Handle error: not enough space
         Serial.println("Error: Not enough space in buffer for both headers.");
     }
+}
+
+
+void changeStateOnMessage(char* startOfMessage) {
+    if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi)) {
+        //message is intended for the computer, so we will print out the message data serially
+        Serial.println(messageBuffer);
+        wireless_transciever_state = WAITING_FOR_SERIAL_FROM_PI;
+    } else if (isMessageMeantForDevice(WIRELESS_NODES_client)) {
+        //message is sent from the server, and it is intended to end at the client, the server probably is just sending a heart beat message
+        //send back a present message
+        DEBUG_PRINTLN("Sending present message to server");
+        setDeviceAndMessageInBufferTo(WIRELESS_NODES_server, "Present!");
+        printWirelessly(messageBuffer);
+    }
+}
+//it modifies global variables, such as state
+void parseMessage() {
+
+
+    
 }
