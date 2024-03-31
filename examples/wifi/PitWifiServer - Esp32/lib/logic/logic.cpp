@@ -59,7 +59,7 @@ void operatingProcedure() {
         
         if (messageBuffer[0] == '\0') {
             isClientConnected = false;
-            DEBUG_PRINTLN("Client disconnected");
+            DEBUG_PRINTLN("Client did not respond in time. Assuming disconnected.");
         }
         else {
             DEBUG_PRINT("Wirelessly Received: ");

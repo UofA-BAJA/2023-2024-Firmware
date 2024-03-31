@@ -98,48 +98,6 @@ void printWirelessly(const char* buffer) {
 }
 
 
-// String readWirelesssSingleLine(int original_time) {
-//     // Ensure WiFi is connected before proceeding
-
-//     int maxloops = 0;
-
-//     //wait for the server's reply to become available
-//     bool isConnected = false;
-
-//     // Wait for the server's reply to become available or for a timeout
-//     while (!client.available() && maxloops < 10000) {
-//         maxloops++;
-//         delay(1); // Delay 1 msec
-
-//         // Every 1000 loops check WiFi connection status
-//         if (maxloops % 1000 == 0) {
-//             // Check if WiFi is still connected
-//             if (WiFiMulti.run() != WL_CONNECTED) {
-//                 Serial.println("WiFi disconnected. Attempting to reconnect...");
-
-//                 // Re-initialize WiFi connection
-//                 tryToConnectToWifi();
-
-//                 // After reconnecting WiFi, try reconnecting to the host
-//                 if (connectToHost()) {
-//                     Serial.println("Reconnected to the host. Continuing to wait for data...");
-//                 } else {
-//                     Serial.println("Failed to reconnect to the host.");
-//                     return ""; // Exit if unable to reconnect to the host
-//                 }
-//             }
-//         }
-//     }
-
-//     if (client.available() > 0) {
-//         //read back one line from the server
-//         String line = client.readStringUntil('\r');
-//         return line;
-//     }
-
-//     return "";
-// }
-
 // Function to read data into a buffer from a wireless connection
 void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned long timeout) {
     // Ensure the buffer is clean before use

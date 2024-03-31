@@ -15,8 +15,7 @@
 enum WirelessTranscieverState {
     DONE_INITIALIZING,
     WAITING_TO_RESPOND_WITH_TYPE,
-    WAITING_FOR_WIRELESS_RESPONSE,
-    WAITING_FOR_SERIAL_FROM_PI,
+    SMART_PASSTHROUGH,
 };
 
 
@@ -41,32 +40,25 @@ void operatingProcedure() {
             
             establishWirelessConnection();
         
-            wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
+            wireless_transciever_state = SMART_PASSTHROUGH;
         } 
         break;
     }
 
-    case WAITING_FOR_WIRELESS_RESPONSE: {
-        ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
-
-        if (messageBuffer[0] == '\0') {
-            //received nothing
-        }
-        else {
-            DEBUG_PRINT("Received message:");
-            DEBUG_PRINTLN(messageBuffer);
-        }
-        
-        // parseMessage();
-        
-        break;
-    }
-
-    case WAITING_FOR_SERIAL_FROM_PI: {
+    case SMART_PASSTHROUGH: {
         recvWithStartEndMarkers(messageBuffer, BUFFER_SIZE);
 
         if (isThereWirelessDataToRead()) {
-            wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
+            ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
+
+            if (messageBuffer[0] == '\0') {
+                //received nothing
+            } else {
+                DEBUG_PRINT("Received message:");
+                DEBUG_PRINTLN(messageBuffer);
+            }
+
+            parseMessage(messageBuffer);
 
         } else {
             if (newData) {
@@ -107,7 +99,7 @@ void changeStateOnMessage(char* startOfMessage) {
     }
 }
 //it modifies global variables, such as state
-void parseMessage() {
+void parseMessage(char* startOfMessage) {
 
 
     
