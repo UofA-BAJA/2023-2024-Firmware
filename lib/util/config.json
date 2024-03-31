@@ -12,12 +12,12 @@
     },
 
     "Commands" :  {
-        "BEGIN_COMMAND" : "BEGIN",
-        "END_COMMAND" : "END",
-        "RETRIEVE_COMMAND" : "RETRIEVE",
-        "QUIT_COMMAND" : "QUIT",
-        "SEND_TYPE_COMMAND" : "SENDTYPE",
-        "HELP_COMMAND" : "HELP"
+        "BEGIN" : "BEGIN",
+        "END" : "END",
+        "RETRIEVE" : "RETRIEVE",
+        "QUIT" : "QUIT",
+        "SEND_TYPE" : "SENDTYPE",
+        "HELP" : "HELP"
     },
 
     "DataTypes" :  {
@@ -36,10 +36,10 @@
     },
     
     "MessageHeaders" : {
-        "START" : "-start:",
-        "TARGET_DEVICE" : "-trgdev:",
-        "BODY" : "-body:",
-        "END" : "-end:"
+        "START" : "!fart!",
+        "TARGET_DEVICE" : "-nxtdev:",
+        "BODY" : "-mesg:",
+        "END" : "!bend!"
     },
 
     "WirelessNodeTypes" :  {

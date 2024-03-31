@@ -41,3 +41,5 @@ if __name__ == "__main__":
     for name, member in ModuleTypes.__members__.items():
         print(name, member.value)
 
+    
+

@@ -69,13 +69,14 @@ class SerialDevices:
             print(f"End of Device Output on {ser.port}\n")
 
                     
-            ser.write(f"<{Commands.SENDTYPE.name}>".encode('utf-8'))
+            ser.write(f"<{Commands.SEND_TYPE.value}>".encode('utf-8'))
             
             dev_type = None
             while ser.in_waiting == 0:
                 dev_type = ser.readline().decode('utf-8').strip()
                 break
-            
+
+            print(f"Device reply is {dev_type}")
             dev_type_enum = None
             try:
                 dev_type_enum = ModuleTypes[dev_type]
@@ -146,20 +147,24 @@ class SerialDevices:
         
         device_output = "START"
         first_time_print_flag = True
-        while (device_output != ""):
-            device_output =  device.readline().decode('utf-8').strip()
+        try:
+            while (device_output != ""):
+                device_output = device.readline().decode('utf-8').strip()
 
-            if "<" in device_output and ">" in device_output:
-                break
+                if "<" in device_output and ">" in device_output:
+                    break
 
-            if (device_output != ""):
+                if device_output != "":
+                    if first_time_print_flag:
+                        print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nOUTPUT FOR {device_type.name}:{bcolors.ENDC}\n")
+                        first_time_print_flag = False  # This should probably be set to False after first time
 
-                if (first_time_print_flag):
-                    print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nOUTPUT FOR {device_type.name}:{bcolors.ENDC}\n")
+                    print(f"{bcolors.GRAYCOLOR}{device_output}{bcolors.ENDC}")
+        except KeyboardInterrupt:
+            print("\nInterrupted by user. Exiting...")
+            # Optionally, perform any cleanup here if necessary
 
-                    device_has_output_flag = False
-
-                print(f"{bcolors.GRAYCOLOR}{device_output}{bcolors.ENDC}")
+        device.flushInput()
 
 
     def read_file_data(self, device_type):

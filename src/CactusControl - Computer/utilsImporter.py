@@ -7,7 +7,7 @@ def adding_utils_to_path():
     repo = git.Repo(Path(__file__).resolve(), search_parent_directories=True)
     git_root = repo.git.rev_parse("--show-toplevel")
 
-    src_path = Path(git_root) / 'src'
+    src_path = Path(git_root) / 'lib' / 'application'
 
     # Add the Git repository root to sys.path to facilitate module imports
     sys.path.append(str(src_path))

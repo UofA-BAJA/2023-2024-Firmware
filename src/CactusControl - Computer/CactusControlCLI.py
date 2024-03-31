@@ -2,8 +2,9 @@ from utilsImporter import adding_utils_to_path
 
 adding_utils_to_path()
 
-from utils.ConfigParser import Commands, ModuleTypes
-from utils.SerialDevices import SerialDevices
+from ConfigParser import Commands, ModuleTypes, WirelessNodeTypes
+from SerialDevices import SerialDevices
+from Messages import *
 '''
 plan
 - get LORA_PIT serial device
@@ -20,11 +21,11 @@ class CactusControlCLI:
         self.session_is_active = False
 
         self.commands = {
-            Commands.HELP.name     : self._print_commands,  # No argument required; directly reference the method
-            Commands.BEGIN.name    : lambda: self._begin_logging(Commands.BEGIN.name),  # Use lambda for delayed execution with arguments
-            Commands.END.name      : lambda: self._end_logging(Commands.END.name),  # Ditto
-            Commands.RETRIEVE.name : lambda: self._retrieve_logs(Commands.RETRIEVE.name),  # Ditto
-            Commands.QUIT.name     : lambda: self._quit_program(Commands.QUIT.name),  # Ditto
+            Commands.HELP.value     : self._print_commands,  # No argument required; directly reference the method
+            Commands.BEGIN.value    : lambda: self._begin_logging(Commands.BEGIN.value),  # Use lambda for delayed execution with arguments
+            Commands.END.value      : lambda: self._end_logging(Commands.END.value),  # Ditto
+            Commands.RETRIEVE.value : lambda: self._retrieve_logs(Commands.RETRIEVE.value),  # Ditto
+            Commands.QUIT.value     : lambda: self._quit_program(Commands.QUIT.value),  # Ditto
             "SETUP"    : lambda: self._setup_session(), # Ditto
             "READ"     : lambda: self._read_data() # Ditto
         }
@@ -38,7 +39,8 @@ class CactusControlCLI:
         self._print_commands()
 
     def send_command_to_rasberry_pi(self, command):
-        self.lora_device.write(f"<{command}>".encode('utf-8'))
+        message = construct_message(WirelessNodeTypes.RASBERRYPI.value, command)
+        self.lora_device.write(f"<{message}>".encode('utf-8'))
 
     def _write_to_lora_device(self, command):
         self.lora_device.write(f"<{command}>".encode('utf-8'))
@@ -109,7 +111,7 @@ class CactusControlCLI:
             if action:
                 action()
 
-                self._write_to_lora_device(choice)
+                self.send_command_to_rasberry_pi(choice)
 
 
             else:
