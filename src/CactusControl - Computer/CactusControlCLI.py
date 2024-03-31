@@ -52,6 +52,8 @@ class CactusControlCLI:
 
                     if ongoing_response and MessageHeaders.PYTHON_MESSAGE not in parsed_response:
                         self.responses.append(parsed_response)
+                        print(f"{bcolors.OKGREEN}Rasberry Pi:\n{parsed_response}{bcolors.ENDC}\n")
+
 
                     if MessageHeaders.PYTHON_MESSAGE in parsed_response and ongoing_response:
                         break
@@ -72,15 +74,13 @@ class CactusControlCLI:
         match = re.search(regex, response)
         extracted_str = match.group(1) if match else "No match found"
         
-        if extracted_str != "No match found" and extracted_str != MessageHeaders.PYTHON_MESSAGE:
-            print(f"{bcolors.OKGREEN}Rasberry Pi:\n{extracted_str}{bcolors.ENDC}\n")
-
         return extracted_str
 
     def parse_responses(self):
-        json_response = {}
+
         for response in self.responses:
             try:
+                print(response)
                 json_response = json.loads(response)
 
                 if "datatypes" in json_response:
@@ -109,7 +109,7 @@ class CactusControlCLI:
         print("Beginning logging...")        
 
     def _end_logging(self, command):
-        print("Ending logging...")
+        # print("Ending logging...")
         # Implement your end logging logic here
 
         print("Logging has ended.")

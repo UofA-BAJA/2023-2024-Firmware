@@ -46,10 +46,11 @@ class Controller:
                     self.send_response_to_pit(datatypes_as_json)
                     
     def send_response_to_pit(self, response_message_str: str):
+
         response_message =  construct_message(target_device=WirelessNodeTypes.COMPUTER, message=response_message_str )
         self.serial_devices._execute_single_command(response_message, ModuleTypes.LORA_PI)
 
-
+       
     def _get_datatypes_in_data(self, device_serial_obj):
         valid_data_types = {attr for attr in dir(DataTypes) if not attr.startswith('__')}
 
@@ -135,6 +136,21 @@ class Controller:
 
             print(f"Rows added to database: {self.rows_added}, lost rows: {self.rows_lost}")
 
+    def get_datatype_and_send_to_pit(self, data_query):
+        print(f"processig data query: {data_query}")
+        data_query_json = json.loads(data_query)
+
+        selected_datatype = data_query_json["data-query"]["selected-datatype"]
+
+        sql_query = f"SELECT {selected_datatype} FROM BajaCloudData WHERE ID = ?;"
+
+        self.conn.cursor().execute(sql_query, (self.session_id,))
+
+        results = self.conn.cursor().fetchall()
+
+        for row in results:
+            print(row)
+
     def run(self):
         if (ModuleTypes.LORA_PIT in self.serial_devices._serial_devices):
             self.serial_devices._serial_devices[ModuleTypes.LORA_PIT].close()
@@ -151,11 +167,14 @@ class Controller:
             
             parsed_message = Controller.parse_input(lora_serial_input)
             
-            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE) ##ik this is backward, it is because the lora guys parse their messages backwards
+            if (Controller.check_if_input_warrants_a_response(parsed_message)):
+                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
             if (Controller.is_command(parsed_message)):
                 self.handleCommand(command_type_enum=parsed_message)
                 self.send_response_to_pit(json.dumps({"message" : f"success for command {parsed_message}"}))
+            elif (Controller.is_data_query(parsed_message)):
+                self.get_datatype_and_send_to_pit(parsed_message)
             else:
                 print(f"Serial input: {parsed_message} is not a valid command.")
 
@@ -169,8 +188,8 @@ class Controller:
 
                 print(f"CURRENT SESSION ID IS: {self.session_id}")
 
-            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
-
+            if (Controller.check_if_input_warrants_a_response(parsed_message)):
+                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
         self.conn.close()
 
 
@@ -184,16 +203,28 @@ class Controller:
             if mesg_part:
                 matches.append(mesg_part.group(1))  
 
-        for l in matches[0]:
-            print(l)
         return matches[0]
 
     
     def is_command(command_str):
         commands = {attribute: value for attribute, value in Commands.__dict__.items() if not attribute.startswith('__')}
         return command_str in commands.values()
+    
+    def is_data_query(input_str):
+        try:
+            json_query = json.loads(input_str)
+            
+            if "data-query" in json_query:
+                return True
+        except json.JSONDecodeError:
+            return False
 
-
+    def check_if_input_warrants_a_response(input_str):
+        if "SESSION" in input_str or Controller.is_command(input_str) or Controller.is_data_query(input_str):
+            return True
+        else:
+            return False
+        
 if __name__ == "__main__":
     c = Controller()
 
