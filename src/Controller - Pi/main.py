@@ -130,13 +130,14 @@ class Controller:
         while True:
             lora_serial_input = self.serial_devices._wait_for_lora_serial_input()
 
-            try:
-                parsed_input = Controller.parse_input(lora_serial_input)
-                command_type_enum = Commands[parsed_input]
-                self.handleCommand(command_type_enum=command_type_enum)
-                print(f"Finished handling command: {command_type_enum} successfully.")
-            except KeyError:
-                print(f"Serial input: {lora_serial_input} is not a valid command.")
+            
+            parsed_message = Controller.parse_input(lora_serial_input)
+            
+            if (Controller.is_command(parsed_message)):
+                self.handleCommand(command_type_enum=parsed_message)
+                print(f"Finished handling command: {parsed_message} successfully.")
+            else:
+                print(f"Serial input: {parsed_message} is not a valid command.")
 
             if "SESSION" in lora_serial_input:
                 actual_text = Controller.parse_input(lora_serial_input).replace("SESSION:", "")
@@ -150,14 +151,22 @@ class Controller:
 
 
     def parse_input(raw):
-        # print(f"idk {command}")
-        pattern = re.compile(r'{(.*?)}')
-        # Find all matches in the text
-        matches = pattern.findall(raw)
+        matches = []
+        bracketed_message = re.findall(r'<(.*?)>', raw)
+
+        # Now extract the 'mesg' part
+        for message in bracketed_message:
+            mesg_part = re.search(r'-mesg:(.*?)!', message)
+            if mesg_part:
+                matches.append(mesg_part.group(1))  
 
         return matches[0]
 
-        
+    
+    def is_command(command_str):
+        commands = {attribute: value for attribute, value in Commands.__dict__.items() if not attribute.startswith('__')}
+        return command_str in commands.values()
+            
 
 
 if __name__ == "__main__":

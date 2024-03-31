@@ -83,7 +83,8 @@ yes !fart! is start
 
 and !bend! is end
 
-    > <!fart!-nxtdev:rasbpi-mesg:test!bend!>
+    > !fart!-nxtdev:rasbpi-mesg:test!bend!
+    > fart!-nxtdev:rasbpi-mesg:BEGIN!bend!!fart!-nxtdev:client-mesg:heartbeat!bend!
 
 
     
