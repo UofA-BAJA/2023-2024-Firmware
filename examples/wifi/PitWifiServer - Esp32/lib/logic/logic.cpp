@@ -24,8 +24,7 @@ bool isClientConnected = false;
 enum WirelessTranscieverState {
     DONE_INITIALIZING,
     WAITING_TO_RESPOND_WITH_TYPE,
-    HANDLE_WIRELESS_RESPONSE,
-    WAITING_FOR_SERIAL_FROM_COMPUTER,
+    SMART_PASSTHROUGH,
 };
 
 WirelessTranscieverState wireless_transciever_state = DONE_INITIALIZING; //initial state
@@ -49,41 +48,13 @@ void operatingProcedure() {
             Serial.println("LORA_PIT");
             Serial.flush();
             
-            wireless_transciever_state = WAITING_FOR_SERIAL_FROM_COMPUTER;
+            wireless_transciever_state = SMART_PASSTHROUGH;
         } 
         break;
     }
 
-    case (HANDLE_WIRELESS_RESPONSE): {
-        ReadWirelessIntoBufferWithTimeout(inputmessageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
-        
-        if (inputmessageBuffer[0] == '\0') {
-            isClientConnected = false;
-            DEBUG_PRINTLN("Client did not respond in time. Assuming disconnected.");
-        }
-        else {
-            DEBUG_PRINT("Wirelessly Received: ");
-            DEBUG_PRINTLN(inputmessageBuffer);
-        }
 
-        if (isMessageMeantForDevice(inputmessageBuffer, WIRELESS_NODES_server)) {
-            // DEBUG_PRINTLN("sending ack to client");
-
-            //the client sent a message to which its intended device is the server, that means it just wants an acknowledgement
-            //the server will go back to listening to the computer for serial input after the acknowledgement
-            //the client will go back to listening to the server for a message after the acknowledgement
-            setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_client, "acknowledged");
-            printWirelessly(outputmessageBuffer);
-
-            isClientConnected = true;
-            wireless_transciever_state = WAITING_FOR_SERIAL_FROM_COMPUTER;
-        }
-        
-
-        break;
-    }
-
-    case WAITING_FOR_SERIAL_FROM_COMPUTER:
+    case SMART_PASSTHROUGH:
         recvWithStartEndMarkers(inputmessageBuffer, BUFFER_SIZE);
         
         if (newData) {
@@ -95,6 +66,8 @@ void operatingProcedure() {
             Serial.print("WSTATUS:");
             Serial.println(isClientConnected);
             Serial.flush();
+
+            parseMessage(inputmessageBuffer);
 
 
         } else {
@@ -108,9 +81,21 @@ void operatingProcedure() {
                 // Send heartbeat message to the computer
                 DEBUG_PRINTLN("Sending heartbeat to car...");
                 setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_client, "heartbeat");
-                printWirelessly(outputmessageBuffer);
+                printWirelessly(outputmessageBuffer);   
                 
-                wireless_transciever_state = HANDLE_WIRELESS_RESPONSE;
+                ReadWirelessIntoBufferWithTimeout(inputmessageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
+                
+                if (inputmessageBuffer[0] == '\0') {
+                    isClientConnected = false;
+                    DEBUG_PRINTLN("Client did not respond in time. Assuming disconnected.");
+                }
+                else {
+                    DEBUG_PRINT("Wirelessly Received: ");
+                    DEBUG_PRINTLN(inputmessageBuffer);
+                }
+
+                parseMessage(inputmessageBuffer);
+
 
             }
         }
@@ -119,5 +104,45 @@ void operatingProcedure() {
 
     default:
         break;
+    }
+}
+
+void parseMessage(char* startOfMessage) {
+    char* end;
+    char* start = strstr(startOfMessage, "fart");
+
+    if (start == nullptr) {
+        Serial.println("No start marker found");
+        return;
+    }
+
+    DEBUG_PRINTLN("Parsing message");
+    if (isMessageMeantForDevice(start, WIRELESS_NODES_client)) {
+        //if you received a message intended for the client from the client, that makes no sense, the cleitn will not send a message to itself
+        DEBUG_PRINTLN("Client is not supposed to send messages to itself");
+
+    } else if (isMessageMeantForDevice(start, WIRELESS_NODES_rasbpi)) {
+        //probably is the computer wanting to send messages downhill, server is just a pass through
+        DEBUG_PRINTLN("Computer is asking for the rasberry pi");
+        printWirelessly(start);
+
+    } else if (isMessageMeantForDevice(start, WIRELESS_NODES_comput)) {
+        //client is sending a message that needs to be sent serially to the computer
+        //just pass through the message
+        DEBUG_PRINTLN("Computer is asking for the client");
+        Serial.println(start);
+        Serial.flush();
+
+    } else if (isMessageMeantForDevice(start, WIRELESS_NODES_server)) {
+        //if you received a message intended for the server, its the client wanting an acknowledgement
+        Serial.println("Server is not supposed to send messages to itself");
+        setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_client, "acknowledged");
+        printWirelessly(outputmessageBuffer);
+        isClientConnected = true;
+
+    } else {
+        //this should never trigger, but if it does, it means the message is not meant for any device
+        //packet is probably corrupted
+        Serial.println("No target device found, message is corrupted");
     }
 }
