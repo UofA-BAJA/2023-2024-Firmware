@@ -57,6 +57,10 @@ to update the library in a project run
 
     > pio pkg update
 
+to update pypi project
+
+    twine upload dist/* -u __token__ -p "api-key-u-ask-alex-for"
+
 ### Example packets
 
 Here are some example packets 
