@@ -326,7 +326,7 @@ void InitializeSDCard(){
     //     DEBUG_PRINTLN("Card failed, or not present");
     //     while(1);
     // } 
-    if (!sd.begin(chipSelect, SD_SCK_MHZ(50))) {
+    if (!sd.begin(chipSelect, SD_SCK_MHZ(4))) {
     Serial.println("SD Card initialization failed!");
     return;
   }
@@ -346,31 +346,22 @@ void InitializeSDCard(){
 
 void SendFile(){
 
-    if (file.open(fileName, O_READ)) {
-        String buffer = "";
-        char ch;
-        // Read the entire file
-        while (file.read(&ch, 1) > 0) {
-            if (ch != '\n') {
-                buffer += ch;
-            } else {
-                buffer.trim();
-                Serial.println(buffer);
-                buffer = ""; // Clear the buffer for the next line
-            }
-        }
-        // Print any remaining content that doesn't end with a newline
-        if (buffer.length() > 0) {
-            buffer.trim();
-            Serial.println(buffer);
-        }
-        file.close();
-        Serial.println("<Finished>");
-        Serial.flush();
-    } else {
+      // Open the file for reading
+    if (!file.open(fileName, O_READ)) {
         Serial.println("Failed to open file for reading.");
+        return;
     }
 
+    // Read from the file until end of file
+    char ch;
+    while (file.read(&ch, 1) > 0) {
+        Serial.write(ch);
+    }
+
+    // Close the file
+    file.close();
+    Serial.println("<Finished>");
+    Serial.flush();
 }
 
 
