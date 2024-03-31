@@ -79,17 +79,19 @@ void setDeviceAndMessageInBufferTo(char* buf, const char* device, const char* me
 bool isMessageMeantForDevice(char* buffer, const char* device) {
     //8 is the length of ':nxtdev-'
     const char* nxtdevLocation = strstr(buffer, MESSAGE_HEADERS_nxtdev);
-
+    DEBUG_PRINTLN("doesnt error here")
     if (nxtdevLocation != nullptr) {
         // Move past the nxtdev header to the start of the device name
         const char* startOfInterest = nxtdevLocation + strlen(MESSAGE_HEADERS_nxtdev);
         // Find the end of the device name, assuming it ends at the start of the next section, which we'll say is '-mesg:'
         // Adjust this based on your actual message format
         const char* endOfInterest = strstr(startOfInterest, MESSAGE_HEADERS_mesg);
+        DEBUG_PRINTLN("prints this")
 
         if (endOfInterest != nullptr) {
             // Compare the device name directly using strncmp to ensure we don't read past the end of the device name
             size_t deviceNameLength = endOfInterest - startOfInterest;
+            DEBUG_PRINTLN("how about this")
 
             // Check if the lengths match and if the device names are equal up to the found length
             if (strlen(device) == deviceNameLength && strncmp(startOfInterest, device, deviceNameLength) == 0) {
