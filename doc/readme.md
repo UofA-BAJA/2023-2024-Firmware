@@ -65,7 +65,7 @@ to update the library in a project run
 ## [PyPi lib](https://pypi.org/project/UofA-BAJA-2023-2024/)
 to build pypi project windows
 
-    > python3 -m build
+    > py -m build
 
 to update pypi project
 

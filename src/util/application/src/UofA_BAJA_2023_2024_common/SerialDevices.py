@@ -28,7 +28,7 @@ class SerialDevices:
 
         print(f"Found devices...\n")
         for dev in self._serial_devices:
-            print(f"{dev.name} on {self._serial_devices[dev].port}")
+            print(f"{dev} on {self._serial_devices[dev].port}")
 
     def get_all_serial_devices(self):
         """ 
@@ -171,7 +171,7 @@ class SerialDevices:
     def read_file_data(self, device_type):
         device = self.get_device(device_type)
 
-        print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nFILE DATA FOR {device_type.name}:{bcolors.ENDC}\n")
+        print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nFILE DATA FOR {device_type}:{bcolors.ENDC}\n")
 
         device_output = "START"
 

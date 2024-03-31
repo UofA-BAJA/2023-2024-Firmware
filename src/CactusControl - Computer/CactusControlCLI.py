@@ -35,7 +35,7 @@ class CactusControlCLI:
         self._print_commands()
 
     def send_command_to_rasberry_pi(self, command):
-        message = construct_message(WirelessNodeTypes.RASBERRYPI.value, command)
+        message = construct_message(WirelessNodeTypes.RASBERRYPI, command)
         self.lora_device.write(f"<{message}>".encode('utf-8'))
 
     def _write_to_lora_device(self, command):
