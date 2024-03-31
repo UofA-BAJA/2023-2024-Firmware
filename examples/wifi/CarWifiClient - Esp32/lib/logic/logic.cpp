@@ -122,7 +122,9 @@ void parseMessage(char* startOfMessage) {
         //probably is the rasberry pi wanting to send a message downhill, client is just a pass through
         //remember that client is connected to pi through serial
         DEBUG_PRINTLN("there is a packet for the rasbbery pi, sending downhill serially");
-        Serial.println(start);
+        Serial.print("<");
+        Serial.print(start);
+        Serial.print(">");
         Serial.flush();
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_comput)) {

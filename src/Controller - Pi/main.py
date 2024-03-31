@@ -1,9 +1,5 @@
-from utilsImporter import adding_utils_to_path
-
-adding_utils_to_path()
-
-from SerialDevices import SerialDevices
-from ConfigParser import Commands, ModuleTypes, DataTypes
+from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, DataTypes
+from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 
 from db.databaseInterfacer import get_BajaCloud_connection, insert_session
 
@@ -26,13 +22,13 @@ class Controller:
     def handleCommand(self, command_type_enum):
 
         if command_type_enum != Commands.RETRIEVE:
-            self.serial_devices.sendCommandToAllDataModules(command_type_enum.name)
+            self.serial_devices.sendCommandToAllDataModules(command_type_enum)
         else:
             for device in self.serial_devices._serial_devices:
 
                 if (device != ModuleTypes.LORA_PIT) and (device != ModuleTypes.LORA_PI):
 
-                    self.serial_devices._execute_single_command(Commands.RETRIEVE.name, device)
+                    self.serial_devices._execute_single_command(Commands.RETRIEVE, device)
                     # serial_devices.read_file_data(device)
                     device_serial_obj = self.serial_devices._serial_devices[device]
 
@@ -46,6 +42,7 @@ class Controller:
                     self.serial_devices._execute_single_command("END", ModuleTypes.LORA_PI)
 
     def _get_datatypes_in_data(self, device_serial_obj):
+        valid_data_types = {attr for attr in dir(DataTypes) if not attr.startswith('__')}
 
         self.datatypes = []
         while True:
@@ -54,7 +51,7 @@ class Controller:
 
             if "Micros" in device_output:
                 for possible_datatypes in device_output.split(","):
-                    if possible_datatypes in DataTypes.__members__:
+                    if possible_datatypes in valid_data_types:
                         print(f"Data type: {possible_datatypes}")
                         self.datatypes.append(possible_datatypes)
 
