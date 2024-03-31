@@ -3,10 +3,11 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
-#include <buffer_handling.h>
-
+//from BAJA library
 #include "macros.h"
 #include "enums.h"
+#include <buffer_handling.h>
+
 
 #include "wifiTransmission.h"
 //wireless stuff
@@ -111,124 +112,6 @@ void operatingProcedure() {
         
         break;
     }
-    // case SEND_SERIAL_TO_COMPUTER: {
-        
-    //     getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
-
-    //     if (strcmp(nextDevice, WIRELESS_NODES_comput)) {
-    //         //this message is intended for the computer, so we will wait for the computer to respond
-    //         setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, WIRELESS_NODES_client);
-    //         Serial.print(messageBuffer);
-    //         Serial.flush();
-    //     }
-
-    //     wireless_transciever_state = RECIEVING_SERIAL_FROM_COMPUTER;
-    //     break;
-    // }
-
-    // case RECIEVING_SERIAL_FROM_COMPUTER: {
-    //     recvWithStartEndMarkers();
-
-    //     if (newData) {
-    //         // DEBUG_PRINT("Received from computer: ");
-    //         // DEBUG_PRINTLN(receivedChars);
-    //         newData = false;
-
-    //         getNextDevice(receivedChars, nextDevice, LEN_OF_DEVICE_NAME);
-
-    //         setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, nextDevice);
-
-    //         if (strcmp(nextDevice, WIRELESS_NODES_server)) {
-    //             wireless_transciever_state = SENDING_WIRELESS_MESSAGE;
-
-    //         }
-    //     }
-    //     break;
-    // }
-
-    // case ATTEMPT_WIRELESS_CONNECT: {
-    //     TURN_LED_ON;
-    //     while (!connectToHost()) {}; //wait until it is connected to the server
-    //     TURN_LED_OFF;
-
-    //     wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
-    //     break;
-    // }
-
-    // case WAIT_FOR_SERIAL_COMMAND: {
-    //     recvWithStartEndMarkers();
-
-    //     if (newData) {
-    //         // Make the onboard LED blink
-    //         Serial.println(receivedChars);
-    //         Serial.flush();
-    //         newData = false;
-
-    //         // Send the received data to the server
-    //         TURN_LED_ON;
-    //         printWirelessly(convertToCommand(receivedChars));
-
-    //         wireless_response_timer = millis();
-    //         wireless_transciever_state = WAIT_FOR_WIRELESS_CONFIRMATION;
-    //     }
-
-    //     break;
-    // }
-
-    // case WAIT_FOR_WIRELESS_CONFIRMATION: {
-    //     // Wait for the server's reply to become available
-    //     response = readWirelesssSingleLine();
-    //     if (response.length() > 0) {
-    //         DEBUG_PRINT("Response:");
-    //         Serial.println(response);
-    //         Serial.flush();
-    //         TURN_LED_OFF;
-
-    //         if (response.indexOf("STAND") != -1) {
-    //             TURN_LED_ON; 
-    //             wireless_transciever_state = LISTEN_WIRELESSLY;
-    //             DEBUG_PRINTLN("Entering listen mode");
-    //             break;
-    //         }
-    //         else {
-    //             DEBUG_PRINTLN("received stuff, now going to WAIT_FOR_SERIAL");
-    //             wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;   
-    //         }
-
-    //         break;
-    //     }
-    //     else {
-            
-    //         DEBUG_PRINTLN("Wireless response timeout");            
-    //         DEBUG_PRINTLN("timed out so going to WAIT_FOR_SERIAL");
-    //         wireless_transciever_state = WAIT_FOR_SERIAL_COMMAND;
-    //         break;
-            
-    //     }
-        
-        
-    //     break;
-    // }
-
-    // case LISTEN_WIRELESSLY: {
-    //     int serial_printer_counter = 0;
-    //     String output = readWirelesssSingleLine();
-
-    //     if (output != "") {
-    //         TURN_LED_OFF; 
-    //         // DEBUG_PRINT("Received: ");
-    //         Serial.println(output);
-    //         Serial.flush();
-    //     } else {
-    //         serial_printer_counter++;
-    //         delay(10);
-    //     }
-
-    //     if (serial_printer_counter > 1000) {
-    //         DEBUG_PRINTLN("No data received for 10 seconds.");
-    //         serial_printer_counter = 0;
-    //     }
-    // }
 
     default:
         break;
@@ -267,40 +150,7 @@ void recvWithStartEndMarkers() {
     }
 }
 
-/*this function will wait for a command to be received and will return a boolean if the command is successfuly recieved
-    give the function a defined command from enums.h as input*/
-bool waitForCommand(const char* cmmdString) {
-    
-    recvWithStartEndMarkers();
-    if (newData) {
 
-        if (strcmp(messageBuffer, cmmdString) == 0) {
-            messageBuffer[0] = '\0'; //clear received chars
-            return true;
-        }
-        else if (messageBuffer[0] != '\0')
-        {
-            DEBUG_PRINT("Currently is in state: ");
-            DEBUG_PRINTLN(wireless_transciever_state);
-            DEBUG_PRINT("Incorrect Command: ");
-            DEBUG_PRINTLN(messageBuffer);
-        }
-        else {
-            // The receivedChars array is empty, so do not print "command not recognized"
-        }
-
-        newData = false;
-    }
-    
-
-    return false;
-}
-
-String convertToCommand(char* receivedChars) {
-    String receivedString = String(receivedChars);
-    String formattedString = "<{" + receivedString + "}>";
-    return formattedString;
-}
 
 ////////////////////////////////////////////////////////////////////////
 //this function will not exit until it has a connection to the server and the device
