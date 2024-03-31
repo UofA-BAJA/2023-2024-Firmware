@@ -1,4 +1,5 @@
 import re
+import json
 
 from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, MessageHeaders
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
@@ -43,19 +44,24 @@ class CactusControlCLI:
 
         ongoing_response = False
         while True:
-            important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
+            try:
+                important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
 
-            if important_serial_data != "":
-                parsed_response = self.parse_response_for_mesg(important_serial_data)
+                if important_serial_data != "":
+                    parsed_response = self.parse_response_for_mesg(important_serial_data)
 
-                if ongoing_response and MessageHeaders.PYTHON_MESSAGE not in parsed_response:
-                    self.responses.append(parsed_response)
+                    if ongoing_response and MessageHeaders.PYTHON_MESSAGE not in parsed_response:
+                        self.responses.append(parsed_response)
 
-                if MessageHeaders.PYTHON_MESSAGE in parsed_response and ongoing_response:
-                    break
+                    if MessageHeaders.PYTHON_MESSAGE in parsed_response and ongoing_response:
+                        break
 
-                if MessageHeaders.PYTHON_MESSAGE in parsed_response:
-                    ongoing_response = True
+                    if MessageHeaders.PYTHON_MESSAGE in parsed_response:
+                        ongoing_response = True
+            except KeyboardInterrupt:
+                print("Stopped reading rasberry pi")
+                break
+        self.parse_responses()
                     
 
     def parse_response_for_mesg(self, response):
@@ -71,11 +77,29 @@ class CactusControlCLI:
         return extracted_str
 
     def parse_responses(self):
-
+        json_response = {}
         for response in self.responses:
-            print(response)
-            
+            try:
+                json_response = json.loads(response)
 
+                if "datatypes" in json_response:
+                    self.have_user_select_data_types(json_response)
+
+            except json.JSONDecodeError:
+                print(f"{bcolors.FAIL}Error: Could not decode JSON response{bcolors.ENDC}")
+                return
+            
+    def have_user_select_data_types(self, datatypes: dict):
+        while True:
+            user_input = input("Please enter a data type from the list above: ")
+            
+            # Check if the entered data type is valid
+            if user_input in datatypes['datatypes']:
+                # print(f"You have selected a valid data type: {user_input}")
+                self.send_command_to_rasberry_pi(json.dumps({"data-query" : {"selected-datatype": user_input}}))
+                break  # Exit the loop if the input is valid
+            else:
+                print("Invalid data type. Please try again.")
 
     def _begin_logging(self, command):
         
