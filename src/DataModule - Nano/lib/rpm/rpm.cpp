@@ -5,9 +5,6 @@
 #include <util/delay.h>
 #include <HardwareSerial.h>
 
-// ! I feel like you shouldn't need to have this dependency in every single data module...?
-#include <SD.h>
-#include <SPI.h>
 
 #include "datamodule.h"
 #include "enums.h"
@@ -51,7 +48,7 @@ void RPM_DataModule::data_module_setup_procedure()
     initTimer2();
 
     DEBUG_PRINTLN("RPM Data Module Setup Complete");
-    
+
     strcpy(dataHeaderArray[0], DATA_TYPES_RPM_FRONT_LEFT);
     strcpy(dataHeaderArray[1], DATA_TYPES_RPM_FRONT_RIGHT);
 
