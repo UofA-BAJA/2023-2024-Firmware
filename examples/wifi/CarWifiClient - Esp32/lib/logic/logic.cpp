@@ -88,20 +88,20 @@ void establishWirelessConnection() {
 //it modifies global variables, such as state
 void parseWirelessMessage(char* startOfMessage) {
 
-    const char* start = strstr(startOfMessage, MESSAGE_HEADERS_start);
+    char* start = strstr(startOfMessage, MESSAGE_HEADERS_start);
     if (start != nullptr) {
         start += strlen(MESSAGE_HEADERS_start); 
     }
     
-    if (isMessageMeantForDevice(WIRELESS_NODES_client, start)) {
+    if (isMessageMeantForDevice(start, WIRELESS_NODES_client)) {
         //means the server wants a response from the client, just tell the server its here
-        setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_server, "present")
+        setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_server, "present");
         printWirelessly(outputmessageBuffer);
-    } else if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi, start)) {
+    } else if (isMessageMeantForDevice(start, WIRELESS_NODES_rasbpi)) {
         //do something
-    } else if (isMessageMeantForDevice(WIRELESS_NODES_comput, start)) {
+    } else if (isMessageMeantForDevice(start, WIRELESS_NODES_comput)) {
         //do something
-    } else if (isMessageMeantForDevice(WIRELESS_NODES_server, start)) {
+    } else if (isMessageMeantForDevice(start, WIRELESS_NODES_server)) {
         //do something
     } else {
         //do something

@@ -67,7 +67,7 @@ void resetBuffer(char* buf) {
 }
 
 void setDeviceAndMessageInBufferTo(char* buf, const char* device, const char* message) {
-    resetMessageBuffer(buf);
+    resetBuffer(buf);
 
     setTextAfterHeader(buf, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, device);
 
