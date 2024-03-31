@@ -153,7 +153,6 @@ cython_debug/
 # Data files
 *.csv
 *.dat
-*.json
 *.log
 *.xml
 *.yaml
