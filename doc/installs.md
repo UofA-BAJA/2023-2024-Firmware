@@ -1,6 +1,13 @@
 # Required Software and Downloads
 
 ## Software Programs
+To Convert VSC into Arduino IDE
+1. Follow the tutorial on [this website](https://www.circuitstate.com/tutorials/how-to-use-vs-code-for-creating-and-uploading-arduino-sketches/)
+
+
+To Get Setup for CAD
+1. Make an account with autodesk with your school email
+2. Install [Fusion360](https://www.autodesk.com/products/fusion-360/overview?term=1-YEAR&tab=subscription)
 
 ### GitHub Desktop
 
@@ -39,3 +46,13 @@ In Baja, there are a couple of python packages that need to be installed so that
 3. Once you have done this, use the "pip list" command to check for these files again. They should appear in the displayed list along with their current versions.
 
 *optional: if you would like to run the GUI, you must install the package "pyqt6"
+
+### Useful commands
+
+to update the pio libray run
+
+    > pio pkg publish
+
+to update the library in a project run
+
+    > pio pkg update
