@@ -46,7 +46,7 @@ void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, con
 }
 
 // Function to reset the message buffer
-void resetBuffer(const char* buf) {
+void resetBuffer(char* buf) {
     // Ensure the buffer is clean before use
     memset(buf, 0, BUFFER_SIZE);
 
@@ -66,7 +66,7 @@ void resetBuffer(const char* buf) {
     }
 }
 
-void setDeviceAndMessageInBufferTo(const char* buf, const char* device, const char* message) {
+void setDeviceAndMessageInBufferTo(char* buf, const char* device, const char* message) {
     resetMessageBuffer(buf);
 
     setTextAfterHeader(buf, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, device);
@@ -75,7 +75,7 @@ void setDeviceAndMessageInBufferTo(const char* buf, const char* device, const ch
 }
 
 
-bool isMessageMeantForDevice(const char* buffer, const char* device) {
+bool isMessageMeantForDevice(char* buffer, const char* device) {
     const char* nxtdevLocation = strstr(buffer, MESSAGE_HEADERS_nxtdev);
 
     if (nxtdevLocation != nullptr) {

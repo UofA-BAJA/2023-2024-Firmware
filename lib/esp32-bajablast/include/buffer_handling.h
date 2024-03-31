@@ -12,8 +12,8 @@ extern char outputmessageBuffer[BUFFER_SIZE];
 extern char nextDevice[LEN_OF_DEVICE_NAME];
 
 void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, const char* newMessage);
-void setDeviceAndMessageInBufferTo(const char* buf, const char* device, const char* message);
-void resetBuffer(const char* buf);
-bool isMessageMeantForDevice(const char* buffer, const char* device);
+void setDeviceAndMessageInBufferTo(char* buf, const char* device, const char* message);
+void resetBuffer(char* buf);
+bool isMessageMeantForDevice(char* buffer, const char* device);
 
 #endif // BUFFER_HANDLING_H

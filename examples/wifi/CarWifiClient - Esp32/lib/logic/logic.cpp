@@ -95,7 +95,8 @@ void parseWirelessMessage(char* startOfMessage) {
     
     if (isMessageMeantForDevice(WIRELESS_NODES_client, start)) {
         //means the server wants a response from the client, just tell the server its here
-        
+        setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_server, "present")
+        printWirelessly(outputmessageBuffer);
     } else if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi, start)) {
         //do something
     } else if (isMessageMeantForDevice(WIRELESS_NODES_comput, start)) {
