@@ -5,6 +5,9 @@
 #include "enums.h"
 #include "macros.h"
 
+char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_fart MESSAGE_HEADERS_nxtdev MESSAGE_HEADERS_mesg MESSAGE_HEADERS_bend;
+char nextDevice[LEN_OF_DEVICE_NAME];
+
 void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, const char* newMessage) {
     // Find the header in the buffer
     char* headerLocation = strstr(buffer, header);
@@ -37,6 +40,27 @@ void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, con
     } else {
         // Handle the case where the header is not found in the buffer
         Serial.println("EdtingBuffer: Header not found in the buffer.");
+    }
+}
+
+// Function to reset the message buffer
+void resetMessageBuffer() {
+    // Ensure the buffer is clean before use
+    memset(messageBuffer, 0, BUFFER_SIZE);
+
+    // Calculate space left after adding MESSAGE_HEADERS_nxtdev
+    size_t spaceLeft = BUFFER_SIZE - strlen(MESSAGE_HEADERS_nxtdev) - 1; // -1 for null terminator
+
+    // Check if MESSAGE_HEADERS_mesg fits into the buffer alongside MESSAGE_HEADERS_nxtdev
+    if (strlen(MESSAGE_HEADERS_mesg) < spaceLeft) {
+        // Concatenate MESSAGE_HEADERS_nxtdev and MESSAGE_HEADERS_mesg into the buffer
+        strcpy(messageBuffer, MESSAGE_HEADERS_fart);
+        strcat(messageBuffer, MESSAGE_HEADERS_nxtdev);
+        strcat(messageBuffer, MESSAGE_HEADERS_mesg);
+        strcat(messageBuffer, MESSAGE_HEADERS_bend);
+    } else {
+        // Handle error: not enough space
+        Serial.println("Error: Not enough space in buffer for both headers.");
     }
 }
 

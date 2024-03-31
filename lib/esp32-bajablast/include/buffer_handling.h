@@ -5,6 +5,11 @@
 #define BUFFER_SIZE 255
 #define WIRELESS_RESPONSE_TIMEOUT_MS 10000
 
+extern char messageBuffer[BUFFER_SIZE];
+extern char nextDevice[LEN_OF_DEVICE_NAME];
+
 void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, const char* newMessage);
+void resetMessageBuffer();
 bool getNextDevice(const char* messageBuffer, char* output, size_t outputSize);
+
 #endif // BUFFER_HANDLING_H

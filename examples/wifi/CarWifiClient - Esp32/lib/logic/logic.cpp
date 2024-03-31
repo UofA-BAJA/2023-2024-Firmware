@@ -11,30 +11,9 @@
 
 #include "wifiTransmission.h"
 //wireless stuff
-#define LEN_OF_DEVICE_NAME 7
-#define BUFFER_SIZE 255
-#define WIRELESS_RESPONSE_TIMEOUT_MS 10000
 
-char messageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_fart MESSAGE_HEADERS_nxtdev MESSAGE_HEADERS_mesg MESSAGE_HEADERS_bend;
-//-nextdev:client-mesg:
-char nextDevice[LEN_OF_DEVICE_NAME]; // Buffer for the next device, plus null terminator
-
-bool onStartup = true;
 ///////////////////////////
 
-
-///serial stuff
-// Define startMarker and endMarker as preprocessor macros
-#define startMarker '<'
-#define endMarker '>'
-
-bool newData = false;
-////////////////////////////
-
-//led stuff
-#define LED_BUILTIN 2
-
-//state stuff
 
 enum WirelessTranscieverState {
     DONE_INITIALIZING,
@@ -50,8 +29,6 @@ void operatingProcedure() {
     switch (wireless_transciever_state)
     {
     case DONE_INITIALIZING: {
-
-        pinMode(LED_BUILTIN, OUTPUT);
 
         Serial.println("Ready");
         Serial.flush();

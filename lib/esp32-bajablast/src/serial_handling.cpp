@@ -13,7 +13,7 @@
 // const char startMarker = '<';
 // const char endMarker = '>';
 
-boolean newData = false;
+bool newData = false;
 
 void recvWithStartEndMarkers(char* messageBuffer, const byte bufferSize) {
     static boolean recvInProgress = false;
