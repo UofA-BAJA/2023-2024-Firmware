@@ -157,7 +157,7 @@ class SerialDevices:
 
                 if device_output != "":
                     if first_time_print_flag:
-                        print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nOUTPUT FOR {device_type.name}:{bcolors.ENDC}\n")
+                        print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nOUTPUT FOR {device_type}:{bcolors.ENDC}\n")
                         first_time_print_flag = False  # This should probably be set to False after first time
 
                     print(f"{bcolors.GRAYCOLOR}{device_output}{bcolors.ENDC}")

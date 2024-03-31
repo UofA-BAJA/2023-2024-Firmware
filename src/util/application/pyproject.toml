@@ -1,6 +1,6 @@
 [project]
 name = "UofA_BAJA_2023-2024"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
   { name="Alex Romero", email="bix.romero@gmail.com" },
 ]
