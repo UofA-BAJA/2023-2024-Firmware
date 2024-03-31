@@ -34,7 +34,7 @@ void operatingProcedure() {
     }
 
     case WAITING_TO_RESPOND_WITH_TYPE: {
-        if (waitForCommand(COMMANDS_SENDTYPE, messageBuffer, BUFFER_SIZE)) {
+        if (waitForCommand(COMMANDS_SENDTYPE, inputmessageBuffer, BUFFER_SIZE)) {
             Serial.println("LORA_PI");
             Serial.flush();
             
@@ -46,24 +46,24 @@ void operatingProcedure() {
     }
 
     case SMART_PASSTHROUGH: {
-        recvWithStartEndMarkers(messageBuffer, BUFFER_SIZE);
+        recvWithStartEndMarkers(inputmessageBuffer, BUFFER_SIZE);
 
         if (isThereWirelessDataToRead()) {
-            ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
+            ReadWirelessIntoBufferWithTimeout(inputmessageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
 
-            if (messageBuffer[0] == '\0') {
+            if (inputmessageBuffer[0] == '\0') {
                 //received nothing
             } else {
                 DEBUG_PRINT("Received message:");
-                DEBUG_PRINTLN(messageBuffer);
+                DEBUG_PRINTLN(inputmessageBuffer);
             }
 
-            parseWirelessMessage(messageBuffer);
+            parseWirelessMessage(inputmessageBuffer);
 
         } else {
             if (newData) {
                 DEBUG_PRINT("Received from pi: ");
-                DEBUG_PRINTLN(messageBuffer);
+                DEBUG_PRINTLN(inputmessageBuffer);
                 newData = false;
 
                 

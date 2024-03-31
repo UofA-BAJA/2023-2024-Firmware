@@ -5,8 +5,8 @@
 #include "enums.h"
 #include "macros.h"
 
-char inputmessageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_fart MESSAGE_HEADERS_nxtdev MESSAGE_HEADERS_mesg MESSAGE_HEADERS_bend;
-char outputmessageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_fart MESSAGE_HEADERS_nxtdev MESSAGE_HEADERS_mesg MESSAGE_HEADERS_bend;
+char inputmessageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_start MESSAGE_HEADERS_nxtdev MESSAGE_HEADERS_mesg MESSAGE_HEADERS_stop;
+char outputmessageBuffer[BUFFER_SIZE] = MESSAGE_HEADERS_start MESSAGE_HEADERS_nxtdev MESSAGE_HEADERS_mesg MESSAGE_HEADERS_stop;
 
 char nextDevice[LEN_OF_DEVICE_NAME];
 
