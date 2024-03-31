@@ -138,6 +138,7 @@ void parseMessageRecursive(char* message, char* end) {
         Serial.print("<");
         Serial.print(startOfMessage);
         Serial.print(">");
+        Serial.println();
         Serial.flush();
 
     } else if (isMessageMeantForDevice(startOfMessage, WIRELESS_NODES_comput)) {
