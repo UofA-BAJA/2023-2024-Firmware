@@ -45,7 +45,7 @@ void operatingProcedure() {
     }
 
     case WAITING_TO_RESPOND_WITH_TYPE: {
-        if (waitForCommand(COMMANDS_SENDTYPE, messageBuffer, BUFFER_SIZE)) {
+        if (waitForCommand(COMMANDS_SENDTYPE, inputmessageBuffer, BUFFER_SIZE)) {
             Serial.println("LORA_PIT");
             Serial.flush();
             
@@ -55,25 +55,25 @@ void operatingProcedure() {
     }
 
     case (HANDLE_WIRELESS_RESPONSE): {
-        ReadWirelessIntoBufferWithTimeout(messageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
+        ReadWirelessIntoBufferWithTimeout(inputmessageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
         
-        if (messageBuffer[0] == '\0') {
+        if (inputmessageBuffer[0] == '\0') {
             isClientConnected = false;
             DEBUG_PRINTLN("Client did not respond in time. Assuming disconnected.");
         }
         else {
             DEBUG_PRINT("Wirelessly Received: ");
-            DEBUG_PRINTLN(messageBuffer);
+            DEBUG_PRINTLN(inputmessageBuffer);
         }
 
-        if (isMessageMeantForDevice(WIRELESS_NODES_server)) {
+        if (isMessageMeantForDevice(inputmessageBuffer, WIRELESS_NODES_server)) {
             // DEBUG_PRINTLN("sending ack to client");
 
             //the client sent a message to which its intended device is the server, that means it just wants an acknowledgement
             //the server will go back to listening to the computer for serial input after the acknowledgement
             //the client will go back to listening to the server for a message after the acknowledgement
-            setDeviceAndMessageInBufferTo(WIRELESS_NODES_client, "acknowledged");
-            printWirelessly(messageBuffer);
+            setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_client, "acknowledged");
+            printWirelessly(outputmessageBuffer);
 
             isClientConnected = true;
             wireless_transciever_state = WAITING_FOR_SERIAL_FROM_COMPUTER;
@@ -84,24 +84,19 @@ void operatingProcedure() {
     }
 
     case WAITING_FOR_SERIAL_FROM_COMPUTER:
-        recvWithStartEndMarkers(messageBuffer, BUFFER_SIZE);
+        recvWithStartEndMarkers(inputmessageBuffer, BUFFER_SIZE);
         
         if (newData) {
             newData = false;
             Serial.flush();
             DEBUG_PRINT("Serially Received: ");
-            DEBUG_PRINTLN(messageBuffer);
+            DEBUG_PRINTLN(inputmessageBuffer);
 
             Serial.print("WSTATUS:");
             Serial.println(isClientConnected);
             Serial.flush();
 
 
-            if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi)) {
-                //the computer sent a message that it wants at the pi, so the server will send this message to client and wait for a response
-                printWirelessly(messageBuffer);
-                wireless_transciever_state = HANDLE_WIRELESS_RESPONSE;
-            }
         } else {
             // If no new data received, check if it's time to send a heartbeat
             static unsigned long lastHeartbeatTime = 0;
@@ -112,8 +107,8 @@ void operatingProcedure() {
                 
                 // Send heartbeat message to the computer
                 DEBUG_PRINTLN("Sending heartbeat to car...");
-                setDeviceAndMessageInBufferTo(WIRELESS_NODES_client, "heartbeat");
-                printWirelessly(messageBuffer);
+                setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_client, "heartbeat");
+                printWirelessly(outputmessageBuffer);
                 
                 wireless_transciever_state = HANDLE_WIRELESS_RESPONSE;
 

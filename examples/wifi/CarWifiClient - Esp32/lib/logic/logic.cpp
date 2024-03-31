@@ -88,7 +88,12 @@ void establishWirelessConnection() {
 //it modifies global variables, such as state
 void parseMessage(char* startOfMessage) {
     char* end;
-    char* start = strstr(startOfMessage, MESSAGE_HEADERS_start);
+    char* start = strstr(startOfMessage, "fart");
+
+    if (start == nullptr) {
+        Serial.println("No start marker found");
+        return;
+    }
     // if (start != nullptr) {
     //     start += strlen(MESSAGE_HEADERS_start);
     //     end = strstr(start, MESSAGE_HEADERS_stop); // Find the end of the current message
