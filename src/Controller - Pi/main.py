@@ -2,8 +2,8 @@ from utilsImporter import adding_utils_to_path
 
 adding_utils_to_path()
 
-from utils.SerialDevices import SerialDevices
-from utils.ConfigParser import Commands, ModuleTypes, DataTypes
+from SerialDevices import SerialDevices
+from ConfigParser import Commands, ModuleTypes, DataTypes
 
 from db.databaseInterfacer import get_BajaCloud_connection, insert_session
 

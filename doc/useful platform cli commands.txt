@@ -1,7 +1,0 @@
-<-nxtdev:rasbpi-mesg:poop>
-
-cd C:\Users\alexr\Documents\Baja\2023-2024-Firmware\lib\esp32-bajablast
-pio pkg publish
-
-cd 'C:\Users\alexr\Documents\Baja\2023-2024-Firmware\examples\wifi\CarWifiClient/ -/ Esp32'
-pio pkg update

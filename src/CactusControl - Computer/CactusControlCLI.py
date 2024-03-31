@@ -1,9 +1,6 @@
-from utilsImporter import adding_utils_to_path
-
-adding_utils_to_path()
-
-from utils.ConfigParser import Commands, ModuleTypes
-from utils.SerialDevices import SerialDevices
+from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes
+from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
+from UofA_BAJA_2023_2024_common.Messages import construct_message
 '''
 plan
 - get LORA_PIT serial device
@@ -20,11 +17,11 @@ class CactusControlCLI:
         self.session_is_active = False
 
         self.commands = {
-            Commands.HELP.name     : self._print_commands,  # No argument required; directly reference the method
-            Commands.BEGIN.name    : lambda: self._begin_logging(Commands.BEGIN.name),  # Use lambda for delayed execution with arguments
-            Commands.END.name      : lambda: self._end_logging(Commands.END.name),  # Ditto
-            Commands.RETRIEVE.name : lambda: self._retrieve_logs(Commands.RETRIEVE.name),  # Ditto
-            Commands.QUIT.name     : lambda: self._quit_program(Commands.QUIT.name),  # Ditto
+            Commands.HELP     : self._print_commands,  # No argument required; directly reference the method
+            Commands.BEGIN    : lambda: self._begin_logging(Commands.BEGIN),  # Use lambda for delayed execution with arguments
+            Commands.END      : lambda: self._end_logging(Commands.END),  # Ditto
+            Commands.RETRIEVE : lambda: self._retrieve_logs(Commands.RETRIEVE),  # Ditto
+            Commands.QUIT    : lambda: self._quit_program(Commands.QUIT),  # Ditto
             "SETUP"    : lambda: self._setup_session(), # Ditto
             "READ"     : lambda: self._read_data() # Ditto
         }
@@ -36,6 +33,10 @@ class CactusControlCLI:
     def display_commands_with_colors(self):
         print(f"{bcolors.HEADER}Available commands:{bcolors.ENDC}")
         self._print_commands()
+
+    def send_command_to_rasberry_pi(self, command):
+        message = construct_message(WirelessNodeTypes.RASBERRYPI, command)
+        self.lora_device.write(f"<{message}>".encode('utf-8'))
 
     def _write_to_lora_device(self, command):
         self.lora_device.write(f"<{command}>".encode('utf-8'))
@@ -106,7 +107,7 @@ class CactusControlCLI:
             if action:
                 action()
 
-                self._write_to_lora_device(choice)
+                self.send_command_to_rasberry_pi(choice)
 
 
             else:

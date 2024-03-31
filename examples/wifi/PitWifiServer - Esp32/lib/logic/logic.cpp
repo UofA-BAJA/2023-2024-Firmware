@@ -79,7 +79,7 @@ void operatingProcedure() {
                 lastHeartbeatTime = currentMillis;
                 
                 // Send heartbeat message to the computer
-                DEBUG_PRINTLN("Sending heartbeat to car...");
+                // DEBUG_PRINTLN("Sending heartbeat to car...");
                 setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_client, "heartbeat");
                 printWirelessly(outputmessageBuffer);   
                 

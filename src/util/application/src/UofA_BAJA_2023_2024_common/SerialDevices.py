@@ -6,7 +6,7 @@ from enum import Enum
 import time
 import sys
 
-from utils.ConfigParser import Commands, ModuleTypes 
+from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes 
 
 
 class SerialDevices:
@@ -28,7 +28,7 @@ class SerialDevices:
 
         print(f"Found devices...\n")
         for dev in self._serial_devices:
-            print(f"{dev.name} on {self._serial_devices[dev].port}")
+            print(f"{dev} on {self._serial_devices[dev].port}")
 
     def get_all_serial_devices(self):
         """ 
@@ -69,23 +69,25 @@ class SerialDevices:
             print(f"End of Device Output on {ser.port}\n")
 
                     
-            ser.write(f"<{Commands.SENDTYPE.name}>".encode('utf-8'))
+            ser.write(f"<{Commands.SEND_TYPE}>".encode('utf-8'))
             
             dev_type = None
             while ser.in_waiting == 0:
                 dev_type = ser.readline().decode('utf-8').strip()
                 break
-            
+
             dev_type_enum = None
             try:
-                dev_type_enum = ModuleTypes[dev_type]
-                print(dev_type_enum)
-            except KeyError:
+                dev_type_value = getattr(ModuleTypes, dev_type)
+                print(dev_type_value)
+            except AttributeError:
                 print(f"No enum member with the name '{dev_type}'")
 
             ser.flushInput()
-            serial_devices[dev_type_enum] = ser
 
+            # Before appending to serial_devices, check if dev_type_value is not None
+            if dev_type_value is not None:
+                serial_devices[dev_type_value] = ser
 
         return serial_devices
 
@@ -146,111 +148,41 @@ class SerialDevices:
         
         device_output = "START"
         first_time_print_flag = True
-        while (device_output != ""):
-            device_output =  device.readline().decode('utf-8').strip()
+        try:
+            while (device_output != ""):
+                device_output = device.readline().decode('utf-8').strip()
 
-            if "<" in device_output and ">" in device_output:
-                break
+                if "<" in device_output and ">" in device_output:
+                    break
 
-            if (device_output != ""):
+                if device_output != "":
+                    if first_time_print_flag:
+                        print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nOUTPUT FOR {device_type.name}:{bcolors.ENDC}\n")
+                        first_time_print_flag = False  # This should probably be set to False after first time
 
-                if (first_time_print_flag):
-                    print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nOUTPUT FOR {device_type.name}:{bcolors.ENDC}\n")
+                    print(f"{bcolors.GRAYCOLOR}{device_output}{bcolors.ENDC}")
+        except KeyboardInterrupt:
+            print("\nInterrupted by user. Exiting...")
+            # Optionally, perform any cleanup here if necessary
 
-                    device_has_output_flag = False
-
-                print(f"{bcolors.GRAYCOLOR}{device_output}{bcolors.ENDC}")
+        device.flushInput()
 
 
     def read_file_data(self, device_type):
         device = self.get_device(device_type)
 
-        print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nFILE DATA FOR {device_type.name}:{bcolors.ENDC}\n")
+        print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nFILE DATA FOR {device_type}:{bcolors.ENDC}\n")
 
         device_output = "START"
 
         while (device_output != "<Finished>"):
             device_output =  device.readline().decode('utf-8').strip()
 
-
-    # def _begin_logging(self, dev_type = None):
-
-    #     # If no parameter is passed for dev_type, that means the command is sent to every device.
-    #     if dev_type == None:
-    #         # send command to nano's to start logging onto their SD cards
-    #         for dev in self._serial_devices:
-
-    #             if (dev != ModuleTypes.LORA_PI):
-    #                 self._serial_devices[dev].write(b"<BEGIN>")
-    #     else:
-    #         self._serial_devices[dev_type].write(b"Begin Logging")
-
-
-    # def _end_logging(self, dev_type = None):
-    #     print(f"Command Sent : -- {bcolors.OKBLUE}End Logging{bcolors.ENDC} --")
-    #     # send command to nano's to stop logging onto their SD cards
-
-    #     # If no parameter is passed for dev_type, that means the command is sent to every device.
-    #     if dev_type == None:
-    #         for dev in self._serial_devices:
-    #             self._serial_devices[dev].write(b"End Logging")
-    #     else:
-    #         self._serial_devices[dev_type].write(b"End Logging")
-
-    
-    # def _retrieve_logs(self,  dev_type = None):
-    #     print(f"Command Sent : -- {bcolors.OKBLUE}Retrieve Logs{bcolors.ENDC} --")
-
-    #     # retrieve data from nano's SD cards
-
-    #     # If no parameter is passed for dev_type, that means the command is sent to every device.
-    #     if dev_type == None:
-    #         for dev in self._serial_devices:
-    #             self._retrieve_dev_log(dev)
-    #     else:
-    #         self._retrieve_dev_log(dev_type)
-    
-    # def _retrieve_dev_log(self, dev_type):
-    #     # Send command
-    #     self._serial_devices[dev_type].write(b"Retrieve Logs")
-
-    #     # Get rid of all the other crap before.
-    #     self._serial_devices[dev_type].flushInput()
-
-    #     print("Waiting for device response...")
-    #     while(self._serial_devices[dev_type].in_waiting == 0):
-    #         pass
-    #     print("Device Responded...")
-
-    #     # get file name
-    #     file_name = "DEFAULT.TXT"
-    #     file_name = self._serial_devices[dev_type].readline().decode('utf-8').rstrip()
-
-    #     file = open(file_name, 'w')
-    #     # try except so that the file gets closed in case of a forceful program close
-    #     try:
-    #         print("Writing to file...")
-    #         while True:
-    #             if self._serial_devices[dev_type].in_waiting > 0:
-    #                 line = self._serial_devices[dev_type].readline().decode('utf-8')
-    #                 if line.strip() == "Finished":
-    #                     break
-    #                 file.write(line)
-    #         file.close()
-    #     except KeyboardInterrupt:
-    #         file.close()
-    #         self._quit_program()
-
-    #     print(f"File {file_name} Created")
-    #     print(f"{bcolors.BOLD}Enter another command{bcolors.ENDC}")
-
-
     def _print_commands(self):
         print(f"{bcolors.OKBLUE}Command List{bcolors.ENDC}")
 
         # print some commands or something here
         pass
-
 
     # * idk if we need this but whatever. This will send a command to the pi to quit or something...?
     def _quit_program(self):

@@ -111,7 +111,7 @@ void parseMessage(char* startOfMessage) {
     //         *startOfMessage = '\0'; // Clear everything in the message that was just parsed
     //     }
     // }
-    DEBUG_PRINTLN("Parsing message");
+    // DEBUG_PRINTLN("Parsing message");
     if (isMessageMeantForDevice(start, WIRELESS_NODES_client)) {
         //means the server wants a response from the client, just tell the server its here
         DEBUG_PRINTLN("Server is asking for the client");
