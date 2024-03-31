@@ -127,9 +127,11 @@ void parseMessage(char* startOfMessage) {
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_comput)) {
         //client is sending a message that needs to be sent serially to the computer
-        //just pass through the message
+        //just pass through the message, add brackets to add importance
         DEBUG_PRINTLN("packet for the computer, sending serially");
-        Serial.println(start);
+        Serial.print("<");
+        Serial.print(start);
+        Serial.print(">");
         Serial.flush();
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_server)) {

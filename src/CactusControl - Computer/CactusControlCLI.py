@@ -41,6 +41,16 @@ class CactusControlCLI:
     def _write_to_lora_device(self, command):
         self.lora_device.write(f"<{command}>".encode('utf-8'))
 
+    def wait_for_response(self):
+        response = ""
+
+        while True:
+            response = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
+            
+            if response != "":
+                print(f"{bcolors.OKGREEN}{response}{bcolors.ENDC}")
+                break
+
     def _begin_logging(self, command):
         
         print("Beginning logging...")        
@@ -109,7 +119,7 @@ class CactusControlCLI:
 
                 self.send_command_to_rasberry_pi(choice)
 
-                
+                self.wait_for_response()
 
 
             else:

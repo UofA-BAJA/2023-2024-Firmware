@@ -118,11 +118,9 @@ class SerialDevices:
         device_output =  selected_device.readline().decode('utf-8').strip()                
 
         if "<" in device_output and ">" in device_output:
-            return True
+            return device_output
         
-        return False
-
-    # TODO: UPDATE THE SEND FUNCTIONS TO WORK USING THE ENUMS
+        return ""
 
     def _wait_for_lora_serial_input(self):
         lora_device = self.get_device(ModuleTypes.LORA_PI)
