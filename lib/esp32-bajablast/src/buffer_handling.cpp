@@ -81,14 +81,18 @@ bool isMessageMeantForDevice(char* buffer, const char* device) {
     const char* nxtdevLocation = strstr(buffer, MESSAGE_HEADERS_nxtdev);
 
     if (nxtdevLocation != nullptr) {
+        // Move past the nxtdev header to the start of the device name
         const char* startOfInterest = nxtdevLocation + strlen(MESSAGE_HEADERS_nxtdev);
-        
-        if (startOfInterest - buffer + 8 <= BUFFER_SIZE) {
-            char extractedDevice[8 + 1]; // +1 for null-termination
-            strncpy(extractedDevice, startOfInterest, 8);
-            extractedDevice[8] = '\0'; // Ensure null termination
+        // Find the end of the device name, assuming it ends at the start of the next section, which we'll say is '-mesg:'
+        // Adjust this based on your actual message format
+        const char* endOfInterest = strstr(startOfInterest, MESSAGE_HEADERS_mesg);
 
-            if (strcmp(extractedDevice, device) == 0) {
+        if (endOfInterest != nullptr) {
+            // Compare the device name directly using strncmp to ensure we don't read past the end of the device name
+            size_t deviceNameLength = endOfInterest - startOfInterest;
+
+            // Check if the lengths match and if the device names are equal up to the found length
+            if (strlen(device) == deviceNameLength && strncmp(startOfInterest, device, deviceNameLength) == 0) {
                 return true; // Device matches
             }
         }
