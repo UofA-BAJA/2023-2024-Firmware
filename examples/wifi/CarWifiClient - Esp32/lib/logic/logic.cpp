@@ -74,13 +74,7 @@ void operatingProcedure() {
                 DEBUG_PRINTLN(messageBuffer);
                 newData = false;
 
-                getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
-
-                if (strcmp(nextDevice, WIRELESS_NODES_comput)) {
-
-                    printWirelessly(messageBuffer);
-                    wireless_transciever_state = WAITING_FOR_WIRELESS_RESPONSE;
-                }
+                
             } 
         }
         
@@ -98,17 +92,6 @@ void establishWirelessConnection() {
     tryToConnectToWifi();
     connectToHost();
 }
-
-
-bool isMessageMeantForDevice(const char* device) {
-    
-    getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
-    if (strcmp(nextDevice, device) == 0) {
-        return true;
-    }
-    return false;
-}
-
 
 void changeStateOnMessage(char* startOfMessage) {
     if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi)) {
