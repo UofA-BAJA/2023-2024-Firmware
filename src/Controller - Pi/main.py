@@ -32,6 +32,7 @@ class Controller:
                 print(device)
                 if (device != ModuleTypes.LORA_PIT) and (device != ModuleTypes.LORA_PI):
 
+                    
                     self.serial_devices._execute_single_command(Commands.RETRIEVE, device)
                     # serial_devices.read_file_data(device)
                     device_serial_obj = self.serial_devices._serial_devices[device]
@@ -154,7 +155,7 @@ class Controller:
 
             if (Controller.is_command(parsed_message)):
                 self.handleCommand(command_type_enum=parsed_message)
-                self.send_response_to_pit(f"Command {parsed_message} executed successfully.")
+                self.send_response_to_pit(json.dumps({"message" : f"success for command {parsed_message}"}))
             else:
                 print(f"Serial input: {parsed_message} is not a valid command.")
 
@@ -183,6 +184,8 @@ class Controller:
             if mesg_part:
                 matches.append(mesg_part.group(1))  
 
+        for l in matches[0]:
+            print(l)
         return matches[0]
 
     

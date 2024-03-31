@@ -74,6 +74,7 @@ class CactusControlCLI:
         
         if extracted_str != "No match found" and extracted_str != MessageHeaders.PYTHON_MESSAGE:
             print(f"{bcolors.OKGREEN}Rasberry Pi:\n{extracted_str}{bcolors.ENDC}\n")
+
         return extracted_str
 
     def parse_responses(self):
@@ -88,6 +89,8 @@ class CactusControlCLI:
             except json.JSONDecodeError:
                 print(f"{bcolors.FAIL}Error: Could not decode JSON response{bcolors.ENDC}")
                 return
+            
+        self.responses = [] # Clear the responses list
             
     def have_user_select_data_types(self, datatypes: dict):
         while True:

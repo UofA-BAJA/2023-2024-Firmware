@@ -418,8 +418,7 @@ void BAJA_EMBEDDED::DataModule::recordDataToSDCard(){
     for (int i = 0; i < arraySize; ++i) {
         if (dataToRecord[i] != -1.0f) { // Check against sentinel value
             // Write data[i] to the SD card
-            DEBUG_PRINT(">writing: ");
-            DEBUG_PRINTLN(dataToRecord[i]);
+            
             file.print(",");
             file.print(dataToRecord[i]);
         }
