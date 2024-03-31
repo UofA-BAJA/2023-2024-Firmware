@@ -61,14 +61,15 @@ BAJA_EMBEDDED::DataModule::DataModule() {
 }
 
 void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
-
     while(1) {
         switch (data_module_state)
         {
         case GENERAL_INITIALIZATION:
             initLifetimeTimer();
+            DEBUG_PRINTLN("Init sd card...");
             InitializeSDCard();
             data_module_state = DATAMODULE_SPECIFIC_INITIALIZATION;
+            DEBUG_PRINTLN("Finished General Init");
             break;
         
 
@@ -140,14 +141,14 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
 BAJA_EMBEDDED::DataModule* create_data_module_type() {
     
     initialize_data_module_select_pins();
-
+    // DEBUG_PRINTLN("Data Module Select Pins Initialized");
     //read the select pins
     int data_module_select =((PINC & (1 << PINC2)) >> PINC2) << 2 | 
                             ((PINC & (1 << PINC1)) >> PINC1) << 1 | 
                             ((PINC & (1 << PINC0)) >> PINC0);
 
-    DEBUG_PRINT("Data Module Select Pin Reads: ");
-    DEBUG_PRINTLN(data_module_select);
+    // DEBUG_PRINT("Data Module Select Pin Reads: ");
+    // DEBUG_PRINTLN(data_module_select);
 
     if (data_module_select == 0b111) {
         DEBUG_PRINTLN("RPM Module Detected");
@@ -316,18 +317,14 @@ ISR(TIMER1_OVF_vect) {
 ////////////////////////////////////////////////////////////////////////
 /////////////////////////sd card stuff//////////////////////////////////
 void InitializeSDCard(){
-    DEBUG_PRINT("Initializing SD card on PIN: ");
-    DEBUG_PRINTLN(chipSelect);
-
+    
     if(!SD.begin(chipSelect)){
         DEBUG_PRINTLN("Card failed, or not present");
         while(1);
-    }
-
-    DEBUG_PRINTLN("Card initialized");
+    } 
 
     if (SD.exists(fileName)) {
-        DEBUG_PRINTLN("Removed existing file...");
+
         SD.remove(fileName);
     }
 
@@ -344,7 +341,8 @@ void SendFile(){
         Serial.flush();
     }
     dataFile.close();
-    DEBUG_PRINTLN("<Finished>");
+    Serial.println("<Finished>");
+    Serial.flush();
 }
 
 
@@ -370,7 +368,19 @@ void StartSDReading() {
 void BAJA_EMBEDDED::DataModule::SetupFileAsCSV() {
     dataFile = SD.open(fileName, FILE_WRITE);
 
-    
+    _delay_ms(100); //delay for 100ms
+
+    if (!dataFile) {
+        DEBUG_PRINTLN("Failed to open file for writing, trying  again...");
+
+        dataFile = SD.open(fileName, FILE_WRITE);
+
+        if (!dataFile) {
+            DEBUG_PRINTLN("Failed to open file again");
+            while(1);
+         }
+    }
+
     dataFile.print("Micros,");
 
     for (int i = 0; i < arraySize; ++i) {
@@ -398,6 +408,8 @@ void BAJA_EMBEDDED::DataModule::recordDataToSDCard(){
     for (int i = 0; i < arraySize; ++i) {
         if (dataToRecord[i] != -1.0f) { // Check against sentinel value
             // Write data[i] to the SD card
+            DEBUG_PRINT(">writing: ");
+            DEBUG_PRINTLN(dataToRecord[i]);
             dataFile.print(",");
             dataFile.print(dataToRecord[i]);
         }

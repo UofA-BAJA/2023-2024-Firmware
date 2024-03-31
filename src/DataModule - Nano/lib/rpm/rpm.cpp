@@ -38,15 +38,12 @@ void RPM_DataModule::set_data_module_type()
     strcpy(data_module_type, MODULE_TYPES_RPM_REAR);
 }
 
-void RPM_DataModule::data_module_setup_procedure()
 float deltaTimes[40];
 float prevTime = 0.0; // Prev time in microseconds
 int currArrayIndex = 0;
 
-float time = 0.0; // Time passed in microseconds
 
-
-void RPM_DataModule::data_module_initialization_procedure()
+void RPM_DataModule::data_module_setup_procedure()
 {
     sei(); // Enable interrupts
     initialize_left_rpm_sensor();
@@ -54,7 +51,7 @@ void RPM_DataModule::data_module_initialization_procedure()
     initTimer2();
 
     DEBUG_PRINTLN("RPM Data Module Setup Complete");
-
+    
     strcpy(dataHeaderArray[0], DATA_TYPES_RPM_FRONT_LEFT);
     strcpy(dataHeaderArray[1], DATA_TYPES_RPM_FRONT_RIGHT);
 
@@ -70,9 +67,11 @@ void RPM_DataModule::data_module_logging_procedure() {
 
         leftSpeed *= 2.23694; // convert to mph.
 
+        leftSpeed = isinf(leftSpeed) ? -2.0 : leftSpeed;
+
         dataToRecord[0] = leftSpeed;
         dataToRecord[1] = -2.0;
-
+        
         // DEBUG_PRINT(">left: ");
         // DEBUG_PRINTLN(leftSpeed);
         recordDataToSDCard();
@@ -85,6 +84,8 @@ void RPM_DataModule::data_module_logging_procedure() {
         rightSpeed = (ANGLE_BETWEEN_MAGNETS_RAD / rightDeltaTimeSeconds) * WHEEL_RADIUS; //angular velocity * radius = speed m/s
 
         rightSpeed *= 2.23694; // convert to mph.
+
+        rightSpeed = isinf(rightSpeed) ? -2.0 : rightSpeed;
 
         dataToRecord[0] = -2.0;
         dataToRecord[1] = rightSpeed;

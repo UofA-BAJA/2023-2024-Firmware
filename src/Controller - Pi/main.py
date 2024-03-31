@@ -1,4 +1,4 @@
-from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, DataTypes
+from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, DataTypes, MessageHeaders
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 from UofA_BAJA_2023_2024_common.Messages import construct_message
 from db.databaseInterfacer import get_BajaCloud_connection, insert_session
@@ -53,6 +53,8 @@ class Controller:
         valid_data_types = {attr for attr in dir(DataTypes) if not attr.startswith('__')}
 
         self.datatypes = []
+
+        empty_output_counter = 0
         while True:
             device_output =  device_serial_obj.readline().decode('utf-8').strip()
 
@@ -73,6 +75,13 @@ class Controller:
             else:
                 print(device_output)
 
+            if device_output == "":
+                empty_output_counter += 1
+
+            if empty_output_counter > 10:
+                print("No data types found in the data stream")
+                break
+            
 
     def _insert_data_into_table(self, device_serial_obj):
         while True:
@@ -141,7 +150,7 @@ class Controller:
             
             parsed_message = Controller.parse_input(lora_serial_input)
             
-            self.send_response_to_pit(f"ENDOFRESPONSE") ##ik this is backward, it is because the lora guys parse their messages backwards
+            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE) ##ik this is backward, it is because the lora guys parse their messages backwards
 
             if (Controller.is_command(parsed_message)):
                 self.handleCommand(command_type_enum=parsed_message)
@@ -159,7 +168,7 @@ class Controller:
 
                 print(f"CURRENT SESSION ID IS: {self.session_id}")
 
-            self.send_response_to_pit(f"STARTOFRESPONSE")
+            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
         self.conn.close()
 

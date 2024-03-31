@@ -48,13 +48,13 @@ class CactusControlCLI:
             if important_serial_data != "":
                 parsed_response = self.parse_response_for_mesg(important_serial_data)
 
-                if ongoing_response and parsed_response != "No match found" and "ENDOFRESPONSE" not in parsed_response and "STARTOFRESPONSE" not in parsed_response:
+                if ongoing_response and MessageHeaders.PYTHON_MESSAGE not in parsed_response:
                     self.responses.append(parsed_response)
 
-                if "STARTOFRESPONSE" in parsed_response and ongoing_response:
+                if MessageHeaders.PYTHON_MESSAGE in parsed_response and ongoing_response:
                     break
 
-                if "ENDOFRESPONSE" in parsed_response:
+                if MessageHeaders.PYTHON_MESSAGE in parsed_response:
                     ongoing_response = True
                     
 
@@ -66,7 +66,8 @@ class CactusControlCLI:
         match = re.search(regex, response)
         extracted_str = match.group(1) if match else "No match found"
         
-        print(f"{bcolors.OKGREEN}Rasberry Pi:\n{extracted_str}{bcolors.ENDC}\n")
+        if extracted_str != "No match found" and extracted_str != MessageHeaders.PYTHON_MESSAGE:
+            print(f"{bcolors.OKGREEN}Rasberry Pi:\n{extracted_str}{bcolors.ENDC}\n")
         return extracted_str
 
     def parse_responses(self):
