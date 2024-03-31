@@ -15,7 +15,7 @@
                     "QUIT", 
                     "SENDTYPE" ],
 
-    "Data Types" :   ["PITCH",
+    "Data Types" :   ["PITC",
                     "ROLL",
                     "RPM_REAR_LEFT",
                     "RPM_REAR_RIGHT",
@@ -25,5 +25,19 @@
                     "BRAKE_PRESSURE_FRONT",
                     "GAS_ANGLE",
                     "BRAKE_ANGLE",
-                    "ENGINE_RPM"]
+                    "ENGINE_RPM"],
+
+    "Message Headers" : [
+        "-nxtdev:",
+        "-mesg:",
+        "fart", 
+        "bend"
+    ],
+
+    "Wireless Nodes" :  [
+        "client",
+        "server",
+        "comput",
+        "rasbpi"
+    ]
 }
