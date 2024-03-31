@@ -1,6 +1,6 @@
 from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, DataTypes
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
-
+from UofA_BAJA_2023_2024_common.Messages import construct_message
 from db.databaseInterfacer import get_BajaCloud_connection, insert_session
 
 import time
@@ -19,6 +19,8 @@ class Controller:
         self.rows_lost = 0
         self.rows_added = 0
 
+        self.response = ""
+
     def handleCommand(self, command_type_enum):
 
         if command_type_enum != Commands.RETRIEVE:
@@ -26,7 +28,7 @@ class Controller:
         else:
             for device in self.serial_devices._serial_devices:
 
-                if (device != ModuleTypes.LORA_PIT) and (device != ModuleTypes.LORA_PI):
+                if (device != ModuleTypes.LORA_PIT) or (device != ModuleTypes.LORA_PI):
 
                     self.serial_devices._execute_single_command(Commands.RETRIEVE, device)
                     # serial_devices.read_file_data(device)
@@ -36,10 +38,10 @@ class Controller:
 
                     self._insert_data_into_table(device_serial_obj)
 
-                    self.serial_devices._execute_single_command("LISTENUP", ModuleTypes.LORA_PI)
-                    for datatypes in self.datatypes:
-                        self.serial_devices._execute_single_command(datatypes, ModuleTypes.LORA_PI)
-                    self.serial_devices._execute_single_command("END", ModuleTypes.LORA_PI)
+                    self.response += ", ".join(self.datatypes)
+                    
+
+
 
     def _get_datatypes_in_data(self, device_serial_obj):
         valid_data_types = {attr for attr in dir(DataTypes) if not attr.startswith('__')}
@@ -136,6 +138,7 @@ class Controller:
             if (Controller.is_command(parsed_message)):
                 self.handleCommand(command_type_enum=parsed_message)
                 print(f"Finished handling command: {parsed_message} successfully.")
+                self.response += f"Finished handling command: {parsed_message} successfully."
             else:
                 print(f"Serial input: {parsed_message} is not a valid command.")
 
@@ -146,7 +149,11 @@ class Controller:
 
                 print(f"ADDING SESSION: '{actual_text}' INTO DATABASE")
                 print(f"CURRENT SESSION ID IS: {self.session_id}")
-        
+
+            response_message = construct_message(target_device=WirelessNodeTypes.COMPUTER, message=self.response )
+            self.serial_devices._execute_single_command(response_message, ModuleTypes.LORA_PI)
+            self.response = "" #clear response message
+
         self.conn.close()
 
 

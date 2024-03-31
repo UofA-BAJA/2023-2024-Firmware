@@ -111,7 +111,16 @@ class SerialDevices:
         print(f"Sending Command to {bcolors.GRAYCOLOR} {devtype} {bcolors.GRAYCOLOR}: -- {bcolors.OKBLUE} {command} {bcolors.ENDC} --")
         serial_connection.write(f"<{command}>".encode('utf-8'))
         
+    def does_device_have_bracketed_output(self, dev_type):
 
+        selected_device = self.get_device(dev_type)
+
+        device_output =  selected_device.readline().decode('utf-8').strip()                
+
+        if "<" in device_output and ">" in device_output:
+            return True
+        
+        return False
 
     # TODO: UPDATE THE SEND FUNCTIONS TO WORK USING THE ENUMS
 

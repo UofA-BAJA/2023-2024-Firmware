@@ -109,6 +109,8 @@ class CactusControlCLI:
 
                 self.send_command_to_rasberry_pi(choice)
 
+                
+
 
             else:
                 print(f"{bcolors.FAIL}Invalid command. Please try again.{bcolors.ENDC}")
