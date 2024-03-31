@@ -85,22 +85,12 @@ void establishWirelessConnection() {
     connectToHost();
 }
 
-void changeStateOnMessage(char* startOfMessage) {
-    if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi)) {
-        //message is intended for the computer, so we will print out the message data serially
-        Serial.println(messageBuffer);
-        wireless_transciever_state = WAITING_FOR_SERIAL_FROM_PI;
-    } else if (isMessageMeantForDevice(WIRELESS_NODES_client)) {
-        //message is sent from the server, and it is intended to end at the client, the server probably is just sending a heart beat message
-        //send back a present message
-        DEBUG_PRINTLN("Sending present message to server");
-        setDeviceAndMessageInBufferTo(WIRELESS_NODES_server, "Present!");
-        printWirelessly(messageBuffer);
-    }
-}
 //it modifies global variables, such as state
 void parseMessage(char* startOfMessage) {
 
-
+    const char* start = strstr(startOfMessage, MESSAGE_HEADERS_start);
+    if (start != nullptr) {
+        start += strlen(MESSAGE_HEADERS_start); 
+    }
     
 }

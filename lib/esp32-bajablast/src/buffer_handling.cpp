@@ -73,13 +73,13 @@ void setDeviceAndMessageInBufferTo(const char* device, const char* message) {
 }
 
 
-bool isMessageMeantForDevice(const char* device) {
-    const char* nxtdevLocation = strstr(messageBuffer, MESSAGE_HEADERS_nxtdev);
+bool isMessageMeantForDevice(const char* buffer, const char* device) {
+    const char* nxtdevLocation = strstr(buffer, MESSAGE_HEADERS_nxtdev);
 
     if (nxtdevLocation != nullptr) {
         const char* startOfInterest = nxtdevLocation + strlen(MESSAGE_HEADERS_nxtdev);
         
-        if (startOfInterest - messageBuffer + LEN_OF_DEVICE_NAME <= BUFFER_SIZE) {
+        if (startOfInterest - buffer + LEN_OF_DEVICE_NAME <= BUFFER_SIZE) {
             char extractedDevice[LEN_OF_DEVICE_NAME + 1]; // +1 for null-termination
             strncpy(extractedDevice, startOfInterest, LEN_OF_DEVICE_NAME);
             extractedDevice[LEN_OF_DEVICE_NAME] = '\0'; // Ensure null termination
