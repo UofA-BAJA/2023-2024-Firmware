@@ -4,8 +4,12 @@
 #include <HardwareSerial.h>
 // #include <string>
 
+//from BAJA library
 #include "macros.h"
 #include "enums.h"
+#include <buffer_handling.h>
+#include <serial_handling.h>
+
 
 #include "wifiTransmission.h"
 ///serial stuff
@@ -41,7 +45,7 @@ void operatingProcedure() {
     }
 
     case WAITING_TO_RESPOND_WITH_TYPE: {
-        if (waitForCommand(COMMANDS_SENDTYPE)) {
+        if (waitForCommand(COMMANDS_SENDTYPE, messageBuffer, BUFFER_SIZE)) {
             Serial.println("LORA_PIT");
             Serial.flush();
             
@@ -62,9 +66,7 @@ void operatingProcedure() {
             DEBUG_PRINTLN(messageBuffer);
         }
 
-        getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
-
-        if (strcmp(nextDevice, WIRELESS_NODES_server)) {
+        if (isMessageMeantForDevice(WIRELESS_NODES_server)) {
             // DEBUG_PRINTLN("sending ack to client");
 
             //the client sent a message to which its intended device is the server, that means it just wants an acknowledgement
@@ -82,7 +84,7 @@ void operatingProcedure() {
     }
 
     case WAITING_FOR_SERIAL_FROM_COMPUTER:
-        recvWithStartEndMarkers();
+        recvWithStartEndMarkers(messageBuffer, BUFFER_SIZE);
         
         if (newData) {
             newData = false;
@@ -94,9 +96,8 @@ void operatingProcedure() {
             Serial.println(isClientConnected);
             Serial.flush();
 
-            getNextDevice(messageBuffer, nextDevice, LEN_OF_DEVICE_NAME);
 
-            if (strcmp(nextDevice, WIRELESS_NODES_rasbpi)) {
+            if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi)) {
                 //the computer sent a message that it wants at the pi, so the server will send this message to client and wait for a response
                 printWirelessly(messageBuffer);
                 wireless_transciever_state = HANDLE_WIRELESS_RESPONSE;
