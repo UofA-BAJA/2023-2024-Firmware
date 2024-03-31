@@ -1,12 +1,6 @@
-from utilsImporter import adding_utils_to_path
-
-
-adding_utils_to_path()
-
-
-from ConfigParser import Commands, ModuleTypes, WirelessNodeTypes
-from SerialDevices import SerialDevices
-from Messages import *
+from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes
+from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
+from UofA_BAJA_2023_2024_common.Messages import construct_message
 '''
 plan
 - get LORA_PIT serial device
@@ -23,11 +17,11 @@ class CactusControlCLI:
         self.session_is_active = False
 
         self.commands = {
-            Commands.HELP.value     : self._print_commands,  # No argument required; directly reference the method
-            Commands.BEGIN.value    : lambda: self._begin_logging(Commands.BEGIN.value),  # Use lambda for delayed execution with arguments
-            Commands.END.value      : lambda: self._end_logging(Commands.END.value),  # Ditto
-            Commands.RETRIEVE.value : lambda: self._retrieve_logs(Commands.RETRIEVE.value),  # Ditto
-            Commands.QUIT.value     : lambda: self._quit_program(Commands.QUIT.value),  # Ditto
+            Commands.HELP     : self._print_commands,  # No argument required; directly reference the method
+            Commands.BEGIN    : lambda: self._begin_logging(Commands.BEGIN),  # Use lambda for delayed execution with arguments
+            Commands.END      : lambda: self._end_logging(Commands.END),  # Ditto
+            Commands.RETRIEVE : lambda: self._retrieve_logs(Commands.RETRIEVE),  # Ditto
+            Commands.QUIT    : lambda: self._quit_program(Commands.QUIT),  # Ditto
             "SETUP"    : lambda: self._setup_session(), # Ditto
             "READ"     : lambda: self._read_data() # Ditto
         }

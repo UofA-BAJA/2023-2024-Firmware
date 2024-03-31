@@ -43,6 +43,10 @@ In Baja, there are a couple of python packages that need to be installed so that
 
     > pip install gitpython
 
+    and by far the coolest pip install
+
+    > pip install UofA-BAJA-2023-2024
+
 3. Once you have done this, use the "pip list" command to check for these files again. They should appear in the displayed list along with their current versions.
 
 *optional: if you would like to run the GUI, you must install the package "pyqt6"
