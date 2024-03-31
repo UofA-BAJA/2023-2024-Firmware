@@ -64,6 +64,14 @@ void resetMessageBuffer() {
     }
 }
 
+void setDeviceAndMessageInBufferTo(const char* device, const char* message) {
+    resetMessageBuffer();
+
+    setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_nxtdev, device);
+
+    setTextAfterHeader(messageBuffer, BUFFER_SIZE, MESSAGE_HEADERS_mesg, message);
+}
+
 
 bool getNextDevice(const char* messageBuffer, char* output, size_t outputSize) {
 
