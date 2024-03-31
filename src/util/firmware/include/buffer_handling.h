@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 #define LEN_OF_DEVICE_NAME 7
-#define BUFFER_SIZE 255
+#define BUFFER_SIZE 1024
 #define WIRELESS_RESPONSE_TIMEOUT_MS 10000
 
 extern char inputmessageBuffer[BUFFER_SIZE];

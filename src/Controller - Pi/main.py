@@ -32,6 +32,7 @@ class Controller:
                 print(device)
                 if (device != ModuleTypes.LORA_PIT) and (device != ModuleTypes.LORA_PI):
 
+                    
                     self.serial_devices._execute_single_command(Commands.RETRIEVE, device)
                     # serial_devices.read_file_data(device)
                     device_serial_obj = self.serial_devices._serial_devices[device]
@@ -45,10 +46,11 @@ class Controller:
                     self.send_response_to_pit(datatypes_as_json)
                     
     def send_response_to_pit(self, response_message_str: str):
+
         response_message =  construct_message(target_device=WirelessNodeTypes.COMPUTER, message=response_message_str )
         self.serial_devices._execute_single_command(response_message, ModuleTypes.LORA_PI)
 
-
+       
     def _get_datatypes_in_data(self, device_serial_obj):
         valid_data_types = {attr for attr in dir(DataTypes) if not attr.startswith('__')}
 
@@ -132,7 +134,35 @@ class Controller:
             except Exception as e:
                 print(f"Failed to insert data: {e}")
 
+
             print(f"Rows added to database: {self.rows_added}, lost rows: {self.rows_lost}")
+
+    def get_datatype_and_send_to_pit(self, data_query):
+        print(f"processig data query: {data_query}")
+        data_query_json = json.loads(data_query)
+
+        selected_datatype = data_query_json["data-query"]["selected-datatype"]
+
+        sql_query = f"SELECT {selected_datatype} FROM BajaCloudData WHERE ID = ?;"
+
+        # other_sql_query = f"SELECT * FROM BajaCloudData WHERE ID = {self.session_id};"
+        # print(other_sql_query)
+        c = self.conn.cursor()
+        c.execute(sql_query, (self.session_id,))
+
+        results = c.fetchall()
+
+        for row in results:
+            print(row)
+
+        # Combine the values into a single string, separated by commas, and ensure it doesn't exceed 512 characters
+        combined_string = ", ".join(str(row[0]) for row in results)
+
+        # Ensure the combined string does not exceed 512 characters
+        if len(combined_string) > 256:
+            combined_string = combined_string[:256-3] + "..."
+
+        self.send_response_to_pit(json.dumps({"data-packet": combined_string}))            
 
     def run(self):
         if (ModuleTypes.LORA_PIT in self.serial_devices._serial_devices):
@@ -150,11 +180,14 @@ class Controller:
             
             parsed_message = Controller.parse_input(lora_serial_input)
             
-            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE) ##ik this is backward, it is because the lora guys parse their messages backwards
+            if (Controller.check_if_input_warrants_a_response(parsed_message)):
+                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
             if (Controller.is_command(parsed_message)):
                 self.handleCommand(command_type_enum=parsed_message)
-                self.send_response_to_pit(f"Command {parsed_message} executed successfully.")
+                self.send_response_to_pit(json.dumps({"message" : f"success for command {parsed_message}"}))
+            elif (Controller.is_data_query(parsed_message)):
+                self.get_datatype_and_send_to_pit(parsed_message)
             else:
                 print(f"Serial input: {parsed_message} is not a valid command.")
 
@@ -164,12 +197,12 @@ class Controller:
                 self.session_id = insert_session(self.conn, actual_text)
 
                 print(f"ADDING SESSION: '{actual_text}' INTO DATABASE")
-                self.send_response_to_pit(f"ADDED SESSION: '{actual_text}' INTO DATABASE")
+                self.send_response_to_pit(json.dumps({"message" :f"ADDED SESSION: '{actual_text}' INTO DATABASE"}))
 
                 print(f"CURRENT SESSION ID IS: {self.session_id}")
 
-            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
-
+            if (Controller.check_if_input_warrants_a_response(parsed_message)):
+                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
         self.conn.close()
 
 
@@ -189,8 +222,22 @@ class Controller:
     def is_command(command_str):
         commands = {attribute: value for attribute, value in Commands.__dict__.items() if not attribute.startswith('__')}
         return command_str in commands.values()
+    
+    def is_data_query(input_str):
+        try:
+            json_query = json.loads(input_str)
+            
+            if "data-query" in json_query:
+                return True
+        except json.JSONDecodeError:
+            return False
 
-
+    def check_if_input_warrants_a_response(input_str):
+        if "SESSION" in input_str or Controller.is_command(input_str) or Controller.is_data_query(input_str):
+            return True
+        else:
+            return False
+        
 if __name__ == "__main__":
     c = Controller()
 

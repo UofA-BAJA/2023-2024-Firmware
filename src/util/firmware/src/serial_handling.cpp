@@ -15,9 +15,9 @@
 
 bool newData = false;
 
-void recvWithStartEndMarkers(char* messageBuffer, const byte bufferSize) {
+void recvWithStartEndMarkers(char* messageBuffer, const int bufferSize) {
     static boolean recvInProgress = false;
-    static byte ndx = 0;
+    static int ndx = 0;
     char rc;
  
     while (Serial.available() > 0 && newData == false) {
@@ -47,7 +47,7 @@ void recvWithStartEndMarkers(char* messageBuffer, const byte bufferSize) {
 
 /*this function will wait for a command to be received and will return a boolean if the command is successfuly recieved
     give the function a defined command from enums.h as input*/
-bool waitForCommand(const char* cmmdString, char* messageBuffer, const byte bufferSize) {
+bool waitForCommand(const char* cmmdString, char* messageBuffer, const int bufferSize) {
     recvWithStartEndMarkers(messageBuffer, bufferSize);
     if (newData) {
         if (strcmp(messageBuffer, cmmdString) == 0) {
