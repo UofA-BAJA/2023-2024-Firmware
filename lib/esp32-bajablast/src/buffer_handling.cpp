@@ -75,16 +75,18 @@ void setDeviceAndMessageInBufferTo(char* buf, const char* device, const char* me
 }
 
 
+
 bool isMessageMeantForDevice(char* buffer, const char* device) {
+    //8 is the length of ':nxtdev-'
     const char* nxtdevLocation = strstr(buffer, MESSAGE_HEADERS_nxtdev);
 
     if (nxtdevLocation != nullptr) {
         const char* startOfInterest = nxtdevLocation + strlen(MESSAGE_HEADERS_nxtdev);
         
-        if (startOfInterest - buffer + LEN_OF_DEVICE_NAME <= BUFFER_SIZE) {
-            char extractedDevice[LEN_OF_DEVICE_NAME + 1]; // +1 for null-termination
-            strncpy(extractedDevice, startOfInterest, LEN_OF_DEVICE_NAME);
-            extractedDevice[LEN_OF_DEVICE_NAME] = '\0'; // Ensure null termination
+        if (startOfInterest - buffer + 8 <= BUFFER_SIZE) {
+            char extractedDevice[8 + 1]; // +1 for null-termination
+            strncpy(extractedDevice, startOfInterest, 8);
+            extractedDevice[8] = '\0'; // Ensure null termination
 
             if (strcmp(extractedDevice, device) == 0) {
                 return true; // Device matches
@@ -93,4 +95,5 @@ bool isMessageMeantForDevice(char* buffer, const char* device) {
     }
     return false; // Device does not match or 'nxtdev' not found
 }
+
 

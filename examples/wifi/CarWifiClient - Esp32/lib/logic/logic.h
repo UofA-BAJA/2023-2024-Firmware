@@ -7,5 +7,5 @@ void operatingProcedure();
 
 void establishWirelessConnection();
 
-void parseWirelessMessage(char* startOfMessage);
+void parseMessage(char* startOfMessage);
 #endif // LOGIC_H

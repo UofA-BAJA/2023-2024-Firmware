@@ -58,7 +58,7 @@ void operatingProcedure() {
                 DEBUG_PRINTLN(inputmessageBuffer);
             }
 
-            parseWirelessMessage(inputmessageBuffer);
+            parseMessage(inputmessageBuffer);
 
         } else {
             if (newData) {
@@ -66,7 +66,7 @@ void operatingProcedure() {
                 DEBUG_PRINTLN(inputmessageBuffer);
                 newData = false;
 
-                
+                parseMessage(inputmessageBuffer);
             } 
         }
         
@@ -86,24 +86,52 @@ void establishWirelessConnection() {
 }
 
 //it modifies global variables, such as state
-void parseWirelessMessage(char* startOfMessage) {
-
+void parseMessage(char* startOfMessage) {
+    char* end;
     char* start = strstr(startOfMessage, MESSAGE_HEADERS_start);
-    if (start != nullptr) {
-        start += strlen(MESSAGE_HEADERS_start); 
-    }
-    
+    // if (start != nullptr) {
+    //     start += strlen(MESSAGE_HEADERS_start);
+    //     end = strstr(start, MESSAGE_HEADERS_stop); // Find the end of the current message
+    //     if (end != nullptr) {
+    //         *end = '\0'; // Terminate the current message
+    //     }
+        
+    //     // ... (rest of the isMessageMeantForDevice checks) ...
+
+    //     if (end != nullptr) {
+    //         end += strlen(MESSAGE_HEADERS_stop); // Move past the end marker
+    //         if (*end != '\0') { // Check if there is more to parse
+    //             parseMessage(end); // Recursively call parseMessage with the remaining message
+    //         }
+    //         *startOfMessage = '\0'; // Clear everything in the message that was just parsed
+    //     }
+    // }
+    DEBUG_PRINTLN("Parsing message");
     if (isMessageMeantForDevice(start, WIRELESS_NODES_client)) {
         //means the server wants a response from the client, just tell the server its here
+        DEBUG_PRINTLN("Server is asking for the client");
         setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_server, "present");
         printWirelessly(outputmessageBuffer);
+
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_rasbpi)) {
-        //do something
+        //probably is the rasberry pi wanting to send a message uphill, client is just a pass through
+        //remember that client is connected to pi through serial
+        DEBUG_PRINTLN("Rasberry pi is asking for the client");
+        Serial.println(start);
+        Serial.flush();
+
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_comput)) {
-        //do something
+        //probably is the rasberry pi wanting to send a message uphill, client is just a pass through
+        DEBUG_PRINTLN("Computer is asking for the client");
+        printWirelessly(start);
+
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_server)) {
-        //do something
+        //if you received a message intended for the server, that makes no sense, the server will not send a message to itself
+        Serial.println("Server is not supposed to send messages to itself");
+
     } else {
-        //do something
+        //this should never trigger, but if it does, it means the message is not meant for any device
+        //packet is probably corrupted
+        Serial.println("No target device found, message is corrupted");
     }
 }
