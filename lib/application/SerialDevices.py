@@ -6,7 +6,7 @@ from enum import Enum
 import time
 import sys
 
-from utils.ConfigParser import Commands, ModuleTypes 
+from ConfigParser import Commands, ModuleTypes 
 
 
 class SerialDevices:
