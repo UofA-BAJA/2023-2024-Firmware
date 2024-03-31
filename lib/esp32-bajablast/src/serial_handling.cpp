@@ -56,8 +56,6 @@ bool waitForCommand(const char* cmmdString, char* messageBuffer, const byte buff
             return true;
         }
         else {
-            DEBUG_PRINT("Currently in state: ");
-            DEBUG_PRINTLN(wireless_transciever_state);
             DEBUG_PRINT("Incorrect Command: ");
             DEBUG_PRINTLN(messageBuffer);
             memset(messageBuffer, 0, bufferSize); // Clear received chars
