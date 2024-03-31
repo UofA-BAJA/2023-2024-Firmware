@@ -53,6 +53,7 @@ In Baja, there are a couple of python packages that need to be installed so that
 
 ### Useful commands
 
+## [PlatformIO lib](https://registry.platformio.org/libraries/b-i-x/UofA-BAJA-2023-2024)
 to update the pio libray run
 
     > pio pkg publish
@@ -61,16 +62,25 @@ to update the library in a project run
 
     > pio pkg update
 
+## [PyPi lib](https://pypi.org/project/UofA-BAJA-2023-2024/)
+to build pypi project windows
+
+    > python3 -m build
+
 to update pypi project
 
-    twine upload dist/* -u __token__ -p "api-key-u-ask-alex-for"
+    > twine upload dist/* -u __token__ -p "api-key-u-ask-alex-for"
+
+[the](https://packaging.python.org/en/latest/tutorials/packaging-projects/) link to the guide i followed for pypi stuff
 
 ### Example packets
 
 Here are some example packets 
 
 This is one meant for the rasberry pi, the test is the mesg, everything is headers, except for the rasbpi, thats the device
+
 yes !fart! is start
+
 and !bend! is end
 
     > <!fart!-nxtdev:rasbpi-mesg:test!bend!>

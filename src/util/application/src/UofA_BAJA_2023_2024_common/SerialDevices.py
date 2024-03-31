@@ -6,7 +6,7 @@ from enum import Enum
 import time
 import sys
 
-from enums import Commands, ModuleTypes 
+from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes 
 
 
 class SerialDevices:

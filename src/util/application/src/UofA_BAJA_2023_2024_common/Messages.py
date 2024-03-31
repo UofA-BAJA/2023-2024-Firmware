@@ -1,4 +1,4 @@
-from enums import WirelessNodeTypes, MessageHeaders
+from UofA_BAJA_2023_2024_common.enums import MessageHeaders
 
 def construct_message(target_device: str, message: str):
     """
