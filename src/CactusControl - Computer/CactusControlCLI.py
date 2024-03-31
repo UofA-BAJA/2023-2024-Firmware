@@ -46,7 +46,7 @@ class CactusControlCLI:
 
         while True:
             response = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
-            
+
             if response != "":
                 print(f"{bcolors.OKGREEN}{response}{bcolors.ENDC}")
                 break
@@ -119,7 +119,7 @@ class CactusControlCLI:
 
                 self.send_command_to_rasberry_pi(choice)
 
-                self.wait_for_response()
+                # self.wait_for_response()
 
 
             else:

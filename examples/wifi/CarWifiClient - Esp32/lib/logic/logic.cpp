@@ -94,29 +94,12 @@ void parseMessage(char* startOfMessage) {
         Serial.println("No start marker found");
         return;
     }
-    // if (start != nullptr) {
-    //     start += strlen(MESSAGE_HEADERS_start);
-    //     end = strstr(start, MESSAGE_HEADERS_stop); // Find the end of the current message
-    //     if (end != nullptr) {
-    //         *end = '\0'; // Terminate the current message
-    //     }
-        
-    //     // ... (rest of the isMessageMeantForDevice checks) ...
-
-    //     if (end != nullptr) {
-    //         end += strlen(MESSAGE_HEADERS_stop); // Move past the end marker
-    //         if (*end != '\0') { // Check if there is more to parse
-    //             parseMessage(end); // Recursively call parseMessage with the remaining message
-    //         }
-    //         *startOfMessage = '\0'; // Clear everything in the message that was just parsed
-    //     }
-    // }
-    // DEBUG_PRINTLN("Parsing message");
+    
     if (isMessageMeantForDevice(start, WIRELESS_NODES_client)) {
-        //means the server wants a response from the client, just tell the server its here
-        DEBUG_PRINTLN("Server is asking for the client");
-        setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_server, "present");
-        printWirelessly(outputmessageBuffer);
+        //means the server is just sending the acknoledgement of the the server
+        //dont respond to the server, just send the message to the rasberry pi
+        DEBUG_PRINTLN("Server is just acknowledging the client");
+        
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_rasbpi)) {
         //probably is the rasberry pi wanting to send a message downhill, client is just a pass through
@@ -133,8 +116,11 @@ void parseMessage(char* startOfMessage) {
         printWirelessly(start);
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_server)) {
-        //if you received a message intended for the server, that makes no sense, the server will not send a message to itself
-        Serial.println("Server is not supposed to send messages to itself");
+        //if you received a message intended for the server, that means the server sent a message it wants a response to
+        //means the server wants a response from the client, just tell the server its here
+        DEBUG_PRINTLN("Server is asking for for client response");
+        setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_server, "present");
+        printWirelessly(outputmessageBuffer);
 
     } else {
         //this should never trigger, but if it does, it means the message is not meant for any device
