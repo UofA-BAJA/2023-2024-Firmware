@@ -13,6 +13,6 @@ extern char nextDevice[LEN_OF_DEVICE_NAME];
 void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, const char* newMessage);
 void setDeviceAndMessageInBufferTo(const char* device, const char* message);
 void resetMessageBuffer();
-bool isMessageMeantForDevice(const char* device);
+bool isMessageMeantForDevice(const char* buffer, const char* device);
 
 #endif // BUFFER_HANDLING_H

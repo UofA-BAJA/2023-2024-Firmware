@@ -58,7 +58,7 @@ void operatingProcedure() {
                 DEBUG_PRINTLN(messageBuffer);
             }
 
-            parseMessage(messageBuffer);
+            parseWirelessMessage(messageBuffer);
 
         } else {
             if (newData) {
@@ -86,7 +86,7 @@ void establishWirelessConnection() {
 }
 
 //it modifies global variables, such as state
-void parseMessage(char* startOfMessage) {
+void parseWirelessMessage(char* startOfMessage) {
 
     const char* start = strstr(startOfMessage, MESSAGE_HEADERS_start);
     if (start != nullptr) {
