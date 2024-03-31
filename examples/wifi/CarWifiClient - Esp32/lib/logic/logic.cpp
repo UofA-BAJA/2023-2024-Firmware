@@ -93,4 +93,16 @@ void parseWirelessMessage(char* startOfMessage) {
         start += strlen(MESSAGE_HEADERS_start); 
     }
     
+    if (isMessageMeantForDevice(WIRELESS_NODES_client, start)) {
+        //means the server wants a response from the client, just tell the server its here
+        
+    } else if (isMessageMeantForDevice(WIRELESS_NODES_rasbpi, start)) {
+        //do something
+    } else if (isMessageMeantForDevice(WIRELESS_NODES_comput, start)) {
+        //do something
+    } else if (isMessageMeantForDevice(WIRELESS_NODES_server, start)) {
+        //do something
+    } else {
+        //do something
+    }
 }
