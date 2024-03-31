@@ -1,14 +1,11 @@
-from utilsImporter import adding_utils_to_path
-
-adding_utils_to_path()
-
-from SerialDevices import SerialDevices
-from ConfigParser import Commands, ModuleTypes, DataTypes
-
+from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, DataTypes, MessageHeaders
+from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
+from UofA_BAJA_2023_2024_common.Messages import construct_message
 from db.databaseInterfacer import get_BajaCloud_connection, insert_session
 
 import time
 import re
+import json
 # ! lily was here
 # ayo
 
@@ -23,16 +20,19 @@ class Controller:
         self.rows_lost = 0
         self.rows_added = 0
 
+        self.response = ""
+
     def handleCommand(self, command_type_enum):
 
         if command_type_enum != Commands.RETRIEVE:
-            self.serial_devices.sendCommandToAllDataModules(command_type_enum.name)
+            self.serial_devices.sendCommandToAllDataModules(command_type_enum)
         else:
-            for device in self.serial_devices._serial_devices:
 
+            for device in self.serial_devices._serial_devices:
+                print(device)
                 if (device != ModuleTypes.LORA_PIT) and (device != ModuleTypes.LORA_PI):
 
-                    self.serial_devices._execute_single_command(Commands.RETRIEVE.name, device)
+                    self.serial_devices._execute_single_command(Commands.RETRIEVE, device)
                     # serial_devices.read_file_data(device)
                     device_serial_obj = self.serial_devices._serial_devices[device]
 
@@ -40,21 +40,28 @@ class Controller:
 
                     self._insert_data_into_table(device_serial_obj)
 
-                    self.serial_devices._execute_single_command("LISTENUP", ModuleTypes.LORA_PI)
-                    for datatypes in self.datatypes:
-                        self.serial_devices._execute_single_command(datatypes, ModuleTypes.LORA_PI)
-                    self.serial_devices._execute_single_command("END", ModuleTypes.LORA_PI)
+                    datatypes_as_json = json.dumps({"datatypes": self.datatypes})
+
+                    self.send_response_to_pit(datatypes_as_json)
+                    
+    def send_response_to_pit(self, response_message_str: str):
+        response_message =  construct_message(target_device=WirelessNodeTypes.COMPUTER, message=response_message_str )
+        self.serial_devices._execute_single_command(response_message, ModuleTypes.LORA_PI)
+
 
     def _get_datatypes_in_data(self, device_serial_obj):
+        valid_data_types = {attr for attr in dir(DataTypes) if not attr.startswith('__')}
 
         self.datatypes = []
+
+        empty_output_counter = 0
         while True:
             device_output =  device_serial_obj.readline().decode('utf-8').strip()
 
 
             if "Micros" in device_output:
                 for possible_datatypes in device_output.split(","):
-                    if possible_datatypes in DataTypes.__members__:
+                    if possible_datatypes in valid_data_types:
                         print(f"Data type: {possible_datatypes}")
                         self.datatypes.append(possible_datatypes)
 
@@ -68,6 +75,13 @@ class Controller:
             else:
                 print(device_output)
 
+            if device_output == "":
+                empty_output_counter += 1
+
+            if empty_output_counter > 10:
+                print("No data types found in the data stream")
+                break
+            
 
     def _insert_data_into_table(self, device_serial_obj):
         while True:
@@ -133,13 +147,16 @@ class Controller:
         while True:
             lora_serial_input = self.serial_devices._wait_for_lora_serial_input()
 
-            try:
-                parsed_input = Controller.parse_input(lora_serial_input)
-                command_type_enum = Commands[parsed_input]
-                self.handleCommand(command_type_enum=command_type_enum)
-                print(f"Finished handling command: {command_type_enum} successfully.")
-            except KeyError:
-                print(f"Serial input: {lora_serial_input} is not a valid command.")
+            
+            parsed_message = Controller.parse_input(lora_serial_input)
+            
+            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE) ##ik this is backward, it is because the lora guys parse their messages backwards
+
+            if (Controller.is_command(parsed_message)):
+                self.handleCommand(command_type_enum=parsed_message)
+                self.send_response_to_pit(f"Command {parsed_message} executed successfully.")
+            else:
+                print(f"Serial input: {parsed_message} is not a valid command.")
 
             if "SESSION" in lora_serial_input:
                 actual_text = Controller.parse_input(lora_serial_input).replace("SESSION:", "")
@@ -147,20 +164,31 @@ class Controller:
                 self.session_id = insert_session(self.conn, actual_text)
 
                 print(f"ADDING SESSION: '{actual_text}' INTO DATABASE")
+                self.send_response_to_pit(f"ADDED SESSION: '{actual_text}' INTO DATABASE")
+
                 print(f"CURRENT SESSION ID IS: {self.session_id}")
-        
+
+            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+
         self.conn.close()
 
 
     def parse_input(raw):
-        # print(f"idk {command}")
-        pattern = re.compile(r'{(.*?)}')
-        # Find all matches in the text
-        matches = pattern.findall(raw)
+        matches = []
+        bracketed_message = re.findall(r'<(.*?)>', raw)
+
+        # Now extract the 'mesg' part
+        for message in bracketed_message:
+            mesg_part = re.search(r'-mesg:(.*?)!', message)
+            if mesg_part:
+                matches.append(mesg_part.group(1))  
 
         return matches[0]
 
-        
+    
+    def is_command(command_str):
+        commands = {attribute: value for attribute, value in Commands.__dict__.items() if not attribute.startswith('__')}
+        return command_str in commands.values()
 
 
 if __name__ == "__main__":

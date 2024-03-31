@@ -80,7 +80,7 @@ void operatingProcedure() {
                 
                 // Send heartbeat message to the computer
                 // DEBUG_PRINTLN("Sending heartbeat to car...");
-                setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_client, "heartbeat");
+                setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_server, "heartbeat");
                 printWirelessly(outputmessageBuffer);   
                 
                 ReadWirelessIntoBufferWithTimeout(inputmessageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
@@ -107,41 +107,81 @@ void operatingProcedure() {
     }
 }
 
-void parseMessage(char* startOfMessage) {
-    char* end;
-    char* start = strstr(startOfMessage, "fart");
-
-    if (start == nullptr) {
-        Serial.println("No start marker found");
+void parseMessageRecursive(char* message, char* end) {
+    if (message >= end) {
+        // Base case: if we've reached or surpassed the start of the message, stop.
         return;
     }
 
-    if (isMessageMeantForDevice(start, WIRELESS_NODES_client)) {
-        //if you received a message intended for the client from the client, that makes no sense, the cleitn will not send a message to itself
+    // Find the last "!fart!" marker in the message, starting from 'end'.
+    char* lastStart = nullptr;
+    for (char* p = end; p >= message; --p) {
+        if (strncmp(p, MESSAGE_HEADERS_start, 6) == 0) {
+            lastStart = p;
+            break;
+        }
+    }
+
+    if (lastStart == nullptr) {
+        // If no marker is found, we're done.
+        return;
+    }
+
+    // Since we want to include "!fart!" in the message for rasbpi, startOfMessage points to "!fart!" itself.
+    char* startOfMessage = lastStart; 
+    char* nextEnd = lastStart; // Next recursion will look before this point.
+
+    // Find the end marker "!bend!" to include in the message.
+    char* messageEnd = strstr(startOfMessage, MESSAGE_HEADERS_stop);
+    if (messageEnd != nullptr) {
+        // Adjust messageEnd to point to the character after "!bend!" to include it.
+        messageEnd += 6; // Include "!bend!" in the message.
+    } else {
+        // If no "!bend!" is found, we use the original end.
+        messageEnd = end;
+    }
+
+    // Temporarily terminate the current message for processing.
+    char savedChar = *messageEnd;
+    *messageEnd = '\0';
+
+    
+    // Handle the message.
+    if (isMessageMeantForDevice(startOfMessage, WIRELESS_NODES_client)) {
         DEBUG_PRINTLN("Client is not supposed to send messages to itself");
 
-    } else if (isMessageMeantForDevice(start, WIRELESS_NODES_rasbpi)) {
-        //probably is the computer wanting to send messages downhill, server is just a pass through
-        DEBUG_PRINTLN("sending message meant for rasberry pi down hill wirelessly");
-        printWirelessly(start);
+    } else if (isMessageMeantForDevice(startOfMessage, WIRELESS_NODES_rasbpi)) {
+        DEBUG_PRINTLN("Sending message meant for Raspberry Pi downhill wirelessly");
+        printWirelessly(startOfMessage);
 
-    } else if (isMessageMeantForDevice(start, WIRELESS_NODES_comput)) {
-        //client is sending a message that needs to be sent serially to the computer
-        //just pass through the message
-        DEBUG_PRINTLN("packet for the computer, sending serially");
-        Serial.println(start);
+    } else if (isMessageMeantForDevice(startOfMessage, WIRELESS_NODES_comput)) {
+        DEBUG_PRINTLN("Packet for the computer, sending serially");
+        Serial.print("<");
+        Serial.print(startOfMessage);
+        Serial.print(">");
+        Serial.println();
         Serial.flush();
 
-    } else if (isMessageMeantForDevice(start, WIRELESS_NODES_server)) {
-        //if you received a message intended for the server, its the client wanting an acknowledgement
-        Serial.println("message for the server, means the client wants an acknowledgement");
+    } else if (isMessageMeantForDevice(startOfMessage, WIRELESS_NODES_server)) {
+        Serial.println("Message for the server, means the client wants an acknowledgement");
         setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_client, "acknowledged");
         printWirelessly(outputmessageBuffer);
         isClientConnected = true;
 
     } else {
-        //this should never trigger, but if it does, it means the message is not meant for any device
-        //packet is probably corrupted
         Serial.println("No target device found, message is corrupted");
     }
+
+    // Restore the character that was temporarily replaced with '\0'.
+    *messageEnd = savedChar;
+
+    // Recursively process the rest of the message, moving towards the start.
+    parseMessageRecursive(message, nextEnd - 6); // Adjust to move before the "!fart!" marker processed.
+    
+}
+
+// Wrapper function to simplify initial calls
+void parseMessage(char* startOfMessage) {
+    int messageLength = strlen(startOfMessage);
+    parseMessageRecursive(startOfMessage, startOfMessage + messageLength);
 }

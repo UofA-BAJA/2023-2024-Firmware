@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <HardwareSerial.h>
-#include <SD.h>
+#include <SdFat.h>
 #include <SPI.h>
 
 #include "datamodule.h"
@@ -21,7 +21,11 @@ bool newData = false;
 ////////////////////////////
 
 //sd card stuff
-File dataFile;
+SdFat sd;
+
+// File object.
+SdFile file;
+// File dataFile;
 #define fileName "temp.csv"
 #define chipSelect 10
 ////////////////////////////
@@ -61,14 +65,15 @@ BAJA_EMBEDDED::DataModule::DataModule() {
 }
 
 void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
-
     while(1) {
         switch (data_module_state)
         {
         case GENERAL_INITIALIZATION:
             initLifetimeTimer();
+            DEBUG_PRINTLN("Init sd card...");
             InitializeSDCard();
             data_module_state = DATAMODULE_SPECIFIC_INITIALIZATION;
+            DEBUG_PRINTLN("Finished General Init");
             break;
         
 
@@ -140,14 +145,14 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
 BAJA_EMBEDDED::DataModule* create_data_module_type() {
     
     initialize_data_module_select_pins();
-
+    // DEBUG_PRINTLN("Data Module Select Pins Initialized");
     //read the select pins
     int data_module_select =((PINC & (1 << PINC2)) >> PINC2) << 2 | 
                             ((PINC & (1 << PINC1)) >> PINC1) << 1 | 
                             ((PINC & (1 << PINC0)) >> PINC0);
 
-    DEBUG_PRINT("Data Module Select Pin Reads: ");
-    DEBUG_PRINTLN(data_module_select);
+    // DEBUG_PRINT("Data Module Select Pin Reads: ");
+    // DEBUG_PRINTLN(data_module_select);
 
     if (data_module_select == 0b111) {
         DEBUG_PRINTLN("RPM Module Detected");
@@ -316,42 +321,57 @@ ISR(TIMER1_OVF_vect) {
 ////////////////////////////////////////////////////////////////////////
 /////////////////////////sd card stuff//////////////////////////////////
 void InitializeSDCard(){
-    DEBUG_PRINT("Initializing SD card on PIN: ");
-    DEBUG_PRINTLN(chipSelect);
+    
+    // if(!SD.begin(chipSelect)){
+    //     DEBUG_PRINTLN("Card failed, or not present");
+    //     while(1);
+    // } 
+    if (!sd.begin(chipSelect, SD_SCK_MHZ(4))) {
+    Serial.println("SD Card initialization failed!");
+    return;
+  }
 
-    if(!SD.begin(chipSelect)){
-        DEBUG_PRINTLN("Card failed, or not present");
-        while(1);
-    }
-
-    DEBUG_PRINTLN("Card initialized");
-
-    if (SD.exists(fileName)) {
-        DEBUG_PRINTLN("Removed existing file...");
-        SD.remove(fileName);
+    if (sd.exists(fileName)) {
+    // Serial.println("File exists. Removing...");
+        if (sd.remove(fileName)) {
+        // Serial.println("File removed successfully.");
+        } else {
+        // Serial.println("File removal failed.");
+        }
+    } else {
+        // Serial.println("File does not exist.");
     }
 
 }
 
 void SendFile(){
 
-    dataFile = SD.open(fileName, FILE_READ);
-
-    while (dataFile.available() > 0) {
-        String buffer = dataFile.readStringUntil('\n');
-        buffer.trim();
-        Serial.println(buffer);
-        Serial.flush();
+      // Open the file for reading
+    if (!file.open(fileName, O_READ)) {
+        Serial.println("Failed to open file for reading.");
+        return;
     }
-    dataFile.close();
-    DEBUG_PRINTLN("<Finished>");
+
+    // Read from the file until end of file
+    char ch;
+    while (file.read(&ch, 1) > 0) {
+        Serial.write(ch);
+    }
+
+    // Close the file
+    file.close();
+    Serial.println("<Finished>");
+    Serial.flush();
 }
 
 
 
 void StartSDReading() {
     
-    dataFile = SD.open(fileName, FILE_WRITE);
+    if (!file.open(fileName, O_CREAT | O_WRITE | O_APPEND)) {
+        Serial.println("Opening file failed!");
+        return;
+    }
     
     // _delay_ms(100); //delay for 100ms
 
@@ -368,42 +388,44 @@ void StartSDReading() {
 }
 
 void BAJA_EMBEDDED::DataModule::SetupFileAsCSV() {
-    dataFile = SD.open(fileName, FILE_WRITE);
+    if (!file.open(fileName, O_CREAT | O_WRITE | O_APPEND)) {
+        DEBUG_PRINTLN("Opening file failed!");
+        return;
+    }
 
-    
-    dataFile.print("Micros,");
+    file.print("Micros,");
 
     for (int i = 0; i < arraySize; ++i) {
         // Use strcmp to compare strings. If the result is not 0, the strings are not equal.
         if (strcmp(dataHeaderArray[i], "EMPTY") != 0) {
-            dataFile.print(dataHeaderArray[i]);
-            dataFile.print(",");
+            file.print(dataHeaderArray[i]);
+            file.print(",");
         }
 
         if (i == arraySize - 1) {
-            dataFile.println();
-            dataFile.flush();
-
+            file.println();
         }
     }
 
-    dataFile.close();
+    file.close();
 
 }
 
 void BAJA_EMBEDDED::DataModule::recordDataToSDCard(){
 
-    dataFile.print(readMicrosecondsLifetimeTimer());
+    file.print(readMicrosecondsLifetimeTimer());
 
     for (int i = 0; i < arraySize; ++i) {
         if (dataToRecord[i] != -1.0f) { // Check against sentinel value
             // Write data[i] to the SD card
-            dataFile.print(",");
-            dataFile.print(dataToRecord[i]);
+            DEBUG_PRINT(">writing: ");
+            DEBUG_PRINTLN(dataToRecord[i]);
+            file.print(",");
+            file.print(dataToRecord[i]);
         }
 
         if (i == arraySize - 1) {
-            dataFile.println();
+            file.println();
         }
     }
     
@@ -411,5 +433,5 @@ void BAJA_EMBEDDED::DataModule::recordDataToSDCard(){
 
 
 void CloseSDFile(){
-    dataFile.close();
+    file.close();
 }

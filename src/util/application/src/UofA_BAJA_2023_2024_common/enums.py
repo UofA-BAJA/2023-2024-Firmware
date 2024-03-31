@@ -36,6 +36,7 @@ class MessageHeaders:
     TARGET_DEVICE = "-nxtdev:"
     BODY = "-mesg:"
     END = "!bend!"
+    PYTHON_MESSAGE = "*pymsg*"
 
 class WirelessNodeTypes:
     CLIENT = "client"

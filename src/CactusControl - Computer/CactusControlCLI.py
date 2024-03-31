@@ -1,14 +1,10 @@
-from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes
+import re
+
+from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, MessageHeaders
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 from UofA_BAJA_2023_2024_common.Messages import construct_message
-'''
-plan
-- get LORA_PIT serial device
-- send command to LORA_PIT
-- wait for response
-- print response
-- retrieve logs
-'''
+
+
 
 class CactusControlCLI:
     def __init__(self):
@@ -26,6 +22,8 @@ class CactusControlCLI:
             "READ"     : lambda: self._read_data() # Ditto
         }
 
+        self.responses = []
+
     def _print_commands(self):
         for command, _ in self.commands.items():
             print(f"{getattr(bcolors, 'OKCYAN')}{command}{getattr(bcolors, 'ENDC')}")
@@ -40,6 +38,44 @@ class CactusControlCLI:
 
     def _write_to_lora_device(self, command):
         self.lora_device.write(f"<{command}>".encode('utf-8'))
+
+    def wait_for_response(self):
+
+        ongoing_response = False
+        while True:
+            important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
+
+            if important_serial_data != "":
+                parsed_response = self.parse_response_for_mesg(important_serial_data)
+
+                if ongoing_response and MessageHeaders.PYTHON_MESSAGE not in parsed_response:
+                    self.responses.append(parsed_response)
+
+                if MessageHeaders.PYTHON_MESSAGE in parsed_response and ongoing_response:
+                    break
+
+                if MessageHeaders.PYTHON_MESSAGE in parsed_response:
+                    ongoing_response = True
+                    
+
+    def parse_response_for_mesg(self, response):
+        regex_pattern_logic = r"(.*?)"
+
+        regex = f"{MessageHeaders.BODY}{regex_pattern_logic}{MessageHeaders.END}"
+
+        match = re.search(regex, response)
+        extracted_str = match.group(1) if match else "No match found"
+        
+        if extracted_str != "No match found" and extracted_str != MessageHeaders.PYTHON_MESSAGE:
+            print(f"{bcolors.OKGREEN}Rasberry Pi:\n{extracted_str}{bcolors.ENDC}\n")
+        return extracted_str
+
+    def parse_responses(self):
+
+        for response in self.responses:
+            print(response)
+            
+
 
     def _begin_logging(self, command):
         
@@ -69,10 +105,12 @@ class CactusControlCLI:
         session_name = input(f"{bcolors.OKCYAN}Enter session name and/or notes: {bcolors.ENDC}")
         
         # Send the setup command over serial
-        self._write_to_lora_device(f"SESSION:{session_name}")
+        self.send_command_to_rasberry_pi(f"SESSION:{session_name}")
         
         # Confirmation message
         print(f"{bcolors.OKGREEN}Session '{session_name}'{bcolors.ENDC}")
+
+        self.wait_for_response()
 
         self.session_is_active = True
 
@@ -109,9 +147,16 @@ class CactusControlCLI:
 
                 self.send_command_to_rasberry_pi(choice)
 
+                if (CactusControlCLI.is_command(choice)):
+                    self.wait_for_response()
+
 
             else:
                 print(f"{bcolors.FAIL}Invalid command. Please try again.{bcolors.ENDC}")
+
+    def is_command(command_str):
+        commands = {attribute: value for attribute, value in Commands.__dict__.items() if not attribute.startswith('__')}
+        return command_str in commands.values()
 
 class bcolors:
     HEADER = '\033[95m'
