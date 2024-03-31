@@ -27,8 +27,8 @@ class Controller:
             self.serial_devices.sendCommandToAllDataModules(command_type_enum)
         else:
             for device in self.serial_devices._serial_devices:
-
-                if (device != ModuleTypes.LORA_PIT) or (device != ModuleTypes.LORA_PI):
+                print(device)
+                if (device != ModuleTypes.LORA_PIT) and (device != ModuleTypes.LORA_PI):
 
                     self.serial_devices._execute_single_command(Commands.RETRIEVE, device)
                     # serial_devices.read_file_data(device)
@@ -38,9 +38,13 @@ class Controller:
 
                     self._insert_data_into_table(device_serial_obj)
 
-                    self.response += ", ".join(self.datatypes)
-                    
+                    datatypes_response = f"Data types: {self.datatypes}"
 
+                    self.send_response_to_pit(datatypes_response)
+                    
+    def send_response_to_pit(self, response_message_str: str):
+        response_message =  construct_message(target_device=WirelessNodeTypes.COMPUTER, message=response_message_str )
+        self.serial_devices._execute_single_command(response_message, ModuleTypes.LORA_PI)
 
 
     def _get_datatypes_in_data(self, device_serial_obj):
@@ -137,8 +141,7 @@ class Controller:
             
             if (Controller.is_command(parsed_message)):
                 self.handleCommand(command_type_enum=parsed_message)
-                print(f"Finished handling command: {parsed_message} successfully.")
-                self.response += f"Finished handling command: {parsed_message} successfully."
+                self.send_response_to_pit(f"Command {parsed_message} executed successfully.")
             else:
                 print(f"Serial input: {parsed_message} is not a valid command.")
 
@@ -148,11 +151,9 @@ class Controller:
                 self.session_id = insert_session(self.conn, actual_text)
 
                 print(f"ADDING SESSION: '{actual_text}' INTO DATABASE")
-                print(f"CURRENT SESSION ID IS: {self.session_id}")
+                self.send_response_to_pit(f"ADDED SESSION: '{actual_text}' INTO DATABASE")
 
-            response_message = construct_message(target_device=WirelessNodeTypes.COMPUTER, message=self.response )
-            self.serial_devices._execute_single_command(response_message, ModuleTypes.LORA_PI)
-            self.response = "" #clear response message
+                print(f"CURRENT SESSION ID IS: {self.session_id}")
 
         self.conn.close()
 
@@ -173,7 +174,6 @@ class Controller:
     def is_command(command_str):
         commands = {attribute: value for attribute, value in Commands.__dict__.items() if not attribute.startswith('__')}
         return command_str in commands.values()
-            
 
 
 if __name__ == "__main__":

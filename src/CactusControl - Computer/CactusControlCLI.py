@@ -44,11 +44,11 @@ class CactusControlCLI:
             response = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
 
             if response != "":
-                print(f"{bcolors.OKGREEN}From pi:{response}{bcolors.ENDC}")
-                self.handle_response(response)
+                # print(f"{bcolors.OKGREEN}From pi:{response}{bcolors.ENDC}")
+                self.parse_response_for_mesg(response)
                 break
 
-    def handle_response(self, response):
+    def parse_response_for_mesg(self, response):
         regex_pattern_logic = r"(.*?)"
 
         regex = f"{MessageHeaders.BODY}{regex_pattern_logic}{MessageHeaders.END}"
@@ -56,7 +56,7 @@ class CactusControlCLI:
         match = re.search(regex, response)
         extracted_str = match.group(1) if match else "No match found"
         
-        print(f"{bcolors.OKGREEN}Message:{extracted_str}{bcolors.ENDC}")
+        print(f"{bcolors.OKGREEN}Rasberry Pi:\n{extracted_str}{bcolors.ENDC}\n")
 
     def _begin_logging(self, command):
         
@@ -86,10 +86,12 @@ class CactusControlCLI:
         session_name = input(f"{bcolors.OKCYAN}Enter session name and/or notes: {bcolors.ENDC}")
         
         # Send the setup command over serial
-        self._write_to_lora_device(f"SESSION:{session_name}")
+        self.send_command_to_rasberry_pi(f"SESSION:{session_name}")
         
         # Confirmation message
         print(f"{bcolors.OKGREEN}Session '{session_name}'{bcolors.ENDC}")
+
+        self.wait_for_response()
 
         self.session_is_active = True
 
@@ -126,11 +128,16 @@ class CactusControlCLI:
 
                 self.send_command_to_rasberry_pi(choice)
 
-                self.wait_for_response()
+                if (CactusControlCLI.is_command(choice)):
+                    self.wait_for_response()
 
 
             else:
                 print(f"{bcolors.FAIL}Invalid command. Please try again.{bcolors.ENDC}")
+
+    def is_command(command_str):
+        commands = {attribute: value for attribute, value in Commands.__dict__.items() if not attribute.startswith('__')}
+        return command_str in commands.values()
 
 class bcolors:
     HEADER = '\033[95m'

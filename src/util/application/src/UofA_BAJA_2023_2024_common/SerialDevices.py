@@ -155,26 +155,25 @@ class SerialDevices:
         
         device_output = "START"
         first_time_print_flag = True
-        try:
-            while (device_output != ""):
-                device_output = device.readline().decode('utf-8').strip()
 
-                if "<" in device_output and ">" in device_output:
-                    break
+        while True:
+            try:
+                device_output = device.readline().decode('utf-8').strip()
 
                 if device_output != "":
                     if first_time_print_flag:
                         print(f"{bcolors.GRAYCOLOR}{bcolors.UNDERLINE}\nOUTPUT FOR {device_type}:{bcolors.ENDC}\n")
+                        print(f"{bcolors.GRAYCOLOR}Ctrl+C to exit {device_type}:{bcolors.ENDC}\n")
                         first_time_print_flag = False  # This should probably be set to False after first time
 
                     print(f"{bcolors.GRAYCOLOR}{device_output}{bcolors.ENDC}")
-        except KeyboardInterrupt:
-            print("\nInterrupted by user. Exiting...")
-            # Optionally, perform any cleanup here if necessary
 
+            except KeyboardInterrupt:
+                print("\nStopped Reading...")
+                break
         device.flushInput()
 
-
+        
     def read_file_data(self, device_type):
         device = self.get_device(device_type)
 
