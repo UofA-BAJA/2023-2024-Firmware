@@ -119,15 +119,15 @@ void parseMessage(char* startOfMessage) {
         printWirelessly(outputmessageBuffer);
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_rasbpi)) {
-        //probably is the rasberry pi wanting to send a message uphill, client is just a pass through
+        //probably is the rasberry pi wanting to send a message downhill, client is just a pass through
         //remember that client is connected to pi through serial
-        DEBUG_PRINTLN("Rasberry pi is asking for the client");
+        DEBUG_PRINTLN("there is a packet for the rasbbery pi, sending downhill serially");
         Serial.println(start);
         Serial.flush();
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_comput)) {
         //probably is the rasberry pi wanting to send a message uphill, client is just a pass through
-        DEBUG_PRINTLN("Computer is asking for the client");
+        DEBUG_PRINTLN("packet is for computer, sending uphill wirelessly");
         printWirelessly(start);
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_server)) {

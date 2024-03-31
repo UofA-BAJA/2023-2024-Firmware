@@ -116,26 +116,25 @@ void parseMessage(char* startOfMessage) {
         return;
     }
 
-    DEBUG_PRINTLN("Parsing message");
     if (isMessageMeantForDevice(start, WIRELESS_NODES_client)) {
         //if you received a message intended for the client from the client, that makes no sense, the cleitn will not send a message to itself
         DEBUG_PRINTLN("Client is not supposed to send messages to itself");
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_rasbpi)) {
         //probably is the computer wanting to send messages downhill, server is just a pass through
-        DEBUG_PRINTLN("Computer is asking for the rasberry pi");
+        DEBUG_PRINTLN("sending message meant for rasberry pi down hill wirelessly");
         printWirelessly(start);
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_comput)) {
         //client is sending a message that needs to be sent serially to the computer
         //just pass through the message
-        DEBUG_PRINTLN("Computer is asking for the client");
+        DEBUG_PRINTLN("packet for the computer, sending serially");
         Serial.println(start);
         Serial.flush();
 
     } else if (isMessageMeantForDevice(start, WIRELESS_NODES_server)) {
         //if you received a message intended for the server, its the client wanting an acknowledgement
-        Serial.println("Server is not supposed to send messages to itself");
+        Serial.println("message for the server, means the client wants an acknowledgement");
         setDeviceAndMessageInBufferTo(outputmessageBuffer, WIRELESS_NODES_client, "acknowledged");
         printWirelessly(outputmessageBuffer);
         isClientConnected = true;
