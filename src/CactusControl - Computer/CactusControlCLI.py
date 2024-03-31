@@ -37,6 +37,9 @@ class CactusControlCLI:
         print(f"{bcolors.HEADER}Available commands:{bcolors.ENDC}")
         self._print_commands()
 
+    def send_command_to_rasberry_pi(self, command):
+        self.lora_device.write(f"<{command}>".encode('utf-8'))
+
     def _write_to_lora_device(self, command):
         self.lora_device.write(f"<{command}>".encode('utf-8'))
 

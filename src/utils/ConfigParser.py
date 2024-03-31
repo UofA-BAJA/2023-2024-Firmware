@@ -28,6 +28,7 @@ def create_enum_class(enum_name, enum_values):
 ModuleTypes = create_enum_class("Module Types", data["Module Types"])
 Commands = create_enum_class("Commands", data["Commands"])
 DataTypes = create_enum_class("Data Types", data["Data Types"])
+MessageHeaders = create_enum_class("Message Headers", data["Message Headers"])
 
 # print("SensorTypes enum members:")
 # for member in ModuleTypes.__members__:
