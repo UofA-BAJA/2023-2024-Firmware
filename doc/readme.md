@@ -86,7 +86,7 @@ and !bend! is end
     > !fart!-nxtdev:rasbpi-mesg:test!bend!
     > !fart!-nxtdev:rasbpi-mesg:BEGIN!bend!!fart!-nxtdev:client-mesg:heartbeat!bend!
     > <!fart!-nxtdev:rasbpi-mesg:BEGIN!bend!>
-    > <!fart!-nxtdev:comput-mesg:we r done!bend!>
+    > <!fart!-nxtdev:comput-mesg:done down here!bend!>
 
 
     

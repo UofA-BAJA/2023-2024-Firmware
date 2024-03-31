@@ -1,14 +1,10 @@
-from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes
+import re
+
+from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, MessageHeaders
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 from UofA_BAJA_2023_2024_common.Messages import construct_message
-'''
-plan
-- get LORA_PIT serial device
-- send command to LORA_PIT
-- wait for response
-- print response
-- retrieve logs
-'''
+
+
 
 class CactusControlCLI:
     def __init__(self):
@@ -48,8 +44,19 @@ class CactusControlCLI:
             response = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
 
             if response != "":
-                print(f"{bcolors.OKGREEN}{response}{bcolors.ENDC}")
+                print(f"{bcolors.OKGREEN}From pi:{response}{bcolors.ENDC}")
+                self.handle_response(response)
                 break
+
+    def handle_response(self, response):
+        regex_pattern_logic = r"(.*?)"
+
+        regex = f"{MessageHeaders.BODY}{regex_pattern_logic}{MessageHeaders.END}"
+
+        match = re.search(regex, response)
+        extracted_str = match.group(1) if match else "No match found"
+        
+        print(f"{bcolors.OKGREEN}Message:{extracted_str}{bcolors.ENDC}")
 
     def _begin_logging(self, command):
         
@@ -119,7 +126,7 @@ class CactusControlCLI:
 
                 self.send_command_to_rasberry_pi(choice)
 
-                # self.wait_for_response()
+                self.wait_for_response()
 
 
             else:
