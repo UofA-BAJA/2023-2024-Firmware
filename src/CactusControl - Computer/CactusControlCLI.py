@@ -41,6 +41,7 @@ class CactusControlCLI:
         self.lora_device.write(f"<{command}>".encode('utf-8'))
 
     def wait_for_response(self):
+        self.responses = [] # Clear the responses list
 
         ongoing_response = False
         while True:
@@ -60,6 +61,7 @@ class CactusControlCLI:
 
                     if MessageHeaders.PYTHON_MESSAGE in parsed_response:
                         ongoing_response = True
+
             except KeyboardInterrupt:
                 print("Stopped reading rasberry pi")
                 break
@@ -86,11 +88,13 @@ class CactusControlCLI:
                 if "datatypes" in json_response:
                     self.have_user_select_data_types(json_response)
 
+                if "data-packet" in json_response:
+                    print(f"{bcolors.OKGREEN}Data Packet Received: {json_response['data-packet']}{bcolors.ENDC}")
+
             except json.JSONDecodeError:
                 print(f"{bcolors.FAIL}Error: Could not decode JSON response{bcolors.ENDC}")
                 return
             
-        self.responses = [] # Clear the responses list
             
     def have_user_select_data_types(self, datatypes: dict):
         while True:
@@ -100,6 +104,7 @@ class CactusControlCLI:
             if user_input in datatypes['datatypes']:
                 # print(f"You have selected a valid data type: {user_input}")
                 self.send_command_to_rasberry_pi(json.dumps({"data-query" : {"selected-datatype": user_input}}))
+                self.wait_for_response()
                 break  # Exit the loop if the input is valid
             else:
                 print("Invalid data type. Please try again.")

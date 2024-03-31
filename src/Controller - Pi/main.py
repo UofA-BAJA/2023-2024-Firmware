@@ -134,6 +134,7 @@ class Controller:
             except Exception as e:
                 print(f"Failed to insert data: {e}")
 
+
             print(f"Rows added to database: {self.rows_added}, lost rows: {self.rows_lost}")
 
     def get_datatype_and_send_to_pit(self, data_query):
@@ -144,12 +145,24 @@ class Controller:
 
         sql_query = f"SELECT {selected_datatype} FROM BajaCloudData WHERE ID = ?;"
 
-        self.conn.cursor().execute(sql_query, (self.session_id,))
+        # other_sql_query = f"SELECT * FROM BajaCloudData WHERE ID = {self.session_id};"
+        # print(other_sql_query)
+        c = self.conn.cursor()
+        c.execute(sql_query, (self.session_id,))
 
-        results = self.conn.cursor().fetchall()
+        results = c.fetchall()
 
         for row in results:
             print(row)
+
+        # Combine the values into a single string, separated by commas, and ensure it doesn't exceed 512 characters
+        combined_string = ", ".join(str(row[0]) for row in results)
+
+        # Ensure the combined string does not exceed 512 characters
+        if len(combined_string) > 256:
+            combined_string = combined_string[:256-3] + "..."
+
+        self.send_response_to_pit(json.dumps({"data-packet": combined_string}))            
 
     def run(self):
         if (ModuleTypes.LORA_PIT in self.serial_devices._serial_devices):
@@ -184,7 +197,7 @@ class Controller:
                 self.session_id = insert_session(self.conn, actual_text)
 
                 print(f"ADDING SESSION: '{actual_text}' INTO DATABASE")
-                self.send_response_to_pit(f"ADDED SESSION: '{actual_text}' INTO DATABASE")
+                self.send_response_to_pit(json.dumps({"message" :f"ADDED SESSION: '{actual_text}' INTO DATABASE"}))
 
                 print(f"CURRENT SESSION ID IS: {self.session_id}")
 
