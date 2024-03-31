@@ -1,6 +1,9 @@
-#include <Arduino.h>
 #include "buffer_handling.h"
 
+#include <Arduino.h>
+
+#include "enums.h"
+#include "macros.h"
 
 void setTextAfterHeader(char* buffer, size_t bufferSize, const char* header, const char* newMessage) {
     // Find the header in the buffer

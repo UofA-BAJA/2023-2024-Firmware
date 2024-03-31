@@ -2,6 +2,9 @@
 
 #include <Arduino.h>
 
+#include "macros.h"
+#include "enums.h"
+
 #define startMarker '<'
 #define endMarker '>'
 
