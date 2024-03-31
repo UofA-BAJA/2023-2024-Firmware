@@ -22,6 +22,8 @@ class CactusControlCLI:
             "READ"     : lambda: self._read_data() # Ditto
         }
 
+        self.responses = []
+
     def _print_commands(self):
         for command, _ in self.commands.items():
             print(f"{getattr(bcolors, 'OKCYAN')}{command}{getattr(bcolors, 'ENDC')}")
@@ -38,15 +40,23 @@ class CactusControlCLI:
         self.lora_device.write(f"<{command}>".encode('utf-8'))
 
     def wait_for_response(self):
-        response = ""
 
+        ongoing_response = False
         while True:
-            response = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
+            important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
 
-            if response != "":
-                # print(f"{bcolors.OKGREEN}From pi:{response}{bcolors.ENDC}")
-                self.parse_response_for_mesg(response)
-                break
+            if important_serial_data != "":
+                parsed_response = self.parse_response_for_mesg(important_serial_data)
+
+                if ongoing_response and parsed_response != "No match found" and "ENDOFRESPONSE" not in parsed_response and "STARTOFRESPONSE" not in parsed_response:
+                    self.responses.append(parsed_response)
+
+                if "STARTOFRESPONSE" in parsed_response and ongoing_response:
+                    break
+
+                if "ENDOFRESPONSE" in parsed_response:
+                    ongoing_response = True
+                    
 
     def parse_response_for_mesg(self, response):
         regex_pattern_logic = r"(.*?)"
@@ -57,6 +67,14 @@ class CactusControlCLI:
         extracted_str = match.group(1) if match else "No match found"
         
         print(f"{bcolors.OKGREEN}Rasberry Pi:\n{extracted_str}{bcolors.ENDC}\n")
+        return extracted_str
+
+    def parse_responses(self):
+
+        for response in self.responses:
+            print(response)
+            
+
 
     def _begin_logging(self, command):
         

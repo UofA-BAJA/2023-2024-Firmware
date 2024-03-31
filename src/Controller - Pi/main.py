@@ -5,6 +5,7 @@ from db.databaseInterfacer import get_BajaCloud_connection, insert_session
 
 import time
 import re
+import json
 # ! lily was here
 # ayo
 
@@ -26,6 +27,7 @@ class Controller:
         if command_type_enum != Commands.RETRIEVE:
             self.serial_devices.sendCommandToAllDataModules(command_type_enum)
         else:
+
             for device in self.serial_devices._serial_devices:
                 print(device)
                 if (device != ModuleTypes.LORA_PIT) and (device != ModuleTypes.LORA_PI):
@@ -38,9 +40,9 @@ class Controller:
 
                     self._insert_data_into_table(device_serial_obj)
 
-                    datatypes_response = f"Data types: {self.datatypes}"
+                    datatypes_as_json = json.dumps({"datatypes": self.datatypes})
 
-                    self.send_response_to_pit(datatypes_response)
+                    self.send_response_to_pit(datatypes_as_json)
                     
     def send_response_to_pit(self, response_message_str: str):
         response_message =  construct_message(target_device=WirelessNodeTypes.COMPUTER, message=response_message_str )
@@ -139,6 +141,8 @@ class Controller:
             
             parsed_message = Controller.parse_input(lora_serial_input)
             
+            self.send_response_to_pit(f"ENDOFRESPONSE") ##ik this is backward, it is because the lora guys parse their messages backwards
+
             if (Controller.is_command(parsed_message)):
                 self.handleCommand(command_type_enum=parsed_message)
                 self.send_response_to_pit(f"Command {parsed_message} executed successfully.")
@@ -154,6 +158,8 @@ class Controller:
                 self.send_response_to_pit(f"ADDED SESSION: '{actual_text}' INTO DATABASE")
 
                 print(f"CURRENT SESSION ID IS: {self.session_id}")
+
+            self.send_response_to_pit(f"STARTOFRESPONSE")
 
         self.conn.close()
 

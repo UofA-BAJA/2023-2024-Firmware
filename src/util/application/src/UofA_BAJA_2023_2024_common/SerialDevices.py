@@ -114,9 +114,12 @@ class SerialDevices:
     def does_device_have_bracketed_output(self, dev_type):
 
         selected_device = self.get_device(dev_type)
-
-        device_output =  selected_device.readline().decode('utf-8').strip()                
-
+        try:
+            device_output =  selected_device.readline().decode('utf-8').strip()                
+        except UnicodeDecodeError:
+            print("UnicodeDecodeError")
+            return ""
+        
         if "<" in device_output and ">" in device_output:
             return device_output
         
