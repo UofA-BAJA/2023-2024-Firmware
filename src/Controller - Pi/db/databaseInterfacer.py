@@ -102,7 +102,7 @@ def main():
     if conn is not None:
         # You can create tables here using conn
         create_table(conn, sessions_table_sql)
-        # create_table(conn, data_db_sql)
+        create_table(conn, data_table_sql)
 
         # print(f"Database created at: {data_db_path}")
         # Don't forget to close the connection when done
