@@ -26,6 +26,8 @@ class Controller:
 
         if command_type_enum != Commands.RETRIEVE:
             self.serial_devices.sendCommandToAllDataModules(command_type_enum)
+
+            self.serial_devices.read_device(ModuleTypes.LORA_PI)
         else:
 
             for device in self.serial_devices._serial_devices:
