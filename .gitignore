@@ -162,4 +162,4 @@ cython_debug/
 .DS_Store
 Thumbs.db
 
-.db
+src/Controller - Pi/db/BajaCloud.db
