@@ -91,5 +91,9 @@ and !bend! is end
     > <!fart!-nxtdev:comput-mesg:done down here!bend!>
     > <!fart!-nxtdev:comput-mesg:RETRIEVE!bend!>
 
+example data packet
+
+    <!fart!-nxtdev:comput-mesg:{"data-packet": "0.8691, 0.8643, 0.8691, 0.8887, 0.8545, 0.9082, 0.9033, 0.8984, 0.8838, 0.8789, 0.874, 0.8838, 0.8594, 0.9033, 0.9033, 0.8643, 0.8691, 0.8594, 0.8887, 0.8594, 0.8984, 0.8691, 0.874, 0.8838, 0.8496, 0.9033, 0.8936, 0.957, 1.0254, 1.0449, 1.0693, 1.1084, "}!bend!>
+
 
     
