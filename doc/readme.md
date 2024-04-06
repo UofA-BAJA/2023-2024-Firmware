@@ -71,6 +71,9 @@ to update pypi project
 
     > twine upload dist/* -u __token__ -p "api-key-u-ask-alex-for"
 
+to install on to rasberry pi, add "--break-system-packages" to pip install
+
+
 [the](https://packaging.python.org/en/latest/tutorials/packaging-projects/) link to the guide i followed for pypi stuff
 
 ### Example packets

@@ -3,7 +3,7 @@ class ModuleTypes:
     RPM_FRONT = "RPM_FRONT"
     RPM_REAR = "RPM_REAR"
     RPM_ENGINE = "RPM_ENGINE"
-    BRAK_PRESSURE = "BRK"
+    BRK = "BRK"
     STEER = "STEER"
     PEDAL_ANGLE = "PEDAL"
     LORA_PI = "LORA_PI"
