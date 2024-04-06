@@ -26,7 +26,10 @@ class Controller:
 
         if command_type_enum != Commands.RETRIEVE:
             self.serial_devices.sendCommandToAllDataModules(command_type_enum)
+            
+            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
             self.send_response_to_pit(json.dumps({"message" : f"success for command {command_type_enum}"}))
+            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
             # self.serial_devices.read_device(ModuleTypes.RPM_REAR)
         else:
@@ -46,7 +49,10 @@ class Controller:
 
                     datatypes_as_json = json.dumps({"datatypes": self.datatypes})
 
+                    self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
                     self.send_response_to_pit(datatypes_as_json)
+                    self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+
                     
     def send_response_to_pit(self, response_message_str: str):
 
@@ -165,7 +171,9 @@ class Controller:
         if len(combined_string) > 256:
             combined_string = combined_string[:256-3] + "..."
 
-        self.send_response_to_pit(json.dumps({"data-packet": combined_string}))            
+        self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+        self.send_response_to_pit(json.dumps({"data-packet": combined_string}))
+        self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
     def run(self):
         if (ModuleTypes.LORA_PIT in self.serial_devices._serial_devices):
@@ -183,8 +191,6 @@ class Controller:
             
             parsed_message = Controller.parse_input(lora_serial_input)
             
-            if (Controller.check_if_input_warrants_a_response(parsed_message)):
-                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
             if (Controller.is_command(parsed_message)):
                 self.handleCommand(command_type_enum=parsed_message)
@@ -199,12 +205,13 @@ class Controller:
                 self.session_id = insert_session(self.conn, actual_text)
 
                 print(f"ADDING SESSION: '{actual_text}' INTO DATABASE")
+                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
                 self.send_response_to_pit(json.dumps({"message" :f"ADDED SESSION: '{actual_text}' INTO DATABASE"}))
+                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
                 print(f"CURRENT SESSION ID IS: {self.session_id}")
 
-            if (Controller.check_if_input_warrants_a_response(parsed_message)):
-                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+            
         self.conn.close()
 
 

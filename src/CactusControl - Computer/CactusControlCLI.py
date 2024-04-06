@@ -53,7 +53,9 @@ class CactusControlCLI:
                     # print(parsed_response)
                     if ongoing_response:
                         print(f"ongoing response: {parsed_response}")
-                        self.responses.append(parsed_response)
+
+                        if (MessageHeaders.PYTHON_MESSAGE not in parsed_response):
+                            self.responses.append(parsed_response)
                         print(f"{bcolors.OKGREEN}Rasberry Pi:\n{parsed_response}{bcolors.ENDC}\n")
 
 
@@ -69,6 +71,7 @@ class CactusControlCLI:
                 print("Stopped reading rasberry pi")
                 break
         
+        print(self.responses)
         self.parse_responses()
                     
 
@@ -97,7 +100,7 @@ class CactusControlCLI:
 
             except json.JSONDecodeError:
                 print(f"{bcolors.FAIL}Error: Could not decode JSON response{bcolors.ENDC}")
-                return
+                continue
             
             
     def have_user_select_data_types(self, datatypes: dict):
