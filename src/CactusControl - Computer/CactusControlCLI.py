@@ -50,7 +50,7 @@ class CactusControlCLI:
 
                 if important_serial_data != "":
                     parsed_response = self.parse_response_for_mesg(important_serial_data)
-                    # print(parsed_response)
+                    print(parsed_response)
                     self.responses.append(parsed_response)
 
                     
