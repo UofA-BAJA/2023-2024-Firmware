@@ -71,6 +71,9 @@ to update pypi project
 
     > twine upload dist/* -u __token__ -p "api-key-u-ask-alex-for"
 
+to install on to rasberry pi, add "--break-system-packages" to pip install
+
+
 [the](https://packaging.python.org/en/latest/tutorials/packaging-projects/) link to the guide i followed for pypi stuff
 
 ### Example packets
@@ -90,6 +93,10 @@ and !bend! is end
     > <!fart!-nxtdev:rasbpi-mesg:RETRIEVE!bend!>
     > <!fart!-nxtdev:comput-mesg:done down here!bend!>
     > <!fart!-nxtdev:comput-mesg:RETRIEVE!bend!>
+
+example data packet
+
+    <!fart!-nxtdev:comput-mesg:{"data-packet": "0.8691, 0.8643, 0.8691, 0.8887, 0.8545, 0.9082, 0.9033, 0.8984, 0.8838, 0.8789, 0.874, 0.8838, 0.8594, 0.9033, 0.9033, 0.8643, 0.8691, 0.8594, 0.8887, 0.8594, 0.8984, 0.8691, 0.874, 0.8838, 0.8496, 0.9033, 0.8936, 0.957, 1.0254, 1.0449, 1.0693, 1.1084, "}!bend!>
 
 
     
