@@ -53,6 +53,7 @@ void operatingProcedure() {
 
             if (inputmessageBuffer[0] == '\0') {
                 //received nothing
+                establishWirelessConnection();
             } else {
                 DEBUG_PRINT("Received message:");
                 DEBUG_PRINTLN(inputmessageBuffer);

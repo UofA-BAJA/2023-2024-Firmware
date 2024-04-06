@@ -19,6 +19,7 @@
 
 bool isClientConnected = false;
 
+bool gotWirelessDataMeantForComputer = false;
 // Define the wireless transceiver state enum
 
 enum WirelessTranscieverState {
@@ -88,6 +89,10 @@ void operatingProcedure() {
                 if (inputmessageBuffer[0] == '\0') {
                     isClientConnected = false;
                     DEBUG_PRINTLN("Client did not respond in time. Assuming disconnected.");
+
+                    while (!connectClient()) {
+                        delay(1000);
+                    }
                 }
                 else {
                     DEBUG_PRINT("Wirelessly Received: ");
@@ -95,8 +100,13 @@ void operatingProcedure() {
                 }
 
                 parseMessage(inputmessageBuffer);
-
-
+                
+                if (gotWirelessDataMeantForComputer) {
+                    Serial.println("<!fart!-nxtdev:comput-mesg:DONE-WITH-MSG!bend!>");
+                    Serial.flush();
+                    gotWirelessDataMeantForComputer = false;
+                }
+                
             }
         }
 
@@ -161,6 +171,7 @@ void parseMessageRecursive(char* message, char* end) {
         Serial.print(">");
         Serial.println();
         Serial.flush();
+        gotWirelessDataMeantForComputer = true;
 
     } else if (isMessageMeantForDevice(startOfMessage, WIRELESS_NODES_server)) {
         Serial.println("Message for the server, means the client wants an acknowledgement");

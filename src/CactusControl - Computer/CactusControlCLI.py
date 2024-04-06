@@ -43,28 +43,33 @@ class CactusControlCLI:
     def wait_for_response(self):
         self.responses = [] # Clear the responses list
 
-        ongoing_response = False
+        # ongoing_response = False
         while True:
             try:
                 important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
 
                 if important_serial_data != "":
                     parsed_response = self.parse_response_for_mesg(important_serial_data)
+                    print(parsed_response)
+                    self.responses.append(parsed_response)
 
-                    if ongoing_response and MessageHeaders.PYTHON_MESSAGE not in parsed_response:
-                        self.responses.append(parsed_response)
+                    
+                    if parsed_response != "":
+                        
                         print(f"{bcolors.OKGREEN}Rasberry Pi:\n{parsed_response}{bcolors.ENDC}\n")
 
 
-                    if MessageHeaders.PYTHON_MESSAGE in parsed_response and ongoing_response:
+                    if "DONE-WITH-MSG" in parsed_response:
+                        print("stopped reading")
                         break
 
-                    if MessageHeaders.PYTHON_MESSAGE in parsed_response:
-                        ongoing_response = True
+                    
 
             except KeyboardInterrupt:
                 print("Stopped reading rasberry pi")
                 break
+        
+        print(self.responses)
         self.parse_responses()
                     
 
@@ -93,7 +98,7 @@ class CactusControlCLI:
 
             except json.JSONDecodeError:
                 print(f"{bcolors.FAIL}Error: Could not decode JSON response{bcolors.ENDC}")
-                return
+                continue
             
             
     def have_user_select_data_types(self, datatypes: dict):

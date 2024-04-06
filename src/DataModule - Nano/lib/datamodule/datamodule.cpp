@@ -420,7 +420,7 @@ void BAJA_EMBEDDED::DataModule::recordDataToSDCard(){
             // Write data[i] to the SD card
             
             file.print(",");
-            file.print(dataToRecord[i]);
+            file.print(dataToRecord[i], 4);
         }
 
         if (i == arraySize - 1) {
