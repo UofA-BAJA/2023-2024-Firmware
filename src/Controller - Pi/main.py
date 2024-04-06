@@ -27,9 +27,9 @@ class Controller:
         if command_type_enum != Commands.RETRIEVE:
             self.serial_devices.sendCommandToAllDataModules(command_type_enum)
 
-            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+            # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
             self.send_response_to_pit(json.dumps({"message" : f"success for command {command_type_enum}"}))
-            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+            # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
             # self.serial_devices.read_device(ModuleTypes.RPM_REAR)
         else:
@@ -49,9 +49,9 @@ class Controller:
 
                     datatypes_as_json = json.dumps({"datatypes": self.datatypes})
 
-                    self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+                    # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
                     self.send_response_to_pit(datatypes_as_json)
-                    self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+                    # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
                     
     def send_response_to_pit(self, response_message_str: str):
@@ -178,9 +178,9 @@ class Controller:
                 break
 
             # Send the chunk
-            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+            # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
             self.send_response_to_pit(json.dumps({"data-packet": chunk}))
-            self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+            # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
     def run(self):
         if (ModuleTypes.LORA_PIT in self.serial_devices._serial_devices):
@@ -212,9 +212,9 @@ class Controller:
                 self.session_id = insert_session(self.conn, actual_text)
 
                 print(f"ADDING SESSION: '{actual_text}' INTO DATABASE")
-                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+                # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
                 self.send_response_to_pit(json.dumps({"message" :f"ADDED SESSION: '{actual_text}' INTO DATABASE"}))
-                self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+                # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
 
                 print(f"CURRENT SESSION ID IS: {self.session_id}")
 

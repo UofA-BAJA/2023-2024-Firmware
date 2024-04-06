@@ -43,7 +43,7 @@ class CactusControlCLI:
     def wait_for_response(self):
         self.responses = [] # Clear the responses list
 
-        ongoing_response = False
+        # ongoing_response = False
         while True:
             try:
                 important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
@@ -51,21 +51,19 @@ class CactusControlCLI:
                 if important_serial_data != "":
                     parsed_response = self.parse_response_for_mesg(important_serial_data)
                     # print(parsed_response)
-                    if ongoing_response:
-                        print(f"ongoing response: {parsed_response}")
+                    self.responses.append(parsed_response)
 
-                        if (MessageHeaders.PYTHON_MESSAGE not in parsed_response):
-                            self.responses.append(parsed_response)
+                    
+                    if parsed_response != "":
+                        
                         print(f"{bcolors.OKGREEN}Rasberry Pi:\n{parsed_response}{bcolors.ENDC}\n")
 
 
-                    if MessageHeaders.PYTHON_MESSAGE in parsed_response and ongoing_response:
+                    if "DONE-WITH-MSG" in parsed_response:
                         print("stopped reading")
                         break
 
-                    if MessageHeaders.PYTHON_MESSAGE in parsed_response:
-                        print("started reading")
-                        ongoing_response = True
+                    
 
             except KeyboardInterrupt:
                 print("Stopped reading rasberry pi")

@@ -69,6 +69,9 @@ void operatingProcedure() {
 
             parseMessage(inputmessageBuffer);
 
+            Serial.println("<DONE-WITH-MSG>");
+            Serial.flush();
+
 
         } else {
             // If no new data received, check if it's time to send a heartbeat
