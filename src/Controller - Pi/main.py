@@ -26,6 +26,7 @@ class Controller:
 
         if command_type_enum != Commands.RETRIEVE:
             self.serial_devices.sendCommandToAllDataModules(command_type_enum)
+            self.send_response_to_pit(json.dumps({"message" : f"success for command {command_type_enum}"}))
 
             # self.serial_devices.read_device(ModuleTypes.RPM_REAR)
         else:
@@ -187,7 +188,6 @@ class Controller:
 
             if (Controller.is_command(parsed_message)):
                 self.handleCommand(command_type_enum=parsed_message)
-                self.send_response_to_pit(json.dumps({"message" : f"success for command {parsed_message}"}))
             elif (Controller.is_data_query(parsed_message)):
                 self.get_datatype_and_send_to_pit(parsed_message)
             else:

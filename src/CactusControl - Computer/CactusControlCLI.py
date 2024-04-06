@@ -50,21 +50,25 @@ class CactusControlCLI:
 
                 if important_serial_data != "":
                     parsed_response = self.parse_response_for_mesg(important_serial_data)
-
-                    if ongoing_response and MessageHeaders.PYTHON_MESSAGE not in parsed_response:
+                    # print(parsed_response)
+                    if ongoing_response:
+                        print(f"ongoing response: {parsed_response}")
                         self.responses.append(parsed_response)
                         print(f"{bcolors.OKGREEN}Rasberry Pi:\n{parsed_response}{bcolors.ENDC}\n")
 
 
                     if MessageHeaders.PYTHON_MESSAGE in parsed_response and ongoing_response:
+                        print("stopped reading")
                         break
 
                     if MessageHeaders.PYTHON_MESSAGE in parsed_response:
+                        print("started reading")
                         ongoing_response = True
 
             except KeyboardInterrupt:
                 print("Stopped reading rasberry pi")
                 break
+        
         self.parse_responses()
                     
 
