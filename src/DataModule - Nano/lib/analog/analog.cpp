@@ -20,9 +20,8 @@ void BRK_DataModule::data_module_setup_procedure() {
     ADMUX &= ~(1 << REFS1);  // Make sure ADPS0 is set to 0
 
 
-    // Set up ADCSRA register for prescaler of 64
-    ADCSRA |= (1 << ADPS2) | (1 << ADPS1);
-    ADCSRA &= ~(1 << ADPS0);  // Make sure ADPS0 is set to 0
+    // Set up ADCSRA register for prescaler of 128
+    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 
     // Clear the MUX bits (MUX3:0) before setting them to the desired channel (ADC5)
     ADMUX &= ~((1 << MUX3) | (1 << MUX2) | (1 << MUX1) | (1 << MUX0));

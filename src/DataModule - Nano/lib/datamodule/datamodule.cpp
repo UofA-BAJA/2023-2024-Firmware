@@ -128,6 +128,7 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
             
             if (waitForCommand(COMMANDS_RETRIEVE)) { 
                 SendFile();
+                deleteFile();
                 data_module_state = WAIT_TO_START_LOGGING;
             }
            
@@ -331,8 +332,24 @@ void InitializeSDCard(){
     return;
   }
 
+    // if (sd.exists(fileName)) {
+    // // Serial.println("File exists. Removing...");
+    //     if (sd.remove(fileName)) {
+    //     // Serial.println("File removed successfully.");
+    //     } else {
+    //     // Serial.println("File removal failed.");
+    //     }
+    // } else {
+    //     // Serial.println("File does not exist.");
+    // }
+
+    deleteFile();
+
+}
+
+void deleteFile(){
     if (sd.exists(fileName)) {
-    // Serial.println("File exists. Removing...");
+        // Serial.println("File exists. Removing...");
         if (sd.remove(fileName)) {
         // Serial.println("File removed successfully.");
         } else {
@@ -341,7 +358,6 @@ void InitializeSDCard(){
     } else {
         // Serial.println("File does not exist.");
     }
-
 }
 
 void SendFile(){

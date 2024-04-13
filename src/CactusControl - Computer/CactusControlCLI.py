@@ -1,5 +1,7 @@
 import re
 import json
+import matplotlib.pyplot as plt
+import numpy
 
 from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, MessageHeaders
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
@@ -95,6 +97,8 @@ class CactusControlCLI:
 
                 if "data-packet" in json_response:
                     print(f"{bcolors.OKGREEN}Data Packet Received: {json_response['data-packet']}{bcolors.ENDC}")
+
+                   
 
             except json.JSONDecodeError:
                 print(f"{bcolors.FAIL}Error: Could not decode JSON response{bcolors.ENDC}")
@@ -211,3 +215,31 @@ if __name__ == "__main__":
     app.run()
 
 
+
+def convertData(dataArray):
+    # testFile = open(fileName, "r")
+    
+    # converts json data to a readable python data type
+    # incommingData = json.load(testFile)
+    
+    #strips json data from data-packet, converts to string
+    # dataString = incommingData["data-packet"]
+    dataString = dataString.split(", ")
+    
+    # adds data string to end of data array
+    dataArray += dataString
+    
+    # returns concatenated dataArray
+    return dataArray
+
+def graphData(xData, yData, xAxisTitle = "", yAxisTitle = "", dataTitle = ""):
+    # creates subplot of xData and yData
+    fig, ax = plt.subplots()
+    ax.plot(xData, yData)
+    
+    # sets axis titles
+    ax.set(xlabel = xAxisTitle, ylabel = yAxisTitle, title = dataTitle)
+    
+    # shows grid lines and plots data
+    ax.grid
+    plt.show()
