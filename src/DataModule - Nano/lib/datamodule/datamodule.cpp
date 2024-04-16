@@ -129,6 +129,7 @@ void BAJA_EMBEDDED::DataModule::data_module_operating_procedure() {
             if (waitForCommand(COMMANDS_RETRIEVE)) { 
                 SendFile();
                 deleteFile();
+                SetupFileAsCSV();
                 data_module_state = WAIT_TO_START_LOGGING;
             }
            
