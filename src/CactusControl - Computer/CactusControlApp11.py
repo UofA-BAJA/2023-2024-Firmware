@@ -2,56 +2,12 @@
 # import json
 # import sys
 # from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QInputDialog
-# from PyQt6.QtCore import Qt, QtCore
+# from PyQt6.QtCore import Qt
 # from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, MessageHeaders
 # from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 # from UofA_BAJA_2023_2024_common.Messages import construct_message
 
-# # Generated GUI code
-# class Ui_MainWindow(object):
-#     def setupUi(self, MainWindow):
-#         MainWindow.setObjectName("MainWindow")
-#         MainWindow.resize(800, 600)
-#         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
-#         self.centralwidget.setObjectName("centralwidget")
-#         self.pushButton = QtWidgets.QPushButton(parent=self.centralwidget)
-#         self.pushButton.setGeometry(QtCore.QRect(20, 230, 75, 24))
-#         self.pushButton.setObjectName("pushButton")
-#         self.pushButton_2 = QtWidgets.QPushButton(parent=self.centralwidget)
-#         self.pushButton_2.setGeometry(QtCore.QRect(120, 230, 75, 24))
-#         self.pushButton_2.setObjectName("pushButton_2")
-#         self.pushButton_3 = QtWidgets.QPushButton(parent=self.centralwidget)
-#         self.pushButton_3.setGeometry(QtCore.QRect(220, 230, 75, 24))
-#         self.pushButton_3.setObjectName("pushButton_3")
-#         self.pushButton_4 = QtWidgets.QPushButton(parent=self.centralwidget)
-#         self.pushButton_4.setGeometry(QtCore.QRect(320, 230, 75, 24))
-#         self.pushButton_4.setObjectName("pushButton_4")
-#         self.pushButton_5 = QtWidgets.QPushButton(parent=self.centralwidget)
-#         self.pushButton_5.setGeometry(QtCore.QRect(410, 230, 75, 24))
-#         self.pushButton_5.setObjectName("pushButton_5")
-#         self.pushButton_6 = QtWidgets.QPushButton(parent=self.centralwidget)
-#         self.pushButton_6.setGeometry(QtCore.QRect(500, 230, 75, 24))
-#         self.pushButton_6.setObjectName("pushButton_6")
-#         self.pushButton_7 = QtWidgets.QPushButton(parent=self.centralwidget)
-#         self.pushButton_7.setGeometry(QtCore.QRect(590, 230, 75, 24))
-#         self.pushButton_7.setObjectName("pushButton_7")
-#         MainWindow.setCentralWidget(self.centralwidget)
-#         self.retranslateUi(MainWindow)
-#         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-#     def retranslateUi(self, MainWindow):
-#         _translate = QtCore.QCoreApplication.translate
-#         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-#         self.pushButton.setText(_translate("MainWindow", "HELP"))
-#         self.pushButton_2.setText(_translate("MainWindow", "BEGIN"))
-#         self.pushButton_3.setText(_translate("MainWindow", "END"))
-#         self.pushButton_4.setText(_translate("MainWindow", "RETRIEVE"))
-#         self.pushButton_5.setText(_translate("MainWindow", "QUIT"))
-#         self.pushButton_6.setText(_translate("MainWindow", "SETUP"))
-#         self.pushButton_7.setText(_translate("MainWindow", "READ"))
-
-# # Main application class
-# class CactusControlApp(QMainWindow, Ui_MainWindow):
+# class CactusControlApp(QMainWindow):
 #     def __init__(self):
 #         super().__init__()
 #         self.lora_device = None
@@ -60,14 +16,16 @@
 #         self.setup_ui()
 
 #     def setup_ui(self):
-#         self.setupUi(self)
-#         self.pushButton.clicked.connect(lambda: self.execute_command("HELP"))
-#         self.pushButton_2.clicked.connect(lambda: self.execute_command("BEGIN"))
-#         self.pushButton_3.clicked.connect(lambda: self.execute_command("END"))
-#         self.pushButton_4.clicked.connect(lambda: self.execute_command("RETRIEVE"))
-#         self.pushButton_5.clicked.connect(lambda: self.execute_command("QUIT"))
-#         self.pushButton_6.clicked.connect(lambda: self.execute_command("SETUP"))
-#         self.pushButton_7.clicked.connect(lambda: self.execute_command("READ"))
+#         from CactusControlGUI import Ui_MainWindow
+#         self.ui = Ui_MainWindow()
+#         self.ui.setupUi(self)
+#         self.ui.pushButtonHelp.clicked.connect(lambda: self.execute_command("HELP"))
+#         self.ui.pushButtonBegin.clicked.connect(lambda: self.execute_command("BEGIN"))
+#         self.ui.pushButtonEnd.clicked.connect(lambda: self.execute_command("END"))
+#         self.ui.pushButtonRetrieve.clicked.connect(lambda: self.execute_command("RETRIEVE"))
+#         self.ui.pushButtonQuit.clicked.connect(lambda: self.execute_command("QUIT"))
+#         self.ui.pushButtonSetup.clicked.connect(lambda: self.execute_command("SETUP"))
+#         self.ui.pushButtonRead.clicked.connect(lambda: self.execute_command("READ"))
 
 #     def execute_command(self, command):
 #         action = self.get_command_action(command)
@@ -193,9 +151,8 @@
 #     def show_info(self, message):
 #         QMessageBox.information(self, "Information", message)
 
-
 # if __name__ == "__main__":
 #     app = QApplication(sys.argv)
 #     window = CactusControlApp()
 #     window.show()
-#     sys.exit(app.exec())
+#     sys
