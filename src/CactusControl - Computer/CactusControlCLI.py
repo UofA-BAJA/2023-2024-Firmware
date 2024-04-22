@@ -1,6 +1,6 @@
 import re
 import json
-import matplotlib.pyplot as plt
+
 import numpy
 
 from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, MessageHeaders

@@ -1,8 +1,7 @@
 # import re
 # import json
 # import sys
-# from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QInputDialog
-# from PyQt6.QtCore import Qt, QtCore
+# from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QInputDialog, QPushButton, QWidget
 # from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, MessageHeaders
 # from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 # from UofA_BAJA_2023_2024_common.Messages import construct_message
@@ -199,3 +198,80 @@
 #     window = CactusControlApp()
 #     window.show()
 #     sys.exit(app.exec())
+# Buttons
+from PyQt6 import QtCore, QtGui, QtWidgets
+from CactusControlCLI import CactusControlCLI  # Import your CactusControlCLI class here
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(800, 600)
+        self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        
+        # Create an instance of CactusControlCLI
+        self.cactus_cli = CactusControlCLI()
+
+        # Buttons
+        self.pushButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton.setGeometry(QtCore.QRect(20, 230, 75, 24))
+        self.pushButton.setObjectName("pushButton")
+        self.pushButton_2 = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_2.setGeometry(QtCore.QRect(120, 230, 75, 24))
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.pushButton_3 = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_3.setGeometry(QtCore.QRect(220, 230, 75, 24))
+        self.pushButton_3.setObjectName("pushButton_3")
+        self.pushButton_4 = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_4.setGeometry(QtCore.QRect(320, 230, 75, 24))
+        self.pushButton_4.setObjectName("pushButton_4")
+        self.pushButton_5 = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_5.setGeometry(QtCore.QRect(410, 230, 75, 24))
+        self.pushButton_5.setObjectName("pushButton_5")
+        self.pushButton_6 = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_6.setGeometry(QtCore.QRect(500, 230, 75, 24))
+        self.pushButton_6.setObjectName("pushButton_6")
+        self.pushButton_7 = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton_7.setGeometry(QtCore.QRect(590, 230, 75, 24))
+        self.pushButton_7.setObjectName("pushButton_7")
+
+        # Set button text
+        self.retranslateUi(MainWindow)
+        
+        # Connect buttons to methods
+        self.pushButton.clicked.connect(self.cactus_cli._print_commands)
+        self.pushButton_2.clicked.connect(lambda: self.cactus_cli._begin_logging("BEGIN"))
+        self.pushButton_3.clicked.connect(lambda: self.cactus_cli._end_logging("END"))
+        self.pushButton_4.clicked.connect(lambda: self.cactus_cli._retrieve_logs("RETRIEVE"))
+        self.pushButton_5.clicked.connect(lambda: self.cactus_cli._quit_program("QUIT"))
+        self.pushButton_6.clicked.connect(self.cactus_cli._setup_session)
+        self.pushButton_7.clicked.connect(self.cactus_cli._read_data)
+
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.pushButton.setText(_translate("MainWindow", "HELP"))
+        self.pushButton_2.setText(_translate("MainWindow", "BEGIN"))
+        self.pushButton_3.setText(_translate("MainWindow", "END"))
+        self.pushButton_4.setText(_translate("MainWindow", "RETRIEVE"))
+        self.pushButton_5.setText(_translate("MainWindow", "QUIT"))
+        self.pushButton_6.setText(_translate("MainWindow", "SETUP"))
+        self.pushButton_7.setText(_translate("MainWindow", "READ"))
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec())
