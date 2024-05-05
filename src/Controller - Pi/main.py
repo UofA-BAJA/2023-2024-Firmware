@@ -167,23 +167,35 @@ class Controller:
         # Combine the values into a single string, separated by commas, and ensure it doesn't exceed 512 characters
         combined_string = ", ".join(str(row) for row in results)
 
-        max_chars = 253
+        max_chars = 1024*6 # Don't go above 1024 * 8, or you will surely die
 
-        while(combined_string):
+
+        while(len(combined_string) > 0):
+            more_data = False
             chunk = ""
             # If the len is less than the max, send all the data
             if(len(combined_string) < max_chars):
                 chunk = combined_string
-                combined_string = None
+                combined_string = ""
             else:
                 # Extract up to the last right parenthesis within the character limit
                 paren_i = combined_string[0:max_chars].rfind(")")
                 chunk = combined_string[:paren_i + 1]
                 combined_string = combined_string[paren_i + 1:]
                 combined_string = combined_string.strip(", ")
+                more_data = True
 
             # send the chunk
-            self.send_response_to_pit(json.dumps({"data-packet": chunk}))
+            self.send_response_to_pit(json.dumps({
+                "more_data" : str(more_data),
+                "data-packet": chunk}))
+
+            if more_data:
+                self.serial_devices._wait_for_lora_serial_input()
+
+
+
+
 
     def run(self):
         if (ModuleTypes.LORA_PIT in self.serial_devices._serial_devices):

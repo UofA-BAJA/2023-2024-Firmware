@@ -45,8 +45,8 @@ void BRK_DataModule::data_module_logging_procedure(){
     float voltage = (float)adc_result * (5.0 / 1024.0); // Convert adc_result to voltage
     dataToRecord[0] = voltage;
 
-    DEBUG_PRINT(">:");
-    DEBUG_PRINTLN(voltage);
+    // DEBUG_PRINT(">:");
+    // DEBUG_PRINTLN(voltage);
     recordDataToSDCard();
 }
 

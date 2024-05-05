@@ -350,11 +350,11 @@ void InitializeSDCard(){
 
 void deleteFile(){
     if (sd.exists(fileName)) {
-        // Serial.println("File exists. Removing...");
+        Serial.println("File exists. Removing...");
         if (sd.remove(fileName)) {
-        // Serial.println("File removed successfully.");
+        Serial.println("File removed successfully.");
         } else {
-        // Serial.println("File removal failed.");
+        Serial.println("File removal failed.");
         }
     } else {
         // Serial.println("File does not exist.");
@@ -430,7 +430,7 @@ void BAJA_EMBEDDED::DataModule::SetupFileAsCSV() {
 
 void BAJA_EMBEDDED::DataModule::recordDataToSDCard(){
 
-    file.print(readMicrosecondsLifetimeTimer());
+    file.print(micros());
 
     for (int i = 0; i < arraySize; ++i) {
         if (dataToRecord[i] != -1.0f) { // Check against sentinel value
