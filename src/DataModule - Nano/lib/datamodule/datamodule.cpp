@@ -352,12 +352,12 @@ void deleteFile(){
     if (sd.exists(fileName)) {
         // Serial.println("File exists. Removing...");
         if (sd.remove(fileName)) {
-        // Serial.println("File removed successfully.");
+        Serial.println("File removed successfully.");
         } else {
-        // Serial.println("File removal failed.");
+        Serial.println("File removal failed.");
         }
     } else {
-        // Serial.println("File does not exist.");
+        Serial.println("File does not exist.");
     }
 }
 

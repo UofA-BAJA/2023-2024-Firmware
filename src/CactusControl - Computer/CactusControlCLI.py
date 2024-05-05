@@ -7,6 +7,8 @@ from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNode
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 from UofA_BAJA_2023_2024_common.Messages import construct_message
 
+MAGIC_NUMBER = 1e-6 #dont change this 
+
 class DataSaver:
 
     def __init__(self) -> None:
@@ -139,7 +141,7 @@ class CactusControlCLI:
                     x = []
                     y = []
                     for t in tuples_list:
-                        x.append(t[0] / 1000000)
+                        x.append(t[0] * MAGIC_NUMBER)
                         y.append(t[1])
 
                     datasaver.datax = x + datasaver.datax

@@ -14,7 +14,7 @@
 #include "wifiTransmission.h"
 ///serial stuff
 #define WIRELESS_RESPONSE_TIMEOUT_MS 5000 // 5 seconds
-#define WIRELESS_HEARTBEAT_FREQUENCY_MS 5000 // 5 seconds
+#define WIRELESS_HEARTBEAT_FREQUENCY_MS 10000 // 5 seconds
 
 
 bool isClientConnected = false;
@@ -71,7 +71,32 @@ void operatingProcedure() {
             parseMessage(inputmessageBuffer);
 
 
-        } else {
+        } else if(isThereWirelessDataToRead()) {
+            ReadWirelessIntoBufferWithTimeout(inputmessageBuffer, BUFFER_SIZE, WIRELESS_RESPONSE_TIMEOUT_MS);
+
+            if (inputmessageBuffer[0] == '\0') {
+                    isClientConnected = false;
+                    DEBUG_PRINTLN("Client did not respond in time. Assuming disconnected.");
+
+                    while (!connectClient()) {
+                        delay(1000);
+                    }
+                }
+                else {
+                    DEBUG_PRINT("Wirelessly Received: ");
+                    DEBUG_PRINTLN(inputmessageBuffer);
+                }
+
+                parseMessage(inputmessageBuffer);
+                
+                if (gotWirelessDataMeantForComputer) {
+                    Serial.println("<!fart!-nxtdev:comput-mesg:DONE-WITH-MSG!bend!>");
+                    Serial.flush();
+                    gotWirelessDataMeantForComputer = false;
+                }
+
+        }
+        else {
             // If no new data received, check if it's time to send a heartbeat
             static unsigned long lastHeartbeatTime = 0;
 

@@ -143,3 +143,7 @@ void disconnectClient() {
     client.stop();
     Serial.println("Client Disconnected.");
 }
+
+bool isThereWirelessDataToRead() {
+    return client.available() > 0;
+}
