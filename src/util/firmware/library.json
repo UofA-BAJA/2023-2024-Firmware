@@ -1,6 +1,6 @@
 {
     "name": "UofA-BAJA-2023-2024",
-    "version": "0.4.8",
+    "version": "0.4.9",
     "description": "A library for the 2023-2024 UofA BAJA team to use common functions across their hardware",
     "keywords": [
       "esp32",

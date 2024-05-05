@@ -357,7 +357,7 @@ void deleteFile(){
         Serial.println("File removal failed.");
         }
     } else {
-        // Serial.println("File does not exist.");
+        Serial.println("File does not exist.");
     }
 }
 

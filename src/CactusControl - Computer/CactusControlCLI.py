@@ -1,14 +1,44 @@
 import re
 import json
-
+import matplotlib.pyplot as plt
 import numpy
 
 from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, MessageHeaders
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 from UofA_BAJA_2023_2024_common.Messages import construct_message
 
+MAGIC_NUMBER = 1e-6 #dont change this 
+
+class DataSaver:
+
+    def __init__(self) -> None:
+        self.datax = []
+        self.datay = []
+
+    def graphData(self, xAxisTitle = "", yAxisTitle = "", dataTitle = ""):
+
+        self.datax = self.datax[1:]
+        self.datay = self.datay[1:]
+        # creates subplot of xData and yData
+        fig, ax = plt.subplots()
+        
+        # sets axis titles
+        ax.set(xlabel = xAxisTitle, ylabel = yAxisTitle, title = dataTitle)
+        
+        # shows grid lines and plots data
+        ax.grid()
+        ax.plot(self.datax, self.datay, 'o')  # Use 'o' to plot points instead of lines
+        plt.show()
+
+    def clearData(self):
+        self.datax = []
+        self.datay = []
+
+datasaver = DataSaver()
 
 
+
+        
 class CactusControlCLI:
     def __init__(self):
 
@@ -47,31 +77,24 @@ class CactusControlCLI:
 
         # ongoing_response = False
         while True:
-            try:
-                important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
+            important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
 
-                if important_serial_data != "":
-                    parsed_response = self.parse_response_for_mesg(important_serial_data)
-                    print(parsed_response)
-                    self.responses.append(parsed_response)
+            if important_serial_data != "":
+                parsed_response = self.parse_response_for_mesg(important_serial_data)
+                print(parsed_response)
+                self.responses.append(parsed_response)
 
+                
+                if parsed_response != "":
                     
-                    if parsed_response != "":
-                        
-                        print(f"{bcolors.OKGREEN}Rasberry Pi:\n{parsed_response}{bcolors.ENDC}\n")
+                    print(f"{bcolors.OKGREEN}Rasberry Pi:\n{parsed_response}{bcolors.ENDC}\n")
 
 
-                    if "DONE-WITH-MSG" in parsed_response:
-                        print("stopped reading")
-                        break
+                if "DONE-WITH-MSG" in parsed_response:
+                    print("stopped reading")
+                    break
 
-                    
-
-            except KeyboardInterrupt:
-                print("Stopped reading rasberry pi")
-                break
         
-        print(self.responses)
         self.parse_responses()
                     
 
@@ -87,6 +110,7 @@ class CactusControlCLI:
 
     def parse_responses(self):
 
+
         for response in self.responses:
             try:
                 print(response)
@@ -98,12 +122,41 @@ class CactusControlCLI:
                 if "data-packet" in json_response:
                     print(f"{bcolors.OKGREEN}Data Packet Received: {json_response['data-packet']}{bcolors.ENDC}")
 
-                   
+                    if json_response["more_data"] == "True":
+                        print(f"{bcolors.OKGREEN}More data is available{bcolors.ENDC}")
+                        
+                        self.send_command_to_rasberry_pi("IM-YOUR-DATA-TAKING-SLUT")
+
+                        self.wait_for_response()
+
+                    data = json_response['data-packet']
+
+                    # Extract the data as tuples using regex
+                    tuples_list = []
+                    for match in re.finditer(r'\(([^)]+)\)', data):
+                        tuple_str = match.group(1)
+                        tuple_values = tuple(map(float, tuple_str.split(',')))
+                        tuples_list.append(tuple_values)
+
+                    x = []
+                    y = []
+                    for t in tuples_list:
+                        x.append(t[0] * MAGIC_NUMBER)
+                        y.append(t[1])
+
+                    datasaver.datax = x + datasaver.datax
+                    datasaver.datay = y + datasaver.datay
+
+                    print(datasaver.datax, datasaver.datay)
+
 
             except json.JSONDecodeError:
                 print(f"{bcolors.FAIL}Error: Could not decode JSON response{bcolors.ENDC}")
                 continue
+
+        
             
+        
             
     def have_user_select_data_types(self, datatypes: dict):
         while True:
@@ -191,6 +244,12 @@ class CactusControlCLI:
                 if (CactusControlCLI.is_command(choice)):
                     self.wait_for_response()
 
+                    if(len(datasaver.datax) > 0):
+      
+                        datasaver.graphData("Time", "Data", "Data vs Time")
+
+                        datasaver.clearData()
+
 
             else:
                 print(f"{bcolors.FAIL}Invalid command. Please try again.{bcolors.ENDC}")
@@ -232,14 +291,3 @@ def convertData(dataArray):
     # returns concatenated dataArray
     return dataArray
 
-def graphData(xData, yData, xAxisTitle = "", yAxisTitle = "", dataTitle = ""):
-    # creates subplot of xData and yData
-    fig, ax = plt.subplots()
-    ax.plot(xData, yData)
-    
-    # sets axis titles
-    ax.set(xlabel = xAxisTitle, ylabel = yAxisTitle, title = dataTitle)
-    
-    # shows grid lines and plots data
-    ax.grid
-    plt.show()

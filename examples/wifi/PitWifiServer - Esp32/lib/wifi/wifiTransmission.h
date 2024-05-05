@@ -9,6 +9,7 @@ bool connectClient();
 
 void ReadWirelessIntoBufferWithTimeout(char* buffer, size_t bufferSize, unsigned long timeout);
 
+bool isThereWirelessDataToRead();
 
 void printWirelessly(const char* buffer);
 
