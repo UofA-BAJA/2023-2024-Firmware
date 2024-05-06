@@ -152,7 +152,7 @@ class Controller:
 
         selected_datatype = data_query_json["data-query"]["selected-datatype"]
 
-        sql_query = f"SELECT {selected_datatype} FROM BajaCloudData WHERE ID = ?;"
+        sql_query = f"SELECT Time,{selected_datatype} FROM BajaCloudData WHERE ID = ?;"
 
         # other_sql_query = f"SELECT * FROM BajaCloudData WHERE ID = {self.session_id};"
         # print(other_sql_query)
@@ -165,22 +165,37 @@ class Controller:
             print(row)
 
         # Combine the values into a single string, separated by commas, and ensure it doesn't exceed 512 characters
-        combined_string = ", ".join(str(row[0]) for row in results)
+        combined_string = ", ".join(str(row) for row in results)
 
-        while combined_string:
-            # If the remaining string is longer than 253 characters, prepare to append "..."
-            if len(combined_string) > 253:
-                chunk = combined_string[:253]  # Extract up to 253 characters for this chunk
-                combined_string = combined_string[253:]  # Remove this chunk from the combined_string
-            else:
-                # If the remaining string is 253 characters or less, break
+        max_chars = 1024*6 # Don't go above 1024 * 8, or you will surely die
+
+
+        while(len(combined_string) > 0):
+            more_data = False
+            chunk = ""
+            # If the len is less than the max, send all the data
+            if(len(combined_string) < max_chars):
                 chunk = combined_string
-                break
+                combined_string = ""
+            else:
+                # Extract up to the last right parenthesis within the character limit
+                paren_i = combined_string[0:max_chars].rfind(")")
+                chunk = combined_string[:paren_i + 1]
+                combined_string = combined_string[paren_i + 1:]
+                combined_string = combined_string.strip(", ")
+                more_data = True
 
-            # Send the chunk
-            # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
-            self.send_response_to_pit(json.dumps({"data-packet": chunk}))
-            # self.send_response_to_pit(MessageHeaders.PYTHON_MESSAGE)
+            # send the chunk
+            self.send_response_to_pit(json.dumps({
+                "more_data" : str(more_data),
+                "data-packet": chunk}))
+
+            if more_data:
+                self.serial_devices._wait_for_lora_serial_input()
+
+
+
+
 
     def run(self):
         if (ModuleTypes.LORA_PIT in self.serial_devices._serial_devices):

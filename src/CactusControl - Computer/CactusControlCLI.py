@@ -1,6 +1,6 @@
 import re
 import json
-
+import matplotlib.pyplot as plt
 import numpy
 import matplotlib.pyplot as plt
 
@@ -8,17 +8,37 @@ from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNode
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 from UofA_BAJA_2023_2024_common.Messages import construct_message
 
-def graphData(xData, yData, xAxisTitle = "", yAxisTitle = "", dataTitle = ""):
-    # creates subplot of xData and yData
-    fig, ax = plt.subplots()
-    ax.plot(xData, yData)
-    
-    # sets axis titles
-    ax.set(xlabel = xAxisTitle, ylabel = yAxisTitle, title = dataTitle)
-    
-    # shows grid lines and plots data
-    ax.grid
-    plt.show()
+MAGIC_NUMBER = 1e-6 #dont change this 
+
+class DataSaver:
+
+    def __init__(self) -> None:
+        self.datax = []
+        self.datay = []
+
+    def graphData(self, xAxisTitle = "", yAxisTitle = "", dataTitle = ""):
+
+        self.datax = self.datax[1:]
+        self.datay = self.datay[1:]
+        # creates subplot of xData and yData
+        fig, ax = plt.subplots()
+        
+        # sets axis titles
+        ax.set(xlabel = xAxisTitle, ylabel = yAxisTitle, title = dataTitle)
+        
+        # shows grid lines and plots data
+        ax.grid()
+        ax.plot(self.datax, self.datay, 'o')  # Use 'o' to plot points instead of lines
+        plt.show()
+
+    def clearData(self):
+        self.datax = []
+        self.datay = []
+
+datasaver = DataSaver()
+
+
+
 
 class CactusControlCLI:
     def __init__(self):
@@ -58,31 +78,24 @@ class CactusControlCLI:
 
         # ongoing_response = False
         while True:
-            try:
-                important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
+            important_serial_data = self.serial_devices.does_device_have_bracketed_output(ModuleTypes.LORA_PIT)
 
-                if important_serial_data != "":
-                    parsed_response = self.parse_response_for_mesg(important_serial_data)
-                    print(parsed_response)
-                    self.responses.append(parsed_response)
+            if important_serial_data != "":
+                parsed_response = self.parse_response_for_mesg(important_serial_data)
+                print(parsed_response)
+                self.responses.append(parsed_response)
 
+                
+                if parsed_response != "":
                     
-                    if parsed_response != "":
-                        
-                        print(f"{bcolors.OKGREEN}Rasberry Pi:\n{parsed_response}{bcolors.ENDC}\n")
+                    print(f"{bcolors.OKGREEN}Rasberry Pi:\n{parsed_response}{bcolors.ENDC}\n")
 
 
-                    if "DONE-WITH-MSG" in parsed_response:
-                        print("stopped reading")
-                        break
+                if "DONE-WITH-MSG" in parsed_response:
+                    print("stopped reading")
+                    break
 
-                    
-
-            except KeyboardInterrupt:
-                print("Stopped reading rasberry pi")
-                break
         
-        print(self.responses)
         self.parse_responses()
                     
 
@@ -97,9 +110,7 @@ class CactusControlCLI:
         return extracted_str
 
     def parse_responses(self):
-        xData = []
-        yData = []
-        
+
         for response in self.responses:
             try:
                 print(response)
@@ -110,35 +121,12 @@ class CactusControlCLI:
                     
                 if "data-packet" in json_response:
                     print(f"{bcolors.OKGREEN}Data Packet Received: {json_response['data-packet']}{bcolors.ENDC}")
-                    
-                    dataString = json_response["data-packet"]
-                    dataString = dataString.split("), ")
-                    
-                    for str in dataString[1:-2]:
-                        element = str.strip("()")
-                        
-                        time = 0
-                        val = 0
-                        
-                        try:
-                            time = float(element.split(", ")[0]) / 1000000
-                            val = float(element.split(", ")[1])
-                            xData += [time]
-                            yData += [val]
-                            
-                        except IndexError:
-                            print("Problem in parsing data. Skip this plot point")
-                            
-                        except ValueError:
-                            print("Ur mom's a ho")
-                            
+
+                   
+
             except json.JSONDecodeError:
                 print(f"{bcolors.FAIL}Error: Could not decode JSON response{bcolors.ENDC}")
                 continue
-            
-        if len(xData) != 0:
-            #graphData(xData, yData, "time", "pressure", "pressure vs time")
-            print(xData, yData)
             
             
     def have_user_select_data_types(self, datatypes: dict):
@@ -227,6 +215,12 @@ class CactusControlCLI:
                 if (CactusControlCLI.is_command(choice)):
                     self.wait_for_response()
 
+                    if(len(datasaver.datax) > 0):
+      
+                        datasaver.graphData("Time", "Data", "Data vs Time")
+
+                        datasaver.clearData()
+
 
             else:
                 print(f"{bcolors.FAIL}Invalid command. Please try again.{bcolors.ENDC}")
@@ -249,3 +243,33 @@ class bcolors:
 if __name__ == "__main__":
     app = CactusControlCLI()
     app.run()
+
+
+
+def convertData(dataArray):
+    # testFile = open(fileName, "r")
+    
+    # converts json data to a readable python data type
+    # incommingData = json.load(testFile)
+    
+    #strips json data from data-packet, converts to string
+    # dataString = incommingData["data-packet"]
+    dataString = dataString.split(", ")
+    
+    # adds data string to end of data array
+    dataArray += dataString
+    
+    # returns concatenated dataArray
+    return dataArray
+
+def graphData(xData, yData, xAxisTitle = "", yAxisTitle = "", dataTitle = ""):
+    # creates subplot of xData and yData
+    fig, ax = plt.subplots()
+    ax.plot(xData, yData)
+    
+    # sets axis titles
+    ax.set(xlabel = xAxisTitle, ylabel = yAxisTitle, title = dataTitle)
+    
+    # shows grid lines and plots data
+    ax.grid
+    plt.show()
