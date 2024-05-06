@@ -2,12 +2,23 @@ import re
 import json
 
 import numpy
+import matplotlib.pyplot as plt
 
 from UofA_BAJA_2023_2024_common.enums import Commands, ModuleTypes, WirelessNodeTypes, MessageHeaders
 from UofA_BAJA_2023_2024_common.SerialDevices import SerialDevices
 from UofA_BAJA_2023_2024_common.Messages import construct_message
 
-
+def graphData(xData, yData, xAxisTitle = "", yAxisTitle = "", dataTitle = ""):
+    # creates subplot of xData and yData
+    fig, ax = plt.subplots()
+    ax.plot(xData, yData)
+    
+    # sets axis titles
+    ax.set(xlabel = xAxisTitle, ylabel = yAxisTitle, title = dataTitle)
+    
+    # shows grid lines and plots data
+    ax.grid
+    plt.show()
 
 class CactusControlCLI:
     def __init__(self):
@@ -86,23 +97,48 @@ class CactusControlCLI:
         return extracted_str
 
     def parse_responses(self):
-
+        xData = []
+        yData = []
+        
         for response in self.responses:
             try:
                 print(response)
                 json_response = json.loads(response)
-
+                
                 if "datatypes" in json_response:
                     self.have_user_select_data_types(json_response)
-
+                    
                 if "data-packet" in json_response:
                     print(f"{bcolors.OKGREEN}Data Packet Received: {json_response['data-packet']}{bcolors.ENDC}")
-
-                   
-
+                    
+                    dataString = json_response["data-packet"]
+                    dataString = dataString.split("), ")
+                    
+                    for str in dataString[1:-2]:
+                        element = str.strip("()")
+                        
+                        time = 0
+                        val = 0
+                        
+                        try:
+                            time = float(element.split(", ")[0]) / 1000000
+                            val = float(element.split(", ")[1])
+                            xData += [time]
+                            yData += [val]
+                            
+                        except IndexError:
+                            print("Problem in parsing data. Skip this plot point")
+                            
+                        except ValueError:
+                            print("Ur mom's a ho")
+                            
             except json.JSONDecodeError:
                 print(f"{bcolors.FAIL}Error: Could not decode JSON response{bcolors.ENDC}")
                 continue
+            
+        if len(xData) != 0:
+            #graphData(xData, yData, "time", "pressure", "pressure vs time")
+            print(xData, yData)
             
             
     def have_user_select_data_types(self, datatypes: dict):
@@ -213,33 +249,3 @@ class bcolors:
 if __name__ == "__main__":
     app = CactusControlCLI()
     app.run()
-
-
-
-def convertData(dataArray):
-    # testFile = open(fileName, "r")
-    
-    # converts json data to a readable python data type
-    # incommingData = json.load(testFile)
-    
-    #strips json data from data-packet, converts to string
-    # dataString = incommingData["data-packet"]
-    dataString = dataString.split(", ")
-    
-    # adds data string to end of data array
-    dataArray += dataString
-    
-    # returns concatenated dataArray
-    return dataArray
-
-def graphData(xData, yData, xAxisTitle = "", yAxisTitle = "", dataTitle = ""):
-    # creates subplot of xData and yData
-    fig, ax = plt.subplots()
-    ax.plot(xData, yData)
-    
-    # sets axis titles
-    ax.set(xlabel = xAxisTitle, ylabel = yAxisTitle, title = dataTitle)
-    
-    # shows grid lines and plots data
-    ax.grid
-    plt.show()

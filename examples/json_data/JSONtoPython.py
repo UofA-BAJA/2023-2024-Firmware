@@ -2,11 +2,11 @@ import json
 import matplotlib.pyplot as plt
 import numpy
 
-def convertData(dataArray, fileName):
-    testFile = open(fileName, "r")
+def convertData(dataArray, JSONObject):
+    #testFile = open(fileName, "r")
     
     # converts json data to a readable python data type
-    incommingData = json.load(testFile)
+    incommingData = json.load(JSONObject)
     
     #strips json data from data-packet, converts to string
     dataString = incommingData["data-packet"]
@@ -15,7 +15,7 @@ def convertData(dataArray, fileName):
     # adds data string to end of data array
     dataArray += dataString
 
-    testFile.close()
+    #testFile.close()
     
     # returns concatenated dataArray
     return dataArray
